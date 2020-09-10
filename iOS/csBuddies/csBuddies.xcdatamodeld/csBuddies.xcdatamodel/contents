@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="16119" systemVersion="19G2021" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
+    <entity name="GlobalEntity" representedClassName="GlobalEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="encodedData" optional="YES" attributeType="Binary"/>
+        <attribute name="filterCountryIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="filterGenderIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="filterHasGitHub" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="filterHasLinkedIn" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="filterInterests" optional="YES" attributeType="String"/>
+        <attribute name="filterLevelIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="filterMaxAge" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="filterMinAge" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="filterSortIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="firstLaunchDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="requestedReview" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+    </entity>
+    <elements>
+        <element name="GlobalEntity" positionX="-63" positionY="-18" width="128" height="223"/>
+    </elements>
+</model>

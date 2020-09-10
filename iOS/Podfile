@@ -1,0 +1,30 @@
+# Uncomment the next line to define a global platform for your project
+# platform :ios, '9.0'
+
+target 'csBuddies' do
+  # Comment the next line if you don't want to use dynamic frameworks
+  use_frameworks!
+
+  # Pods for csBuddies
+  pod 'Firebase'
+  pod 'Firebase/Core'
+  pod 'Firebase/Auth'
+  pod 'Firebase/Analytics'
+  pod 'Firebase/Messaging'
+  pod 'Firebase/Firestore'
+  pod 'FirebaseFirestoreSwift'
+  pod 'TrueTime'
+  pod 'SwiftUIRefresh'
+  pod "Introspect"
+  pod 'Google-Mobile-Ads-SDK'
+
+  target 'csBuddiesTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'csBuddiesUITests' do
+    # Pods for testing
+  end
+
+end
