@@ -30,7 +30,7 @@ struct SearchProfileView: View {
     @State private var isReady = false
     
     var body: some View {
-        Form {
+        List {
             if isReady {
                 HStack {
                     VStack {
@@ -56,7 +56,7 @@ struct SearchProfileView: View {
                         Text("\(buddyUsername)")
                             .bold()
                             .font(.title)
-                        Text("\(global.genderOptions[safe: buddyGenderIndex] ?? "Unknown"), \(buddyBirthday.toAge())")
+                        Text("\(global.genderOptions[safe: buddyGenderIndex] ?? "Unknown"), \(buddyBirthday.toString(toFormat: "yyyy")[0] != "0" ? "\(buddyBirthday.toAge())" : "Private")")
                         Text("\(global.countryOptions[safe: buddyCountryIndex] ?? "Unknown")")
                     }
                 }
@@ -136,7 +136,10 @@ struct SearchProfileView: View {
                         NavigationLink(destination: ChatRoomView(buddyUsername: buddyUsername)) {
                             EmptyView()
                         }
-                        .hidden()
+                        .if(UIDevice.current.systemVersion[0...1] == "13") { content in
+                            // This hides arrow in iOS 13, but disables link in iOS 14.
+                            content.hidden()
+                        }
                     }
                     
                     if !global.blockedList.contains(buddyUsername) {
@@ -162,9 +165,11 @@ struct SearchProfileView: View {
                         NavigationLink(destination: SearchProfileReportView(buddyUsername: buddyUsername)) {
                             EmptyView()
                         }
-                        .hidden()
+                        .if(UIDevice.current.systemVersion[0...1] == "13") { content in
+                            // This hides arrow in iOS 13, but disables link in iOS 14.
+                            content.hidden()
+                        }
                     }
-                    
                 }
             }
         }

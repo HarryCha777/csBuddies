@@ -32,7 +32,7 @@ class Global: ObservableObject {
     
     // SetProfileView
     @Published var isSettingProfile = true
-    @Published var genderOptions = ["Male", "Female", "Other"]
+    @Published var genderOptions = ["Male", "Female", "Other", "Private"]
     @Published var genderIndex = 0
     @Published var birthday = Date()
     @Published var countryOptions = ["Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo, Democratic Republic of the", "Congo, Republic of the", "Costa Rica", "Cote d'Ivoire", "Croatia", "Cuba", "Cyprus", "Czechia", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"]
@@ -48,6 +48,7 @@ class Global: ObservableObject {
     @Published var lastVisit = Date()
     @Published var lastUpdate = Date()
     @Published var accountCreation = Date()
+    @Published var announcement = ""
     @Published var mustUpdate = false
     @Published var isBanned = false
     @Published var isPremium = false
@@ -56,7 +57,7 @@ class Global: ObservableObject {
     // SearchView
     @Published var showWelcomeAlert = false
     @Published var mustSearch = true
-
+    
     // SearchFilterView
     @Published var filterGenderIndex = 0
     @Published var filterMinAge = 13
@@ -81,8 +82,9 @@ class Global: ObservableObject {
     @Published var newFilterHasLinkedIn = false
     @Published var newFilterSortIndex = 0
     
+    @Published var hasAppliedFilters = false
     var admobRewardedAdsFilter = AdmobRewardedAdsFilter() // if it's not global, it will take some time to load
-
+    
     // ChatView
     @Published var mustVisitChatRoom = false
     @Published var notificationBuddyUsername = ""
@@ -423,13 +425,40 @@ extension UIImage {
 }
 
 extension View {
-    // Round form corners.
+    // Round list's corners.
     public func roundCorners() -> some View {
-        return self
-            .listStyle(GroupedListStyle())
-            .environment(\.horizontalSizeClass, .regular)
+        if #available(iOS 14.0, *) {
+            return AnyView(self
+                .listStyle(InsetGroupedListStyle()))
+        } else {
+            return AnyView(self
+                .listStyle(GroupedListStyle())
+                .environment(\.horizontalSizeClass, .regular))
+        }
     }
     
+    // Remove list's line separators
+    public func removeLineSeparators() -> some View {
+        if #available(iOS 14.0, *) {
+            return AnyView(self
+                .listStyle(SidebarListStyle())
+                .padding(.horizontal, -20))
+        } else {
+            return AnyView(self
+                .introspectTableView { tableView in // change tableView only for this view
+                    tableView.separatorStyle = .none
+                })
+        }
+    }
+    
+    // Remove list's header padding
+    public func removeHeaderPadding() -> some View {
+        return AnyView(self
+            .introspectTableView { tableView in // change tableView only for this view
+                tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: Double.leastNonzeroMagnitude))
+            })
+    }
+
     // Add a modifier based on a condition.
     func `if`<Content: View>(_ conditional: Bool, content: (Self) -> Content) -> some View {
         if conditional {

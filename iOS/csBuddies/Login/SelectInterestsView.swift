@@ -99,20 +99,22 @@ struct SelectInterestsView: View {
                 }
             }
             .navigationBarTitle("Interests")
-            .onAppear {
-                // Reset birthday here instead of on appear of Set Profile View since it may be navigated from views within itself.
-                var dateComponents: DateComponents? = Calendar.current.dateComponents([.hour, .minute, .second], from: self.global.getUtcTime())
-                dateComponents?.year = 2000
-                dateComponents?.month = 1
-                dateComponents?.day = 1
-                self.global.birthday = Calendar.current.date(from: dateComponents!)!
-                
-                self.isSelectedList = [Bool](repeating: false, count: self.global.interestsOptions.count)
-                self.isReady = true
+            .if(UIDevice.current.systemVersion[0...1] == "13") { content in
+                content.modifier(AdaptsToKeyboard())
             }
-            .modifier(AdaptsToKeyboard())
         }
-        .navigationViewStyle(StackNavigationViewStyle()) // needed so screen works on iPad
+        .navigationViewStyle(StackNavigationViewStyle())
+        .onAppear {
+            // Reset birthday here instead of on appear of Set Profile View since it may be navigated from other views.
+            var dateComponents: DateComponents? = Calendar.current.dateComponents([.hour, .minute, .second], from: self.global.getUtcTime())
+            dateComponents?.year = 2000
+            dateComponents?.month = 1
+            dateComponents?.day = 1
+            self.global.birthday = Calendar.current.date(from: dateComponents!)!
+            
+            self.isSelectedList = [Bool](repeating: false, count: self.global.interestsOptions.count)
+            self.isReady = true
+        }
     }
 }
 

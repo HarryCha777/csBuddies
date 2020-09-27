@@ -10,6 +10,7 @@
 		117F4B0D634D76A6A234404E /* Pods_csBuddies_csBuddiesUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EBB38A6B0F6E2F0C7CBE11F /* Pods_csBuddies_csBuddiesUITests.framework */; };
 		72DA2B9574865D3CBFF6BD78 /* Pods_csBuddiesTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55B4832A11F870FFD22D8E95 /* Pods_csBuddiesTests.framework */; };
 		7BB131E7416022336E2FC0C5 /* Pods_csBuddies.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C44F9A7AF1164675C86329EE /* Pods_csBuddies.framework */; };
+		8F0D8AD92518D02500058A46 /* KeyboardDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0D8AD82518D02400058A46 /* KeyboardDetector.swift */; };
 		8F18F4F724E0753700D9E524 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F18F4F624E0753700D9E524 /* ImagePicker.swift */; };
 		8F22ECBF24DBC096001EB990 /* ChatRoomMessageFullView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F22ECBE24DBC096001EB990 /* ChatRoomMessageFullView.swift */; };
 		8F2BFF8624F18E8F00F87BB8 /* AdmobNativeAds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F2BFF8524F18E8F00F87BB8 /* AdmobNativeAds.swift */; };
@@ -103,6 +104,7 @@
 		6EBB38A6B0F6E2F0C7CBE11F /* Pods_csBuddies_csBuddiesUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_csBuddies_csBuddiesUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7417654CA9E1DACB14463C59 /* Pods-csBuddiesTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-csBuddiesTests.release.xcconfig"; path = "Target Support Files/Pods-csBuddiesTests/Pods-csBuddiesTests.release.xcconfig"; sourceTree = "<group>"; };
 		78F40A00B4F7CC485DDE93C8 /* Pods-csBuddies-csBuddiesUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-csBuddies-csBuddiesUITests.release.xcconfig"; path = "Target Support Files/Pods-csBuddies-csBuddiesUITests/Pods-csBuddies-csBuddiesUITests.release.xcconfig"; sourceTree = "<group>"; };
+		8F0D8AD82518D02400058A46 /* KeyboardDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardDetector.swift; sourceTree = "<group>"; };
 		8F18F4F624E0753700D9E524 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		8F22ECBE24DBC096001EB990 /* ChatRoomMessageFullView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoomMessageFullView.swift; sourceTree = "<group>"; };
 		8F2BFF8524F18E8F00F87BB8 /* AdmobNativeAds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdmobNativeAds.swift; sourceTree = "<group>"; };
@@ -353,6 +355,7 @@
 				8F2BFF8524F18E8F00F87BB8 /* AdmobNativeAds.swift */,
 				8FDA96EF24F0D6D90039EC4C /* AdmobRewardedAds.swift */,
 				8FC6A9C124C7CD80001FB6E0 /* LoadingView.swift */,
+				8F0D8AD82518D02400058A46 /* KeyboardDetector.swift */,
 				8FC6A9AA24C7CD80001FB6E0 /* AdaptsToKeyboard.swift */,
 				8FC6A9C224C7CD80001FB6E0 /* MultilineTextField.swift */,
 				8F18F4F624E0753700D9E524 /* ImagePicker.swift */,
@@ -714,6 +717,7 @@
 				8FC6A9CB24C7CD80001FB6E0 /* SearchFilterInterestsView.swift in Sources */,
 				8FC6A9F324C7CD81001FB6E0 /* RangeTrackConfiguration.swift in Sources */,
 				8FC6A9EA24C7CD81001FB6E0 /* AnyRangeSliderStyle.swift in Sources */,
+				8F0D8AD92518D02500058A46 /* KeyboardDetector.swift in Sources */,
 				8FC6A9ED24C7CD81001FB6E0 /* RangeSliderStyleConfiguration.swift in Sources */,
 				8FC6A9F824C7CD81001FB6E0 /* BlockedListView.swift in Sources */,
 				8FC6A9DC24C7CD80001FB6E0 /* ChatRoomMenuView.swift in Sources */,
@@ -929,7 +933,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 17;
 				DEVELOPMENT_ASSET_PATHS = "\"csBuddies/Preview Content\"";
 				DEVELOPMENT_TEAM = 9P4X6V9RQ5;
 				ENABLE_PREVIEWS = YES;
@@ -938,7 +942,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 2.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrycha.csBuddies;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -961,7 +965,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 17;
 				DEVELOPMENT_ASSET_PATHS = "\"csBuddies/Preview Content\"";
 				DEVELOPMENT_TEAM = 9P4X6V9RQ5;
 				ENABLE_PREVIEWS = YES;
@@ -970,7 +974,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 2.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrycha.csBuddies;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

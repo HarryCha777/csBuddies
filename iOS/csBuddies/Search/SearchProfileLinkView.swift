@@ -48,7 +48,8 @@ struct SearchProfileLinkView: View {
                                 Text("\(global.genderOptions[searchProfileLinkData.genderIndex])")
                                     .foregroundColor(Color(red: 255 / 255, green: 20 / 255, blue: 147 / 255)) + // pink
                                     Text(",")
-                            } else if searchProfileLinkData.genderIndex == 2 {
+                            } else if searchProfileLinkData.genderIndex == 2 ||
+                                        searchProfileLinkData.genderIndex == 3 {
                                 Text("\(global.genderOptions[searchProfileLinkData.genderIndex])")
                                     .foregroundColor(Color.gray) +
                                     Text(",")
@@ -56,7 +57,7 @@ struct SearchProfileLinkView: View {
                                 Text("Unknown") +
                                     Text(",")
                             }
-                            Text("\(searchProfileLinkData.birthday.toAge())")
+                            Text("\(searchProfileLinkData.birthday.toString(toFormat: "yyyy")[0] != "0" ? "\(searchProfileLinkData.birthday.toAge())" : "Private")")
                             Spacer()
                             if searchProfileLinkData.hasGitHub {
                                 Image("gitHubLogo")
@@ -90,12 +91,15 @@ struct SearchProfileLinkView: View {
                     }
                 }
             }
-    
+            
             // Hide navigation link arrow by making invisible navigation link in ZStack.
             NavigationLink(destination: SearchProfileView(buddyUsername: searchProfileLinkData.username)) {
                 EmptyView()
             }
-            .hidden()
+            .if(UIDevice.current.systemVersion[0...1] == "13") { content in
+                // This hides arrow in iOS 13, but disables link in iOS 14.
+                content.hidden()
+            }
         }
     }
 }

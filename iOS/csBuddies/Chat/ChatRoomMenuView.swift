@@ -32,7 +32,7 @@ struct ChatRoomMenu: View {
             }
             
             HStack {
-                Form {
+                List {
                     ZStack(alignment: .leading) {
                         Text("View User")
                             .foregroundColor(Color.blue)
@@ -41,7 +41,10 @@ struct ChatRoomMenu: View {
                         NavigationLink(destination: SearchProfileView(buddyUsername: self.buddyUsername)) {
                             EmptyView()
                         }
-                        .hidden()
+                        .if(UIDevice.current.systemVersion[0...1] == "13") { content in
+                            // This hides arrow in iOS 13, but disables link in iOS 14.
+                            content.hidden()
+                        }
                     }
 
                     if !global.blockedList.contains(self.buddyUsername) {
@@ -68,7 +71,10 @@ struct ChatRoomMenu: View {
                         NavigationLink(destination: SearchProfileReportView(buddyUsername: self.buddyUsername)) {
                             EmptyView()
                         }
-                        .hidden()
+                        .if(UIDevice.current.systemVersion[0...1] == "13") { content in
+                            // This hides arrow in iOS 13, but disables link in iOS 14.
+                            content.hidden()
+                        }
                     }
 
                     Button(action: {
@@ -86,9 +92,7 @@ struct ChatRoomMenu: View {
                 .frame(width: screenWidth * 0.7) // position side menu appropriately based on screen width
                 .offset(x: CGFloat(self.isMenuOpen ? screenWidth * 0.3: screenWidth)) // move side menu if it is opened
                 .animation(.default) // animate sliding in side menu
-                .introspectTableView { tableView in // change tableView only for this view
-                    tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: Double.leastNonzeroMagnitude)) // remove extra space at top
-                }
+                .removeHeaderPadding()
 
                 Spacer()
             }

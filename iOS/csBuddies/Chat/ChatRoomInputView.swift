@@ -146,6 +146,7 @@ struct ChatRoomInputView: View {
     func sendMessage() {
         let now = global.getUtcTime()
         let documentId = now.toString(toFormat: "yyyy-MM-dd HH:mm:ss.SSS")
+        // this format does not seem to work for all users
         
         global.db.collection("messages")
             .document(documentId)

@@ -11,11 +11,13 @@ import Firebase
 
 struct SetProfileView: View {
     @EnvironmentObject var global: Global
+    @Environment(\.colorScheme) var colorScheme
     
     private struct AlertId: Identifiable {
         enum Id {
             case
             mustBeAtLeast13,
+            mustBeAtMost80,
             notGitHubUsername,
             tooLongGitHub,
             invalidGitHub,
@@ -26,6 +28,8 @@ struct SetProfileView: View {
         var id: Id
     }
     
+    @State private var privateGender = false
+    @State private var privateBirthday = false
     @State private var alertId: AlertId?
     
     var body: some View {
@@ -37,10 +41,46 @@ struct SetProfileView: View {
                 Section(header: Text("Gender")) {
                     Picker("", selection: $global.genderIndex) {
                         ForEach(global.genderOptions.indices) { index in
-                            Text(self.global.genderOptions[index])
+                            if index != global.genderOptions.count - 1 {
+                                Text(self.global.genderOptions[index])
+                            }
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
+                    .disabled(global.genderIndex == global.genderOptions.count - 1)
+                    
+                    Button(action: {
+                        if global.genderIndex == global.genderOptions.count - 1 {
+                            global.genderIndex = global.genderOptions.count - 2
+                        } else {
+                            global.genderIndex = global.genderOptions.count - 1
+                            privateGender = true
+                        }
+                    }) {
+                        HStack {
+                            Text("I prefer not to say.")
+                                .foregroundColor(colorScheme == .light ? Color.black : Color.white)
+                            Spacer()
+                            if global.genderIndex == global.genderOptions.count - 1 {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.blue)
+                                        .frame(width: 20, height: 20)
+                                    Circle()
+                                        .fill(Color.white)
+                                        .frame(width: 8, height: 8)
+                                }
+                            } else {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 20, height: 20)
+                                    .overlay(Circle().stroke(Color.gray, lineWidth: 1))
+                            }
+                        }
+                    }
+                    .alert(isPresented: $privateGender) {
+                        Alert(title: Text("Private Gender"), message: Text("Your profile will not be visible to users who filter by gender."), dismissButton: .default(Text("OK")))
+                    }
                 }
                 
                 Section(header: Text("Birthday")) {
@@ -48,6 +88,42 @@ struct SetProfileView: View {
                     
                     DatePicker("Date Label", selection: $global.birthday, in: ...global.getUtcTime(), displayedComponents: .date)
                         .labelsHidden()
+                        .disabled(global.birthday.toString(toFormat: "yyyy")[0] == "0")
+                    
+                    Button(action: {
+                        if global.birthday.toString(toFormat: "yyyy")[0] == "0" {
+                            global.birthday = global.getUtcTime()
+                        } else {
+                            var dateComponents = DateComponents()
+                            dateComponents.year = 0
+                            global.birthday = Calendar.current.date(from: dateComponents)!
+                            privateBirthday = true
+                        }
+                    }) {
+                        HStack {
+                            Text("I prefer not to say.")
+                                .foregroundColor(colorScheme == .light ? Color.black : Color.white)
+                            Spacer()
+                            if global.birthday.toString(toFormat: "yyyy")[0] == "0" {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.blue)
+                                        .frame(width: 20, height: 20)
+                                    Circle()
+                                        .fill(Color.white)
+                                        .frame(width: 8, height: 8)
+                                }
+                            } else {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 20, height: 20)
+                                    .overlay(Circle().stroke(Color.gray, lineWidth: 1))
+                            }
+                        }
+                    }
+                    .alert(isPresented: $privateBirthday) {
+                        Alert(title: Text("Private Birthday"), message: Text("Your profile will not be visible to users who filter by age."), dismissButton: .default(Text("OK")))
+                    }
                 }
                 
                 Section(header: Text("Country")) {
@@ -81,6 +157,9 @@ struct SetProfileView: View {
                 Button(action: {
                     if self.global.birthday.toAge() < 13 {
                         self.alertId = AlertId(id: .mustBeAtLeast13)
+                    } else if self.global.birthday.toAge() > 80 &&
+                        global.birthday.toString(toFormat: "yyyy")[0] != "0" {
+                        self.alertId = AlertId(id: .mustBeAtMost80)
                     } else if self.global.gitHub.contains("github.com") {
                         self.alertId = AlertId(id: .notGitHubUsername)
                     } else if self.global.gitHub.count > 39 {
@@ -103,6 +182,8 @@ struct SetProfileView: View {
                                 switch alert.id {
                                 case .mustBeAtLeast13:
                                     return Alert(title: Text("Younger Than 13"), message: Text("In order to comply with the Terms and Conditions, you must be at least 13."), dismissButton: .default(Text("OK")))
+                                case .mustBeAtMost80:
+                                    return Alert(title: Text("Older Than 80"), message: Text("In order to be included in the age filter, you must be at most 80."), dismissButton: .default(Text("OK")))
                                 case .notGitHubUsername:
                                     return Alert(title: Text("Not a GitHub Username"), message: Text("Please type in only your GitHub username, not a URL."), dismissButton: .default(Text("OK")))
                                 case .tooLongGitHub:
@@ -122,9 +203,11 @@ struct SetProfileView: View {
 
             }
             .navigationBarTitle("Profile")
-            .modifier(AdaptsToKeyboard())
+            .if(UIDevice.current.systemVersion[0...1] == "13") { content in
+                content.modifier(AdaptsToKeyboard())
+            }
         }
-        .navigationViewStyle(StackNavigationViewStyle()) // needed so screen works on iPad
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 

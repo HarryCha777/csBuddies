@@ -49,12 +49,14 @@
     array_push($paramsArray, $gender);
   }
 
-	$maxAge += 1;
-  $minDate = date("Y-m-d", strtotime("-{$maxAge} years"));
-  $maxDate = date("Y-m-d", strtotime("-{$minAge} years"));
-  $query .= "and birthday between ? and ? ";
-  $paramsString .= "ss";
-  array_push($paramsArray, $minDate, $maxDate);
+	if ($minAge != 13 || $maxAge != 80) {
+		$maxAge += 1;
+  	$minDate = date("Y-m-d", strtotime("-{$maxAge} years"));
+  	$maxDate = date("Y-m-d", strtotime("-{$minAge} years"));
+  	$query .= "and birthday between ? and ? ";
+  	$paramsString .= "ss";
+  	array_push($paramsArray, $minDate, $maxDate);
+	}
 
   if ($country !== -1) {
     $query .= "and country = ? ";

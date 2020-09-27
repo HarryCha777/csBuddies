@@ -41,7 +41,9 @@ struct ChatRoomView: View {
                     .imageScale(.large)
             }
         )
-        .modifier(AdaptsToKeyboard())
+        .if(UIDevice.current.systemVersion[0...1] == "13") { content in
+            content.modifier(AdaptsToKeyboard())
+        }
         .animation(.easeOut(duration: 0.16))
         .onAppear {
             self.markAllRead()

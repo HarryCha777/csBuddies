@@ -25,6 +25,7 @@
   $stmt->execute();
 
   $minimumBuild = getMinimumBuild();
+  $announcement = getAnnouncement();
 
   if ($hasImage) {
 		$image = getImage($username);
@@ -42,6 +43,7 @@
   $return = array(
     "isNewUser" => False,
     "minimumBuild" => $minimumBuild,
+    "announcement" => $announcement,
     "image" => $image,
     "gender" => $row[0],
     "birthday" => $row[1],

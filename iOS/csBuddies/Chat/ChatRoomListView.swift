@@ -11,7 +11,7 @@ import SwiftUI
 struct ChatRoomListView: View {
     @EnvironmentObject var global: Global
     @Environment(\.colorScheme) var colorScheme
-    
+
     let buddyUsername: String
     
     @State private var showActions = false
@@ -59,9 +59,9 @@ struct ChatRoomListView: View {
                     .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0)) // remove space in-between messages
                 }
                 .flip()
-                .listStyle(PlainListStyle()) // remove extra space on top and bottom
+                .removeLineSeparators()
+                .removeHeaderPadding()
                 .introspectTableView { tableView in // change tableView only for this view
-                    tableView.separatorStyle = .none // remove line separators
                     tableView.backgroundColor = self.colorScheme == .light ? UIColor.white : UIColor.black // set list background
                 }
             }

@@ -78,7 +78,9 @@ struct SearchProfileReportView: View {
             }
         }
         .navigationBarTitle("Report User", displayMode: .inline)
-        .modifier(AdaptsToKeyboard())
+        .if(UIDevice.current.systemVersion[0...1] == "13") { content in
+            content.modifier(AdaptsToKeyboard())
+        }
         .onAppear {
             self.isSelectedList = [Bool](repeating: false, count: self.reasonOptions.count)
             self.isReady = true

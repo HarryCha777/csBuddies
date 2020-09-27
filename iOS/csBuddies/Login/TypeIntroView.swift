@@ -154,9 +154,11 @@ struct TypeIntroView: View {
                 .disabled(isSigningUp)
             }
             .navigationBarTitle("Introduction")
-            .modifier(AdaptsToKeyboard())
+            .if(UIDevice.current.systemVersion[0...1] == "13") { content in
+                content.modifier(AdaptsToKeyboard())
+            }
         }
-        .navigationViewStyle(StackNavigationViewStyle()) // needed so screen works on iPad
+        .navigationViewStyle(StackNavigationViewStyle())
     }
     
     func hasInvalidCharacterInUsername() -> Bool {
@@ -228,6 +230,7 @@ struct TypeIntroView: View {
             self.global.lastVisit = self.global.getUtcTime()
             self.global.lastUpdate = self.global.getUtcTime()
             self.global.accountCreation = self.global.getUtcTime()
+            self.global.announcement = json["announcement"] as! String
             self.global.listenToNewMessages()
             
             self.global.showWelcomeAlert = true

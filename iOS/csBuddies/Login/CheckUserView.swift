@@ -99,8 +99,9 @@ struct CheckUserView: View {
             self.global.lastUpdate = (json["lastUpdate"] as! String).toDate(fromFormat: "yyyy-MM-dd HH:mm:ss")
             self.global.accountCreation = (json["accountCreation"] as! String).toDate(fromFormat: "yyyy-MM-dd HH:mm:ss")
             self.global.blockedList = (json["blocks"] as! String).toBlockedList()
+            self.global.announcement = json["announcement"] as! String
             self.global.isPremium = json["isPremium"] as! Bool
-
+            
             self.fetchCoreData()
             self.unarchiveData()
             
@@ -139,6 +140,7 @@ struct CheckUserView: View {
         global.filterMinAge = Int(globalEntity.filterMinAge)
         global.filterMaxAge = Int(globalEntity.filterMaxAge)
         global.filterCountryIndex = Int(globalEntity.filterCountryIndex)
+        global.filterHasImage = globalEntity.filterHasImage
         global.filterHasGitHub = globalEntity.filterHasGitHub
         global.filterHasLinkedIn = globalEntity.filterHasLinkedIn
         global.filterInterests = globalEntity.filterInterests!

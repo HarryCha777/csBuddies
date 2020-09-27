@@ -50,10 +50,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     
     // Run code when notification is tapped.
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        let userInfo = response.notification.request.content.userInfo
-        globalObject.notificationBuddyUsername = ((userInfo["aps"] as! NSDictionary)["alert"] as! NSDictionary)["title"] as! String
-        globalObject.mustVisitChatRoom = true
-        globalObject.tabIndex = 0 // navigate to any view that's not Chat View
+        if UIDevice.current.systemVersion[0...1] == "13" {
+            let userInfo = response.notification.request.content.userInfo
+            globalObject.notificationBuddyUsername = ((userInfo["aps"] as! NSDictionary)["alert"] as! NSDictionary)["title"] as! String
+            globalObject.mustVisitChatRoom = true
+            globalObject.tabIndex = 0 // navigate to any view that's not Chat View
+        } else {
+            globalObject.tabIndex = 1
+        }
         
         completionHandler()
     }

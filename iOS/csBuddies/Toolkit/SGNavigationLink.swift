@@ -6,7 +6,7 @@ struct SGNavigationLink<Content, Destination>: View where Destination: View, Con
     let destination: Destination?
     let content: () -> Content
 
-    @State private var isLinkActive:Bool = false
+    @State private var isLinkActive = false
 
     init(destination: Destination, title: String = "", @ViewBuilder content: @escaping () -> Content) {
         self.content = content
@@ -14,21 +14,19 @@ struct SGNavigationLink<Content, Destination>: View where Destination: View, Con
     }
 
     var body: some View {
-        return ZStack (alignment: .leading){
-            if self.isLinkActive{
+        return ZStack(alignment: .leading) {
+            content()
+            
+            // This if condition allows clicking on messages in chat room, but removes transition animation in iOS 14.
+            if isLinkActive {
                 NavigationLink(destination: destination, isActive: $isLinkActive) {
-                    Color.clear
+                    EmptyView()
                 }
                 .frame(width: 0, height: 0)
             }
-            content()
         }
         .onTapGesture {
-            self.pushHiddenNavLink()
+            self.isLinkActive = true
         }
-    }
-
-    func pushHiddenNavLink(){
-        self.isLinkActive = true
     }
 }

@@ -56,8 +56,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called when the scene will move from an active state to an inactive state.
         // This may occur due to temporary interruptions (ex. an incoming phone call).
         
-        // Handle core data only if user check is finished or all core data will be deleted.
-        if !globalObject.isCheckingUser {
+        // Handle core data only if user check is finished, user is not banned, and there is no need to update
+        // or all core data will be deleted.
+        if !globalObject.isCheckingUser &&
+            !globalObject.mustUpdate &&
+            !globalObject.isBanned {
             archiveData() // archive first since it will change globalObject.encodedData
             deleteCoreData()
             saveCoreData()
@@ -93,6 +96,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         globalEntity.filterMinAge = Int16(globalObject.filterMinAge)
         globalEntity.filterMaxAge = Int16(globalObject.filterMaxAge)
         globalEntity.filterCountryIndex = Int16(globalObject.filterCountryIndex)
+        globalEntity.filterHasImage = globalObject.filterHasImage
         globalEntity.filterHasGitHub = globalObject.filterHasGitHub
         globalEntity.filterHasLinkedIn = globalObject.filterHasLinkedIn
         globalEntity.filterInterests = globalObject.filterInterests

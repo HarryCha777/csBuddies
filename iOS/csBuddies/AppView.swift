@@ -10,6 +10,8 @@ import SwiftUI
 
 struct AppView: View {
     @EnvironmentObject var global: Global
+    
+    @ObservedObject private var keyboardDetector = KeyboardDetector()
 
     var body: some View {
         Group {
@@ -66,24 +68,26 @@ struct AppView: View {
                                     .tag(3)
                                 }
                                 
-                                ZStack {
-                                    Circle()
-                                        .foregroundColor(.red)
+                                if !keyboardDetector.isKeyboardShown {
+                                    ZStack {
+                                        Circle()
+                                            .foregroundColor(.red)
                                     
-                                    if self.global.getUnreadCounter() <= 99 {
-                                        Text("\(self.global.getUnreadCounter())")
-                                            .foregroundColor(.white)
-                                            .font(Font.system(size: 10))
-                                    } else {
-                                        Text("99+")
-                                            .foregroundColor(.white)
-                                            .font(Font.system(size: 10))
+                                        if self.global.getUnreadCounter() <= 99 {
+                                            Text("\(self.global.getUnreadCounter())")
+                                                .foregroundColor(.white)
+                                                .font(Font.system(size: 10))
+                                        } else {
+                                            Text("99+")
+                                                .foregroundColor(.white)
+                                                .font(Font.system(size: 10))
+                                        }
                                     }
+                                    .frame(width: 20, height: 20)
+                                    // Offset x: (tab's index * 2 - 1) * (geometry.size.width / (total number of tabs * 2)
+                                    .offset(x: (2 * 2 - 1) * (geometry.size.width / (4 * 2)), y: -30)
+                                    .opacity(self.global.getUnreadCounter() == 0 ? 0 : 1)
                                 }
-                                .frame(width: 20, height: 20)
-                                // Offset x: (tab's index * 2 - 1) * (geometry.size.width / (total number of tabs * 2)
-                                .offset(x: (2 * 2 - 1) * (geometry.size.width / (4 * 2)), y: -30)
-                                .opacity(self.global.getUnreadCounter() == 0 ? 0 : 1)
                             }
                         }
                         

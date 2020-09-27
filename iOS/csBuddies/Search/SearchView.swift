@@ -31,6 +31,7 @@ struct SearchView: View {
     @State private var isRefreshing = false
     @State private var canLoadMore = false
     @State private var mustClearSearchResults = false
+    @State private var mustVisitSearchFilter = false
     
     @State private var searchCounter = 0
     @State private var showRequestOnOpening = false
@@ -43,8 +44,36 @@ struct SearchView: View {
                 // Hide review alert view from screen.
                 reviewAlertView()
                     .frame(width: 0)
+                
+                // Hide search function from screen but execute regardless of list scroll position.
+                if self.global.mustSearch {
+                    Spacer()
+                        .onAppear {
+                            self.global.mustSearch = false
+                            self.lastSearchDate = self.global.getUtcTime()
+                            self.mustClearSearchResults = true
+                            self.searchResults.removeAll()
+                            self.searchCounter += 1
+                            self.search()
+                        }
+                }
+                
+                List {
+                    if global.announcement.count != 0 {
+                        HStack {
+                            Text(global.announcement)
+                                .font(.system(size: 14))
+                                .foregroundColor(Color.white)
+                            Spacer()
+                            Image(systemName: "xmark")
+                                .foregroundColor(Color.white)
+                                .onTapGesture {
+                                    global.announcement = ""
+                                }
+                        }
+                        .listRowBackground(Color.orange)
+                    }
 
-                Form {
                     // Indices will not update the views when more profiles are loaded.
                     // Using enumerated or zip will require ad banner to stick to a profile using Vstack.
                     // Also, using enumerated or zip will cause a glitch when more profiles are loaded after clicking on a banner ad.
@@ -57,7 +86,7 @@ struct SearchView: View {
                             AdmobNativeAdsView()
                         }
                     }
-
+                    
                     if canLoadMore {
                         Text("Loading...")
                             .onAppear {
@@ -81,9 +110,18 @@ struct SearchView: View {
                 .roundCorners()
                 .navigationBarTitle("Search")
                 .navigationBarItems(trailing:
-                    NavigationLink(destination: SearchFilterView()) {
-                        Image(systemName: "slider.horizontal.3")
-                            .imageScale(.large)
+                    ZStack {
+                        Button(action: {
+                            self.setNewFilterVars()
+                            self.mustVisitSearchFilter = true
+                        }) {
+                            Image(systemName: "slider.horizontal.3")
+                                .imageScale(.large)
+                        }
+                        
+                        NavigationLink(destination: SearchFilterView(), isActive: self.$mustVisitSearchFilter) {
+                            EmptyView()
+                        }
                     }
                 )
                 .pullToRefresh(isShowing: $isRefreshing) {
@@ -93,30 +131,21 @@ struct SearchView: View {
                     self.searchCounter += 1
                     self.search()
                 }
-                .onAppear {
-                    self.setNewFilterVars()
-                    if self.global.mustSearch {
-                        self.global.mustSearch = false
-                        self.lastSearchDate = self.global.getUtcTime()
-                        self.mustClearSearchResults = true
-                        self.searchResults.removeAll()
-                        self.searchCounter += 1
-                        self.search()
-                    }
-                    if !Calendar.current.isDate(self.global.getUtcTime(), inSameDayAs: self.global.lastVisit) {
-                        self.global.lastVisit = self.global.getUtcTime()
-                        let postString =
-                            "username=\(self.global.username.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                            "password=\(self.global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-                        self.global.runPhp(script: "updateLastVisit", postString: postString) { json in }
-                    }
-                }
             }
         }
-        .navigationViewStyle(StackNavigationViewStyle()) // needed so screen works on iPad
+        .navigationViewStyle(StackNavigationViewStyle())
+        .onAppear {
+            if !Calendar.current.isDate(self.global.getUtcTime(), inSameDayAs: self.global.lastVisit) {
+                self.global.lastVisit = self.global.getUtcTime()
+                let postString =
+                    "username=\(self.global.username.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                    "password=\(self.global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+                self.global.runPhp(script: "updateLastVisit", postString: postString) { json in }
+            }
+        }
     }
     
-    // Reset new filter variables here instead of on appear of Search Filter View since it may be navigated from views within itself.
+    // Reset new filter variables here instead of on appear of Search Filter View since it may be navigated from other views.
     func setNewFilterVars() {
         global.newFilterGenderIndex = global.filterGenderIndex
         global.newFilterMinAge = global.filterMinAge
@@ -125,6 +154,7 @@ struct SearchView: View {
         global.newFilterCountryIndex = global.filterCountryIndex
         global.newFilterInterests = global.filterInterests
         global.newFilterLevelIndex = global.filterLevelIndex
+        global.newFilterHasImage = global.filterHasImage
         global.newFilterHasGitHub = global.filterHasGitHub
         global.newFilterHasLinkedIn = global.filterHasLinkedIn
         global.newFilterSortIndex = global.filterSortIndex

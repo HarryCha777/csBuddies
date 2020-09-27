@@ -1,4 +1,5 @@
 // Source: https://stackoverflow.com/a/60178361
+// This provides space at the bottom in iOS 13, but it covers the screen in iOS 14, so use it only in iOS 13.
 
 import SwiftUI
 import Combine

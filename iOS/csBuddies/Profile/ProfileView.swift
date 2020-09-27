@@ -12,9 +12,11 @@ struct ProfileView: View {
     @EnvironmentObject var global: Global
     @Environment(\.colorScheme) var colorScheme
     
+    @State private var mustVisitProfileEdit = false
+    
     var body: some View {
         NavigationView {
-            Form {
+            List {
                 HStack {
                     VStack {
                         Spacer()
@@ -39,7 +41,7 @@ struct ProfileView: View {
                         Text("\(global.username)")
                             .bold()
                             .font(.title)
-                        Text("\(global.genderOptions[safe: global.genderIndex] ?? "Unknown"), \(global.birthday.toAge())")
+                        Text("\(global.genderOptions[safe: global.genderIndex] ?? "Unknown"), \(global.birthday.toString(toFormat: "yyyy")[0] != "0" ? "\(global.birthday.toAge())" : "Private")")
                         Text("\(global.countryOptions[safe: global.countryIndex] ?? "Unknown")")
                     }
                 }
@@ -109,19 +111,25 @@ struct ProfileView: View {
             .roundCorners()
             .navigationBarTitle("Profile")
             .navigationBarItems(trailing:
-                NavigationLink(destination: ProfileEditView()) {
-                    Image(systemName: "square.and.pencil")
-                        .imageScale(.large)
+                ZStack {
+                    Button(action: {
+                        self.setEditVars()
+                        self.mustVisitProfileEdit = true
+                    }) {
+                        Image(systemName: "square.and.pencil")
+                            .imageScale(.large)
+                    }
+                    
+                    NavigationLink(destination: ProfileEditView(), isActive: self.$mustVisitProfileEdit) {
+                        EmptyView()
+                    }
                 }
             )
-            .onAppear {
-                self.setEditVars()
-            }
         }
-        .navigationViewStyle(StackNavigationViewStyle()) // needed so screen works on iPad
+        .navigationViewStyle(StackNavigationViewStyle())
     }
     
-    // Reset edit variables here instead of on appear of Profile Edit View since it may be navigated from views within itself.
+    // Reset edit variables here instead of on appear of Profile Edit View since it may be navigated from other views.
     func setEditVars() {
         global.editImage = global.image
         global.editGenderIndex = global.genderIndex

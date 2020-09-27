@@ -19,7 +19,7 @@
 		isValidUsername($username) &&
 		isNewUsername($username) &&
 		isValidString($password, 0, 1000) &&
-		isValidInt($gender, 0, 2) &&
+		isValidInt($gender, 0, 3) &&
 		isValidDate($birthday, False) &&
 		isValidInt($country, 0, 196) &&
 		isValidString($interests, 0, 1000) &&
@@ -37,5 +37,9 @@
   $stmt = $conn->prepare($query);
   $stmt->bind_param("sssssssssss", $username, $password, $gender, $birthday, $country, $interests, $otherInterests, $level, $intro, $gitHub, $linkedIn);
   $stmt->execute();
+
+  $announcement = getAnnouncement();
+  $return = array("announcement" => $announcement);
+  echo json_encode($return);
 ?>
 

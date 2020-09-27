@@ -20,139 +20,160 @@ struct SearchFilterView: View {
         }
         var id: Id
     }
-
+    
     @State private var isReady = false
     @State private var filterGenderOptions = [String]()
     @State private var filterCountryOptions = [String]()
     @State private var filterLevelOptions = [String]()
     @State private var filterSortOptions = ["Last Visit", "Last Update", "New Users"]
     @State private var alertId: AlertId?
-    
+
     var body: some View {
-        Form {
-            if isReady {
-                Section(header: Text("Demographics")) {
-                    Picker("", selection: $global.newFilterGenderIndex) {
-                        ForEach(filterGenderOptions.indices) { index in
-                            Text(self.filterGenderOptions[index])
-                        }
+        HStack {
+            // Hide search function from screen but execute regardless of list scroll position.
+            // Don't Navigate back to Search View using applyFilters() function since the rewarded video ad will bring you back to this view.
+            if global.hasAppliedFilters {
+                Spacer()
+                    .onAppear {
+                        global.hasAppliedFilters = false
+                        presentation.wrappedValue.dismiss()
                     }
-                    .pickerStyle(SegmentedPickerStyle())
-                    
-                    VStack(alignment: .leading, spacing: 0) {
-                        Spacer()
-                            .frame(height: 7)
-                        Text("Age range: \(toAge(double: global.newFilterAgeRange.lowerBound)) - \(toAge(double: global.newFilterAgeRange.upperBound))")
-                        RangeSlider(range: $global.newFilterAgeRange)
-                            .rangeSliderStyle(
-                                HorizontalRangeSliderStyle(
-                                    lowerThumbSize: CGSize(width: 20, height: 20),
-                                    upperThumbSize: CGSize(width: 20, height: 20)
-                                )
-                            )
-                    }
-                    
-                    Picker("Must live in", selection: $global.newFilterCountryIndex) {
-                        ForEach(filterCountryOptions.indices) { index in
-                            Text(self.filterCountryOptions[index])
-                        }
-                    }
-                }
-                
-                Section(header: Text("Interests")) {
-                    NavigationLink(destination: SearchFilterInterestsView()) {
-                        Text("Must be interested in")
-                    }
-                    
-                    Picker("", selection: $global.newFilterLevelIndex) {
-                        ForEach(filterLevelOptions.indices) { index in
-                            Text(self.filterLevelOptions[index])
-                        }
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                }
-                
-                Section(header: Text("Optional")) {
-                    Toggle(isOn: $global.newFilterHasImage) {
-                        Text("Must have Image")
-                    }
-                    
-                    Toggle(isOn: $global.newFilterHasGitHub) {
-                        Text("Must have GitHub")
-                    }
-                    
-                    Toggle(isOn: $global.newFilterHasLinkedIn) {
-                        Text("Must have LinkedIn")
-                    }
-                }
-                
-                Section(header: Text("Sort")) {
-                    Picker("", selection: $global.newFilterSortIndex) {
-                        ForEach(filterSortOptions.indices) { index in
-                            Text(self.filterSortOptions[index])
-                        }
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                }
-                
-                Button(action: {
-                    self.global.newFilterGenderIndex = 0
-                    self.global.newFilterMinAge = 13
-                    self.global.newFilterMaxAge = 80
-                    self.global.newFilterAgeRange = 0.0...1.0
-                    self.global.newFilterCountryIndex = 0
-                    self.global.newFilterHasImage = false
-                    self.global.newFilterHasGitHub = false
-                    self.global.newFilterHasLinkedIn = false
-                    self.global.newFilterInterests = ""
-                    self.global.newFilterLevelIndex = 0
-                    self.global.newFilterSortIndex = 0
-                }) {
-                    Text("Reset")
-                }
-                
-                Button(action: {
-                    if self.global.isPremium || self.getFilterCounter() <= 2 {
-                        self.applyFilters()
-                    } else {
-                        self.alertId = AlertId(id: .tooManyFilters)
-                    }
-                    
-                }) {
-                    HStack {
-                        Text("Apply Filters")
-                            .alert(item: $alertId) { alert in
-                                switch alert.id {
-                                case .tooManyFilters:
-                                    return Alert(title: Text("Three or More Filters"), message: Text("To apply 3 or more filters at once, you need to watch one ad."), primaryButton: .destructive(Text("Cancel")), secondaryButton: .default(Text("OK"), action: {
-                                        if self.global.admobRewardedAdsFilter.rewardedAd.isReady {
-                                            self.global.admobRewardedAdsFilter.showAd(rewardFunction: {
-                                                self.applyFilters()
-                                            })
-                                        } else {
-                                            self.applyFilters()
-                                        }
-                                    }))
+            }
+            
+            Form {
+                if isReady {
+                    Section(header: Text("Demographics")) {
+                        Picker("", selection: $global.newFilterGenderIndex) {
+                            ForEach(filterGenderOptions.indices) { index in
+                                if index != filterGenderOptions.count - 1 {
+                                    Text(self.filterGenderOptions[index])
                                 }
+                            }
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+            
+                        VStack(alignment: .leading, spacing: 0) {
+                            Spacer()
+                                .frame(height: 7)
+                            Text("Age range: \(toAge(double: global.newFilterAgeRange.lowerBound)) - \(toAge(double: global.newFilterAgeRange.upperBound))")
+                            RangeSlider(range: $global.newFilterAgeRange)
+                                .rangeSliderStyle(
+                                    HorizontalRangeSliderStyle(
+                                        lowerThumbSize: CGSize(width: 20, height: 20),
+                                        upperThumbSize: CGSize(width: 20, height: 20)
+                                    )
+                                )
+                        }
+            
+                        Picker("Must live in", selection: $global.newFilterCountryIndex) {
+                            ForEach(filterCountryOptions.indices) { index in
+                                Text(self.filterCountryOptions[index])
+                            }
+                        }
+                    }
+            
+                    Section(header: Text("Interests")) {
+                        NavigationLink(destination: SearchFilterInterestsView()) {
+                            Text("Must be interested in")
+                        }
+            
+                        Picker("", selection: $global.newFilterLevelIndex) {
+                            ForEach(filterLevelOptions.indices) { index in
+                                Text(self.filterLevelOptions[index])
+                            }
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+                    }
+            
+                    Section(header: Text("Optional")) {
+                        Toggle(isOn: $global.newFilterHasImage) {
+                            Text("Must have Image")
+                        }
+            
+                        Toggle(isOn: $global.newFilterHasGitHub) {
+                            Text("Must have GitHub")
+                        }
+            
+                        Toggle(isOn: $global.newFilterHasLinkedIn) {
+                            Text("Must have LinkedIn")
+                        }
+                    }
+            
+                    Section(header: Text("Sort")) {
+                        Picker("", selection: $global.newFilterSortIndex) {
+                            ForEach(filterSortOptions.indices) { index in
+                                Text(self.filterSortOptions[index])
+                            }
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+                    }
+            
+                    Button(action: {
+                        self.global.newFilterGenderIndex = 0
+                        self.global.newFilterMinAge = 13
+                        self.global.newFilterMaxAge = 80
+                        self.global.newFilterAgeRange = 0.0...1.0
+                        self.global.newFilterCountryIndex = 0
+                        self.global.newFilterHasImage = false
+                        self.global.newFilterHasGitHub = false
+                        self.global.newFilterHasLinkedIn = false
+                        self.global.newFilterInterests = ""
+                        self.global.newFilterLevelIndex = 0
+                        self.global.newFilterSortIndex = 0
+                    }) {
+                        Text("Reset")
+                    }
+            
+                    Button(action: {
+                        if self.global.isPremium || self.getFilterCounter() <= 2 {
+                            self.applyFilters()
+                        } else {
+                            self.alertId = AlertId(id: .tooManyFilters)
+                        }
+            
+                    }) {
+                        HStack {
+                            Text("Apply Filters")
+                                .alert(item: $alertId) { alert in
+                                    switch alert.id {
+                                    case .tooManyFilters:
+                                        return Alert(title: Text("Three or More Filters"), message: Text("To apply 3 or more filters at once, you need to watch one ad."), primaryButton: .destructive(Text("Cancel")), secondaryButton: .default(Text("OK"), action: {
+                                            if self.global.admobRewardedAdsFilter.rewardedAd.isReady {
+                                                print("ad is ready")
+                                                self.global.admobRewardedAdsFilter.showAd(rewardFunction: {
+                                                    print("finished ad")
+                                                    self.applyFilters()
+                                                })
+                                            } else {
+                                                print("ad is not ready")
+                                                self.applyFilters()
+                                            }
+                                        }))
+                                    }
+                            }
                         }
                     }
                 }
             }
-        }
-        .navigationBarTitle("Filter Search", displayMode: .inline)
-        .navigationBarBackButtonHidden(true)
-        .navigationBarItems(leading: global.cancelButton(presentation: presentation))
-        .onAppear {
-            self.filterGenderOptions.append("All")
-            self.filterGenderOptions.append(contentsOf: self.global.genderOptions)
+            .navigationBarTitle("Filter Search", displayMode: .inline)
+            .navigationBarBackButtonHidden(true)
+            .navigationBarItems(leading: global.cancelButton(presentation: presentation))
+            .onAppear {
+                // Remove all before appending since onAppear may be triggered by navigating from other views.
+                self.filterGenderOptions.removeAll()
+                self.filterGenderOptions.append("All")
+                self.filterGenderOptions.append(contentsOf: self.global.genderOptions)
             
-            self.filterCountryOptions.append("Anywhere")
-            self.filterCountryOptions.append(contentsOf: self.global.countryOptions)
+                self.filterCountryOptions.removeAll()
+                self.filterCountryOptions.append("Anywhere")
+                self.filterCountryOptions.append(contentsOf: self.global.countryOptions)
             
-            self.filterLevelOptions.append("Both")
-            self.filterLevelOptions.append(contentsOf: self.global.levelOptions)
+                self.filterLevelOptions.removeAll()
+                self.filterLevelOptions.append("Both")
+                self.filterLevelOptions.append(contentsOf: self.global.levelOptions)
             
-            self.isReady = true
+                self.isReady = true
+            }
         }
     }
     
@@ -220,6 +241,6 @@ struct SearchFilterView: View {
         ])
         
         global.mustSearch = true
-        presentation.wrappedValue.dismiss()
+        global.hasAppliedFilters = true
     }
 }

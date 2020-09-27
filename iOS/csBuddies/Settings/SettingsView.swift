@@ -16,7 +16,7 @@ struct SettingsView: View {
     
     var body: some View {
         NavigationView {
-            Form {
+            List {
                 Section(header: Text("Chat")) {
                     NavigationLink(destination: BlockedListView()) {
                         Text("Blocked List")
@@ -79,7 +79,7 @@ struct SettingsView: View {
             .roundCorners()
             .navigationBarTitle("Settings")
         }
-        .navigationViewStyle(StackNavigationViewStyle()) // needed so screen works on iPad
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 

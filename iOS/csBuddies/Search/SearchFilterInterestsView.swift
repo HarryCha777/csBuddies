@@ -52,7 +52,6 @@ struct SearchFilterInterestsView: View {
         .navigationBarTitle("Filter Interests", displayMode: .inline)
         .onAppear {
             self.isSelectedList = self.global.newFilterInterests.toIsSelectedList()
-            print("\(self.isSelectedList)")
             self.isReady = true
         }
         .onDisappear {

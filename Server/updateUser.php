@@ -19,7 +19,7 @@
 	$isValid =
 		isAuthenticated($username, $password) &&
 		isValidString($image, 0, 20000) &&
-		isValidInt($gender, 0, 2) &&
+		isValidInt($gender, 0, 3) &&
 		isValidDate($birthday, False) &&
 		isValidInt($country, 0, 196) &&
 		isValidString($interests, 0, 1000) &&
