@@ -33,6 +33,9 @@ struct ChatRoomInputView: View {
         HStack {
             TextField("Enter message here...", text: $message)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+            //MultilineTextField(minHeight: 30, "Enter message here...", text: Binding<String>(get: { message }, set: {
+                    //self.message = $0 } ))
+
             Button(action: {
                 self.isMessaging = true
                 

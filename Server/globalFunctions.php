@@ -1,14 +1,6 @@
 <?php
 	include "/var/www/inc/dbinfo.inc";
 	
-  function getAnnouncement() {
-    return "";
-  }
-
-  function getMinimumBuild() {
-    return 1;
-  }
-
 	function toBool($string) {
 		if ($string == "true") {
 			return True;

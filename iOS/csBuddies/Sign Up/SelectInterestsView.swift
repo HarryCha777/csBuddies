@@ -83,7 +83,7 @@ struct SelectInterestsView: View {
                             self.alertId = AlertId(id: .tooLongOtherInterests)
                         } else {
                             self.global.interests = self.isSelectedList.toInterests()
-                            self.global.isSelectingInterests = false
+                            self.global.signUpId = SignUpId(id: .setProfile)
                         }
                     }) {
                         Text("Select These Interests")

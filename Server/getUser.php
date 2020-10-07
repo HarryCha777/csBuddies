@@ -24,16 +24,24 @@
   $stmt->bind_param("s", $username);
   $stmt->execute();
 
-  $minimumBuild = getMinimumBuild();
-  $announcement = getAnnouncement();
-
   if ($hasImage) {
 		$image = getImage($username);
   } else {
 		$image = "";
 	}
 
-  $query = "select gender, birthday, country, interests, otherInterests, level, intro, gitHub, linkedIn, lastVisit, lastUpdate, accountCreation, isBanned, blocks, lastNewChat, newChats, isPremium from users where username = ? limit 1;";
+  $query = "select buddyUsername from blocks where username = ?;";
+  $stmt = $conn->prepare($query);
+  $stmt->bind_param("s", $username);
+  $stmt->execute();
+  $result = $stmt->get_result() or die("Error");
+
+	$blocks = "";
+  while($row = mysqli_fetch_array($result)) {
+		$blocks .= "&".$row[0]."&";
+  }
+
+  $query = "select gender, birthday, country, interests, otherInterests, level, intro, gitHub, linkedIn, lastVisit, lastUpdate, accountCreation, isBanned, lastNewChat, newChats, isPremium from users where username = ? limit 1;";
   $stmt = $conn->prepare($query);
   $stmt->bind_param("s", $username);
   $stmt->execute();
@@ -42,8 +50,6 @@
   $row = mysqli_fetch_array($result);
   $return = array(
     "isNewUser" => False,
-    "minimumBuild" => $minimumBuild,
-    "announcement" => $announcement,
     "image" => $image,
     "gender" => $row[0],
     "birthday" => $row[1],
@@ -58,10 +64,10 @@
     "lastUpdate" => $row[10],
     "accountCreation" => $row[11],
     "isBanned" => $row[12],
-    "blocks" => $row[13],
-    "lastNewChat" => $row[14],
-    "newChats" => $row[15],
-    "isPremium" => $row[16],
+    "blocks" => $blocks,
+    "lastNewChat" => $row[13],
+    "newChats" => $row[14],
+    "isPremium" => $row[15],
   );
   echo json_encode($return);
 ?>

@@ -14,11 +14,9 @@
 		die("Invalid");
 	}
 
-	$paramBuddyUsername = "&".$buddyUsername."&";
-
-  $query = "update users set blocks = concat(blocks, ?) where username = ?;";
+  $query = "insert into blocks (username, buddyUsername, blockTime) values (?, ?, current_timestamp);";
   $stmt = $conn->prepare($query);
-  $stmt->bind_param("ss", $paramBuddyUsername, $username);
+  $stmt->bind_param("ss", $username, $buddyUsername);
   $stmt->execute();
 ?>
 

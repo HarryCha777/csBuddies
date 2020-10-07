@@ -134,9 +134,7 @@ struct SetProfileView: View {
                     }
                 }
                 
-                // When the new users are allowed to check out the app before making an account,
-                // uncomment the code below and also let users upload a profile image.
-                /*Section(header: Text("Optional")) {
+                Section(header: Text("Optional")) {
                     Text("If you'd like to show off your code, feel free to include your GitHub username.")
                     
                     HStack {
@@ -152,7 +150,7 @@ struct SetProfileView: View {
                         TextField("Start with \"https://www.linkedin.com/\"", text: $global.linkedIn)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                     }
-                }*/
+                }
                 
                 Button(action: {
                     if self.global.birthday.toAge() < 13 {
@@ -173,7 +171,7 @@ struct SetProfileView: View {
                     } else if self.global.linkedIn.count != 0 && !"\(self.global.linkedIn)".isValidUrl {
                         self.alertId = AlertId(id: .invalidLinkedIn)
                     } else {
-                        self.global.isSettingProfile = false
+                        self.global.signUpId = SignUpId(id: .typeIntro)
                     }
                 }) {
                     HStack {
@@ -200,7 +198,6 @@ struct SetProfileView: View {
                             }
                     }
                 }
-
             }
             .navigationBarTitle("Profile")
             .if(UIDevice.current.systemVersion[0...1] == "13") { content in

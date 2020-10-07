@@ -11,17 +11,18 @@ import Firebase
 import TrueTime
 
 class Global: ObservableObject {
-    // CheckUserView
+    // LoadingView
     @Published var db = Firestore.firestore()
     @Published var referenceTime: ReferenceTime?
+    @Published var viewId = ViewId(id: .loading)
+    @Published var signUpId = SignUpId(id: .selectInterests)
+    @Published var isOthersListenerSetUp = false
     @Published var firstLaunchDate = Date()
     @Published var requestedReview = false
+    @Published var guestId = ""
     @Published var encodedData = Data()
-    @Published var isCheckingUser = true
-    @Published var isNewUser = false
 
     // SelectInterestsView
-    @Published var isSelectingInterests = true
     @Published var interestsOptions = ["C", "C#", "C++", "CSS", "HTML", "Java", "JavaScript", "Kotlin", "PHP", "Python", "SQL", "Swift",
         "Android Development", "Artificial Intelligence", "Competitive Programming", "Data Science", "Ethical Hacking", "Game Development", "iOS Development", "Robotics", "Web Development",
         "Firebase", "Flutter", "Kali Linux", "SwiftUI", "Unity3D", "WordPress"]
@@ -31,7 +32,6 @@ class Global: ObservableObject {
     @Published var levelIndex = 0
     
     // SetProfileView
-    @Published var isSettingProfile = true
     @Published var genderOptions = ["Male", "Female", "Other", "Private"]
     @Published var genderIndex = 0
     @Published var birthday = Date()
@@ -48,16 +48,14 @@ class Global: ObservableObject {
     @Published var lastVisit = Date()
     @Published var lastUpdate = Date()
     @Published var accountCreation = Date()
-    @Published var announcement = ""
-    @Published var mustUpdate = false
-    @Published var isBanned = false
     @Published var isPremium = false
     @Published var tabIndex = 0
     
     // SearchView
-    @Published var showWelcomeAlert = false
     @Published var mustSearch = true
-    
+    @Published var announcementText = ""
+    @Published var announcementLink = ""
+
     // SearchFilterView
     @Published var filterGenderIndex = 0
     @Published var filterMinAge = 13
@@ -119,7 +117,7 @@ class Global: ObservableObject {
         //print("script: \(script)")
         //print("postString: \(postString)")
         
-        let myUrl = URL(string: "http://ec2-54-184-108-149.us-west-2.compute.amazonaws.com/8/\(script).php");
+        let myUrl = URL(string: "http://ec2-54-184-108-149.us-west-2.compute.amazonaws.com/18/\(script).php");
         var request = URLRequest(url: myUrl!)
         request.httpMethod = "POST"
         request.httpBody = postString.data(using: String.Encoding.utf8)
@@ -184,7 +182,6 @@ class Global: ObservableObject {
             .whereField("isRead", isEqualTo: false)
             .whereField("isDeleted", isEqualTo: false)
             .addSnapshotListener { (snapshot, error) in
-                
                 snapshot!
                     .documentChanges
                     .forEach { documentChange in
@@ -206,6 +203,42 @@ class Global: ObservableObject {
                         }
                 }
         }
+    }
+    
+    func toResizedString(uiImage: UIImage) -> String {
+        var actualHeight = Float(uiImage.size.height)
+        var actualWidth = Float(uiImage.size.width)
+        let maxHeight: Float = 200.0
+        let maxWidth: Float = 200.0
+        var imgRatio: Float = actualWidth / actualHeight
+        let maxRatio: Float = maxWidth / maxHeight
+        let compressionQuality: Float = 0.5
+        
+        if actualHeight > maxHeight || actualWidth > maxWidth {
+            if imgRatio < maxRatio {
+                imgRatio = maxHeight / actualHeight
+                actualWidth = imgRatio * actualWidth
+                actualHeight = maxHeight
+            }
+            else if imgRatio > maxRatio {
+                imgRatio = maxWidth / actualWidth
+                actualHeight = imgRatio * actualHeight
+                actualWidth = maxWidth
+            }
+            else {
+                actualHeight = maxHeight
+                actualWidth = maxWidth
+            }
+        }
+        
+        let rect = CGRect(x: 0.0, y: 0.0, width: CGFloat(actualWidth), height: CGFloat(actualHeight))
+        UIGraphicsBeginImageContext(rect.size)
+        uiImage.draw(in: rect)
+        let img = UIGraphicsGetImageFromCurrentImageContext()
+        let imageData = img?.jpegData(compressionQuality: CGFloat(compressionQuality))
+        UIGraphicsEndImageContext()
+        // Change data straight to string here instead of changing data to UIImage to string since the latter results in much longer string.
+        return imageData!.base64EncodedString(options: Data.Base64EncodingOptions.lineLength64Characters)
     }
 
     func deleteChatRoom(buddyUsername: String) {
@@ -275,11 +308,6 @@ class Global: ObservableObject {
     }
     
     func block(buddyUsername: String) {
-        // A user cannot block more than 1,000 users.
-        if blockedList.count >= 1000 {
-            return
-        }
-        
         blockedList.append(buddyUsername)
         
         let postString =
@@ -308,6 +336,30 @@ class Global: ObservableObject {
             }
         }
     }
+}
+
+// Global Structs
+struct ViewId: Identifiable {
+    enum Id {
+        case
+            maintenance,
+            update,
+            banned,
+            signUp,
+            loading,
+            tabs
+    }
+    var id: Id
+}
+
+struct SignUpId: Identifiable {
+    enum Id {
+        case
+            selectInterests,
+            setProfile,
+            typeIntro
+    }
+    var id: Id
 }
 
 // Global Extensions

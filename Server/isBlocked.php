@@ -14,11 +14,9 @@
 		die("Invalid");
 	}
 
-	$paramUsername = "%&".$username."&%";
-
-  $query = "select blocks from users where username = ? and blocks like ? limit 1;";
+  $query = "select username from blocks where username = ? and buddyUsername = ? limit 1;";
   $stmt = $conn->prepare($query);
-  $stmt->bind_param("ss", $buddyUsername, $paramUsername);
+  $stmt->bind_param("ss", $buddyUsername, $username);
   $stmt->execute();
   $result = $stmt->get_result() or die("Error");
 

@@ -13,6 +13,16 @@ struct SearchProfileView: View {
     @EnvironmentObject var global: Global
     @Environment(\.colorScheme) var colorScheme
     
+    private struct AlertId: Identifiable {
+        enum Id {
+            case
+            mustSignUpToMessage,
+            mustSignUpToBlock,
+            mustSignUpToReport
+        }
+        var id: Id
+    }
+    
     let buddyUsername: String
     
     @State private var buddyImage = ""
@@ -28,7 +38,8 @@ struct SearchProfileView: View {
     @State private var buddyLastUpdate = Date()
     @State private var buddyAccountCreation = Date()
     @State private var isReady = false
-    
+    @State private var alertId: AlertId?
+
     var body: some View {
         List {
             if isReady {
@@ -56,21 +67,27 @@ struct SearchProfileView: View {
                         Text("\(buddyUsername)")
                             .bold()
                             .font(.title)
-                        Text("\(global.genderOptions[safe: buddyGenderIndex] ?? "Unknown"), \(buddyBirthday.toString(toFormat: "yyyy")[0] != "0" ? "\(buddyBirthday.toAge())" : "Private")")
+                        HStack {
+                            if buddyGenderIndex == 0 {
+                                Text("\(global.genderOptions[buddyGenderIndex])")
+                                    .foregroundColor(Color.blue) +
+                                    Text(",")
+                            } else if buddyGenderIndex == 1 {
+                                Text("\(global.genderOptions[buddyGenderIndex])")
+                                    .foregroundColor(Color(red: 255 / 255, green: 20 / 255, blue: 147 / 255)) + // pink
+                                    Text(",")
+                            } else if buddyGenderIndex == 2 ||
+                                        buddyGenderIndex == 3 {
+                                Text("\(global.genderOptions[buddyGenderIndex])")
+                                    .foregroundColor(Color.gray) +
+                                    Text(",")
+                            } else {
+                                Text("Unknown") +
+                                    Text(",")
+                            }
+                            Text("\(buddyBirthday.toString(toFormat: "yyyy")[0] != "0" ? "\(buddyBirthday.toAge())" : "N/A")")
+                        }
                         Text("\(global.countryOptions[safe: buddyCountryIndex] ?? "Unknown")")
-                    }
-                }
-                
-                Section(header: Text("Interests")) {
-                    if buddyInterests.count == 0 {
-                        Text("Did not select any interest.")
-                    } else {
-                        Text("\(buddyInterests.toReadableInterests())")
-                    }
-                    HStack {
-                        Text("Level")
-                        Spacer()
-                        Text("\(global.levelOptions[safe: buddyLevelIndex] ?? "Unknown")")
                     }
                 }
                 
@@ -109,7 +126,23 @@ struct SearchProfileView: View {
                     }
                 }
                 
-                Section(header: Text("Activity")) {
+                Section(header: Text("Interests")) {
+                    if buddyInterests.count == 0 {
+                        Text("Did not select any interest.")
+                    } else {
+                        Text("\(buddyInterests.toReadableInterests())")
+                    }
+                    HStack {
+                        Text("Level")
+                        Spacer()
+                        Text("\(global.levelOptions[safe: buddyLevelIndex] ?? "Unknown")")
+                    }
+                }
+                
+                // Since the users are not very active yet, last visit may discourage new users from messaging old users.
+                // Uncomment the Activity section only when the app is more active so that new users will get encouraged to see other users' last visit.
+                // Mark "Today" and "Yesterday" in text.
+                /*Section(header: Text("Activity")) {
                     HStack {
                         Text("Last Visit")
                         Spacer()
@@ -125,49 +158,72 @@ struct SearchProfileView: View {
                         Spacer()
                         Text("\(buddyAccountCreation.toLocal().toString(toFormat: "M/d/yy"))")
                     }
-                }
+                }*/
                 
                 Section(header: Text("Action")) {
-                    ZStack(alignment: .leading) {
-                        Text("Message User")
-                            .foregroundColor(Color.blue)
-                        
-                        // Hide navigation link arrow by making invisible navigation link in ZStack.
-                        NavigationLink(destination: ChatRoomView(buddyUsername: buddyUsername)) {
-                            EmptyView()
-                        }
-                        .if(UIDevice.current.systemVersion[0...1] == "13") { content in
-                            // This hides arrow in iOS 13, but disables link in iOS 14.
-                            content.hidden()
-                        }
-                    }
-                    
-                    if !global.blockedList.contains(buddyUsername) {
+                    if global.username == "" {
                         Button(action: {
-                            self.global.block(buddyUsername: self.buddyUsername)
+                            self.alertId = AlertId(id: .mustSignUpToMessage)
+                        }) {
+                            Text("Message User")
+                                .foregroundColor(Color.blue)
+                        }
+
+                        Button(action: {
+                            self.alertId = AlertId(id: .mustSignUpToBlock)
                         }) {
                             Text("Block User")
                                 .foregroundColor(Color.red)
                         }
-                    } else {
-                        Button(action: {
-                            self.global.unblock(buddyUsername: self.buddyUsername)
-                        }) {
-                            Text("Unblock User")
-                        }
-                    }
-                    
-                    ZStack(alignment: .leading) {
-                        Text("Report User")
-                            .foregroundColor(Color.red)
                         
-                        // Hide navigation link arrow by making invisible navigation link in ZStack.
-                        NavigationLink(destination: SearchProfileReportView(buddyUsername: buddyUsername)) {
-                            EmptyView()
+                        Button(action: {
+                            self.alertId = AlertId(id: .mustSignUpToReport)
+                        }) {
+                            Text("Report User")
+                                .foregroundColor(Color.red)
                         }
-                        .if(UIDevice.current.systemVersion[0...1] == "13") { content in
-                            // This hides arrow in iOS 13, but disables link in iOS 14.
-                            content.hidden()
+                    } else {
+                        ZStack(alignment: .leading) {
+                            Text("Message User")
+                                .foregroundColor(Color.blue)
+                        
+                            // Hide navigation link arrow by making invisible navigation link in ZStack.
+                            NavigationLink(destination: ChatRoomView(buddyUsername: buddyUsername)) {
+                                EmptyView()
+                            }
+                            .if(UIDevice.current.systemVersion[0...1] == "13") { content in
+                                // This hides arrow in iOS 13, but disables link in iOS 14.
+                                content.hidden()
+                            }
+                        }
+                        
+                        if !global.blockedList.contains(buddyUsername) {
+                            Button(action: {
+                                self.global.block(buddyUsername: self.buddyUsername)
+                            }) {
+                                Text("Block User")
+                                    .foregroundColor(Color.red)
+                            }
+                        } else {
+                            Button(action: {
+                                self.global.unblock(buddyUsername: self.buddyUsername)
+                            }) {
+                                Text("Unblock User")
+                            }
+                        }
+                        
+                        ZStack(alignment: .leading) {
+                            Text("Report User")
+                                .foregroundColor(Color.red)
+                        
+                            // Hide navigation link arrow by making invisible navigation link in ZStack.
+                            NavigationLink(destination: SearchProfileReportView(buddyUsername: buddyUsername)) {
+                                EmptyView()
+                            }
+                            .if(UIDevice.current.systemVersion[0...1] == "13") { content in
+                                // This hides arrow in iOS 13, but disables link in iOS 14.
+                                content.hidden()
+                            }
                         }
                     }
                 }
@@ -175,12 +231,45 @@ struct SearchProfileView: View {
         }
         .roundCorners()
         .navigationBarTitle("\(buddyUsername)", displayMode: .inline)
-        .navigationBarItems(trailing:
-            NavigationLink(destination: ChatRoomView(buddyUsername: buddyUsername)) {
-                Image(systemName: "text.bubble")
-                    .imageScale(.large)
-            }
-        )
+        .if(global.username == "") { content in
+            content
+                .navigationBarItems(trailing:
+                    Button(action: {
+                        self.alertId = AlertId(id: .mustSignUpToMessage)
+                    }) {
+                        Image(systemName: "text.bubble")
+                            .imageScale(.large)
+                    }
+                    .alert(item: $alertId) { alert in
+                        switch alert.id {
+                        case .mustSignUpToMessage:
+                            return Alert(title: Text("You Must Sign Up to Message \(buddyUsername)"), message: Text("Sign up only takes a minute, and we never ask for your email, phone number, or password."), primaryButton: .destructive(Text("Cancel")), secondaryButton: .default(Text("Sign Up"), action: {
+                                self.global.viewId = ViewId(id: .signUp)
+                                self.global.signUpId = SignUpId(id: .selectInterests)
+                            }))
+                        case .mustSignUpToBlock:
+                            return Alert(title: Text("You Must Sign Up to Block \(buddyUsername)"), message: Text("Sign up only takes a minute, and we never ask for your email, phone number, or password."), primaryButton: .destructive(Text("Cancel")), secondaryButton: .default(Text("Sign Up"), action: {
+                                self.global.viewId = ViewId(id: .signUp)
+                                self.global.signUpId = SignUpId(id: .selectInterests)
+                            }))
+                        case .mustSignUpToReport:
+                            return Alert(title: Text("You Must Sign Up to Report \(buddyUsername)"), message: Text("Sign up only takes a minute, and we never ask for your email, phone number, or password."), primaryButton: .destructive(Text("Cancel")), secondaryButton: .default(Text("Sign Up"), action: {
+                                self.global.viewId = ViewId(id: .signUp)
+                                self.global.signUpId = SignUpId(id: .selectInterests)
+                            }))
+                        }
+                    }
+                )
+        }
+        .if(global.username != "") { content in
+            content
+                .navigationBarItems(trailing:
+                    NavigationLink(destination: ChatRoomView(buddyUsername: buddyUsername)) {
+                        Image(systemName: "text.bubble")
+                            .imageScale(.large)
+                    }
+                )
+        }
         .onAppear {
             self.fetchUser()
         }

@@ -34,7 +34,7 @@ struct ChatRoomLinkView: View {
                     }
                     
                     Spacer()
-                        .frame(width: 20)
+                        .frame(width: 10)
                     
                     SGNavigationLink(destination: ChatRoomView(buddyUsername: buddyUsername)) {
                         HStack {
@@ -44,9 +44,9 @@ struct ChatRoomLinkView: View {
                                     .lineLimit(1)
                                 }
                                 HStack {
-                                Text("\(self.getLastMessage())")
+                                Text("\(self.getLastMessage())\n") // add a new line to make sure there are at least 2 lines
                                     .foregroundColor(Color.gray)
-                                    .lineLimit(1)
+                                    .lineLimit(2)
                                 }
                             }
                             

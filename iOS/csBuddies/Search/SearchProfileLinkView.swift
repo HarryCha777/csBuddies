@@ -21,22 +21,26 @@ struct SearchProfileLinkView: View {
                     if searchProfileLinkData.image == "" {
                         Image(systemName: "person.crop.circle.fill")
                             .resizable()
-                            .frame(width: 50, height: 50)
+                            .frame(width: 75, height: 75)
                             .clipShape(Circle())
                     } else {
                         Image(uiImage: searchProfileLinkData.image.toUiImage())
                             .resizable()
-                            .frame(width: 50, height: 50)
+                            .frame(width: 75, height: 75)
                             .clipShape(Circle())
                     }
                     
+                    Spacer()
+                        .frame(width: 10)
+
                     // Set spacing to 0 to preveng GitHub and LinkedIn logos from taking unnecessary vertical space.
                     VStack(spacing: 0) {
                         HStack {
                             Text("\(searchProfileLinkData.username)")
                                 .bold()
                                 .font(.system(size: 22))
-                                .lineLimit(1)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
                             Spacer()
                         }
                         HStack {
@@ -57,7 +61,7 @@ struct SearchProfileLinkView: View {
                                 Text("Unknown") +
                                     Text(",")
                             }
-                            Text("\(searchProfileLinkData.birthday.toString(toFormat: "yyyy")[0] != "0" ? "\(searchProfileLinkData.birthday.toAge())" : "Private")")
+                            Text("\(searchProfileLinkData.birthday.toString(toFormat: "yyyy")[0] != "0" ? "\(searchProfileLinkData.birthday.toAge())" : "N/A")")
                             Spacer()
                             if searchProfileLinkData.hasGitHub {
                                 Image("gitHubLogo")
@@ -76,29 +80,24 @@ struct SearchProfileLinkView: View {
                     }
                 }
                 
-                if searchProfileLinkData.shortInterests.count != 0 {
+                if searchProfileLinkData.intro.count != 0 {
                     HStack {
-                        Text("\(searchProfileLinkData.shortInterests.toReadableInterests())")
-                            .lineLimit(1)
-                        Spacer()
-                    }
-                }
-                if searchProfileLinkData.shortIntro.count != 0 {
-                    HStack {
-                        Text("\(searchProfileLinkData.shortIntro.replacingOccurrences(of: "\n", with: " "))")
-                            .lineLimit(1)
+                        Text("\(searchProfileLinkData.intro.replacingOccurrences(of: "\n", with: " "))")
+                            .lineLimit(3)
                         Spacer()
                     }
                 }
             }
             
-            // Hide navigation link arrow by making invisible navigation link in ZStack.
-            NavigationLink(destination: SearchProfileView(buddyUsername: searchProfileLinkData.username)) {
-                EmptyView()
-            }
-            .if(UIDevice.current.systemVersion[0...1] == "13") { content in
-                // This hides arrow in iOS 13, but disables link in iOS 14.
-                content.hidden()
+            if searchProfileLinkData.username != global.username {
+                // Hide navigation link arrow by making invisible navigation link in ZStack.
+                NavigationLink(destination: SearchProfileView(buddyUsername: searchProfileLinkData.username)) {
+                    EmptyView()
+                }
+                .if(UIDevice.current.systemVersion[0...1] == "13") { content in
+                    // This hides arrow in iOS 13, but disables link in iOS 14.
+                    content.hidden()
+                }
             }
         }
     }

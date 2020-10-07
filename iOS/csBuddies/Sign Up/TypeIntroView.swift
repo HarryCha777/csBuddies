@@ -36,10 +36,11 @@ struct TypeIntroView: View {
         var id: Id
     }
     
+    @State var showImagePicker: Bool = false
     @State private var agreed = false
     @State private var isSigningUp = false
     @State private var alertId: AlertId?
-    
+
     var body: some View {
         NavigationView {
             Form {
@@ -56,9 +57,58 @@ struct TypeIntroView: View {
                     }
                 }
                 
+                Section(header: Text("Image")) {
+                    Button(action: {
+                        self.showImagePicker.toggle()
+                    }) {
+                        HStack {
+                            Spacer()
+                            if global.image == "" {
+                                Image(systemName: "person.crop.circle.fill")
+                                    .resizable()
+                                    .frame(width: 75, height: 75)
+                                    .clipShape(Circle())
+                            } else {
+                                Image(uiImage: global.image.toUiImage())
+                                    .resizable()
+                                    .frame(width: 75, height: 75)
+                                    .clipShape(Circle())
+                            }
+                            Spacer()
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .sheet(isPresented: $showImagePicker) {
+                        ImagePicker(sourceType: .photoLibrary) { uiImage in
+                            self.global.image = self.global.toResizedString(uiImage: uiImage)
+                        }
+                    }
+                    
+                    Button(action: {
+                        self.global.image = ""
+                    }) {
+                        Text("Remove Image")
+                            .foregroundColor(Color.red)
+                    }
+                }
+                
                 Section(header: Text("Self-Introduction")) {
                     MultilineTextField(minHeight: 300, introExample, text: Binding<String>(get: { self.global.intro }, set: {
                         self.global.intro = $0 } ))
+                }
+                
+                Section(header: Text("Preview")) {
+                    Text("Preview may look different depending on the screen width of the viewer's device.")
+                    SearchProfileLinkView(searchProfileLinkData: SearchProfileLinkData(
+                                            id: global.username,
+                                            image: global.image,
+                                            username: global.username,
+                                            birthday: global.birthday,
+                                            genderIndex: global.genderIndex,
+                                            intro: global.intro,
+                                            hasGitHub: global.gitHub.count != 0,
+                                            hasLinkedIn: global.linkedIn.count != 0))
+                        .padding() // use padding to compensate for rounded list in search view
                 }
                 
                 Section(header: Text("Agreement")) {
@@ -101,7 +151,7 @@ struct TypeIntroView: View {
                         Text("View Terms and Conditions")
                     }
                 }
-
+                
                 Button(action: {
                     self.isSigningUp = true
                     
@@ -115,7 +165,7 @@ struct TypeIntroView: View {
                         self.alertId = AlertId(id: .improperSpacingInUsername)
                     } else if self.global.username.count > 30 {
                         self.alertId = AlertId(id: .tooLongUsername)
-                    } else if self.global.intro.count < 50 {
+                    } else if self.global.intro.count < 100 {
                         self.alertId = AlertId(id: .tooShortIntro)
                     } else if self.global.intro.count > 1000 {
                         self.alertId = AlertId(id: .tooLongIntro)
@@ -142,7 +192,7 @@ struct TypeIntroView: View {
                                 case .tooLongUsername:
                                     return Alert(title: Text("Too Long Username"), message: Text("Your username must be no longer than 30 characters."), dismissButton: .default(Text("OK")))
                                 case .tooShortIntro:
-                                    return Alert(title: Text("Your intro is too short."), message: Text("You currently typed \(self.global.intro.count) characters. Please write at least 50 characters."), dismissButton: .default(Text("OK")))
+                                    return Alert(title: Text("Your intro is too short."), message: Text("You currently typed \(self.global.intro.count) characters. Please write at least 100 characters."), dismissButton: .default(Text("OK")))
                                 case .tooLongIntro:
                                     return Alert(title: Text("Your intro is too long."), message: Text("You currently typed \(self.global.intro.count) characters. Please type no more than 1,000 characters."), dismissButton: .default(Text("OK")))
                                 case .extantUsername:
@@ -217,6 +267,7 @@ struct TypeIntroView: View {
         let postString =
             "username=\(global.username.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
             "password=\(global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+            "image=\(global.image.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
             "gender=\(global.genderIndex)&" +
             "birthday=\(global.birthday.toString(toFormat: "yyyy-MM-dd", hasTime: false))&" +
             "country=\(global.countryIndex)&" +
@@ -225,16 +276,16 @@ struct TypeIntroView: View {
             "level=\(global.levelIndex)&" +
             "intro=\(global.intro.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
             "gitHub=\(global.gitHub.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "linkedIn=\(global.linkedIn.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+            "linkedIn=\(global.linkedIn.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+            "guestId=\(global.guestId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
         global.runPhp(script: "addUser", postString: postString) { json in
             self.global.lastVisit = self.global.getUtcTime()
             self.global.lastUpdate = self.global.getUtcTime()
             self.global.accountCreation = self.global.getUtcTime()
-            self.global.announcement = json["announcement"] as! String
             self.global.listenToNewMessages()
             
-            self.global.showWelcomeAlert = true
-            self.global.isNewUser = false
+            self.global.mustSearch = true
+            self.global.viewId = ViewId(id: .tabs)
         }
     }
 }

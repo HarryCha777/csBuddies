@@ -10,7 +10,8 @@ service cloud.firestore {
       // All senders can create their own documents.
       allow create: if
       	isValidString("content", 1, 1000000000) &&
-        isValidString("id", 23, 23) &&
+      	// Do not validate the length of id since it may be in various formats.
+        //isValidString("id", 23, 23) &&
         incomingData().id == request.resource.id &&
         incomingData().isDeleted is bool &&
         incomingData().isDeleted == false &&
@@ -35,6 +36,11 @@ service cloud.firestore {
       
       // No one can delete any document.
       allow delete: if false;
+    }
+    
+    match /global/{documentId} {
+    	allow read: if true;
+      allow write: if false;
     }
 
     function existingData() {

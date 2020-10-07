@@ -17,9 +17,11 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             List {
-                Section(header: Text("Chat")) {
-                    NavigationLink(destination: BlockedListView()) {
-                        Text("Blocked List")
+                if global.username != "" {
+                    Section(header: Text("Chat")) {
+                        NavigationLink(destination: BlockedListView()) {
+                            Text("Blocked List")
+                        }
                     }
                 }
                 

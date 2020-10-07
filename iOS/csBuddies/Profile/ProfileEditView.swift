@@ -41,10 +41,10 @@ struct ProfileEditView: View {
         var id: Id
     }
 
+    @State var showImagePicker: Bool = false
     @State private var privateGender = false
     @State private var privateBirthday = false
     @State private var alertId: AlertId?
-    @State var showImagePicker: Bool = false
 
     var body: some View {
         Form {
@@ -71,7 +71,7 @@ struct ProfileEditView: View {
                 .buttonStyle(PlainButtonStyle())
                 .sheet(isPresented: $showImagePicker) {
                     ImagePicker(sourceType: .photoLibrary) { uiImage in
-                        self.global.editImage = self.toResizedString(uiImage: uiImage)
+                        self.global.editImage = self.global.toResizedString(uiImage: uiImage)
                     }
                 }
                 
@@ -179,25 +179,6 @@ struct ProfileEditView: View {
                 }
             }
             
-            Section(header: Text("Interests")) {
-                NavigationLink(destination: ProfileEditInterestsView()) {
-                    Text("Interests")
-                }
-                
-                HStack {
-                    Text("Others:")
-                    TextField("Ex: R, Wix, Dart, Ruby, Flask, Django, Weebly, Desktop, Xamarin, Graphics, etc", text: $global.editOtherInterests)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                }
-                
-                Picker("", selection: $global.editLevelIndex) {
-                    ForEach(global.levelOptions.indices) { index in
-                        Text(self.global.levelOptions[index])
-                    }
-                }
-                .pickerStyle(SegmentedPickerStyle())
-            }
-            
             Section(header: Text("Self-Introduction")) {
                 MultilineTextField(minHeight: 300, introExample, text: Binding<String>(get: { self.global.editIntro }, set: {
                     self.global.editIntro = $0 } ))
@@ -217,6 +198,39 @@ struct ProfileEditView: View {
                 }
             }
             
+            Section(header: Text("Interests")) {
+                NavigationLink(destination: ProfileEditInterestsView()) {
+                    Text("Interests")
+                }
+                
+                HStack {
+                    Text("Others:")
+                    TextField("Ex: R, Wix, Dart, Ruby, Flask, Django, Weebly, Desktop, Xamarin, Graphics, etc", text: $global.editOtherInterests)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                }
+                
+                Picker("", selection: $global.editLevelIndex) {
+                    ForEach(global.levelOptions.indices) { index in
+                        Text(self.global.levelOptions[index])
+                    }
+                }
+                .pickerStyle(SegmentedPickerStyle())
+            }
+            
+            Section(header: Text("Preview")) {
+                Text("Preview may look different depending on the screen width of the viewer's device.")
+                SearchProfileLinkView(searchProfileLinkData: SearchProfileLinkData(
+                                        id: global.username,
+                                        image: global.editImage,
+                                        username: global.username,
+                                        birthday: global.editBirthday,
+                                        genderIndex: global.editGenderIndex,
+                                        intro: global.editIntro,
+                                        hasGitHub: global.editGitHub.count != 0,
+                                        hasLinkedIn: global.editLinkedIn.count != 0))
+                    .padding() // use padding to compensate for rounded list in search view
+            }
+
             global.cancelButton(presentation: presentation)
             Button(action: {
                 if self.global.editBirthday.toAge() < 13 {
@@ -240,7 +254,7 @@ struct ProfileEditView: View {
                     self.alertId = AlertId(id: .tooLongLinkedIn)
                 } else if self.global.editLinkedIn.count != 0 && !"\(self.global.editLinkedIn)".isValidUrl {
                     self.alertId = AlertId(id: .invalidLinkedIn)
-                } else if self.global.editIntro.count < 50 {
+                } else if self.global.editIntro.count < 100 {
                     self.alertId = AlertId(id: .tooShortIntro)
                 } else if self.global.editIntro.count > 1000 {
                     self.alertId = AlertId(id: .tooLongIntro)
@@ -273,7 +287,7 @@ struct ProfileEditView: View {
                             case .invalidLinkedIn:
                                 return Alert(title: Text("Invalid LinkedIn URL"), message: Text("Your LinkedIn URL must be either valid or left empty."), dismissButton: .default(Text("OK")))
                             case .tooShortIntro:
-                                return Alert(title: Text("Your intro is too short."), message: Text("You currently typed \(self.global.editIntro.count) characters. Please write at least 50 characters."), dismissButton: .default(Text("OK")))
+                                return Alert(title: Text("Your intro is too short."), message: Text("You currently typed \(self.global.editIntro.count) characters. Please write at least 100 characters."), dismissButton: .default(Text("OK")))
                             case .tooLongIntro:
                                 return Alert(title: Text("Your intro is too long."), message: Text("You currently typed \(self.global.editIntro.count) characters. Please type no more than 1,000 characters."), dismissButton: .default(Text("OK")))
                             }
@@ -287,42 +301,6 @@ struct ProfileEditView: View {
         .if(UIDevice.current.systemVersion[0...1] == "13") { content in
             content.modifier(AdaptsToKeyboard())
         }
-    }
-    
-    func toResizedString(uiImage: UIImage) -> String {
-        var actualHeight = Float(uiImage.size.height)
-        var actualWidth = Float(uiImage.size.width)
-        let maxHeight: Float = 200.0
-        let maxWidth: Float = 200.0
-        var imgRatio: Float = actualWidth / actualHeight
-        let maxRatio: Float = maxWidth / maxHeight
-        let compressionQuality: Float = 0.5
-        
-        if actualHeight > maxHeight || actualWidth > maxWidth {
-            if imgRatio < maxRatio {
-                imgRatio = maxHeight / actualHeight
-                actualWidth = imgRatio * actualWidth
-                actualHeight = maxHeight
-            }
-            else if imgRatio > maxRatio {
-                imgRatio = maxWidth / actualWidth
-                actualHeight = imgRatio * actualHeight
-                actualWidth = maxWidth
-            }
-            else {
-                actualHeight = maxHeight
-                actualWidth = maxWidth
-            }
-        }
-        
-        let rect = CGRect(x: 0.0, y: 0.0, width: CGFloat(actualWidth), height: CGFloat(actualHeight))
-        UIGraphicsBeginImageContext(rect.size)
-        uiImage.draw(in: rect)
-        let img = UIGraphicsGetImageFromCurrentImageContext()
-        let imageData = img?.jpegData(compressionQuality: CGFloat(compressionQuality))
-        UIGraphicsEndImageContext()
-        // Change data straight to string here instead of changing data to UIImage to string since the latter results in much longer string.
-        return imageData!.base64EncodedString(options: Data.Base64EncodingOptions.lineLength64Characters)
     }
     
     func updateUser() {

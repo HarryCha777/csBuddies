@@ -14,11 +14,9 @@
 		die("Invalid");
 	}
 
-	$paramBuddyUsername = "&".$buddyUsername."&";
-
-  $query = "update users set blocks = replace(blocks, ?, \"\") where username = ?;";
+  $query = "delete from blocks where username = ? and buddyUsername = ?;";
   $stmt = $conn->prepare($query);
-  $stmt->bind_param("ss", $paramBuddyUsername, $username);
+  $stmt->bind_param("ss", $username, $buddyUsername);
   $stmt->execute();
 ?>
 

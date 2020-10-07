@@ -1,5 +1,5 @@
 //
-//  MustUpdateView.swift
+//  UpdateView.swift
 //  csBuddies
 //
 //  Created by Harry Cha on 6/19/20.
@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct MustUpdateView: View {
+struct UpdateView: View {
     var body: some View {
         VStack {
             Text("Update Required")
@@ -30,8 +30,8 @@ struct MustUpdateView: View {
     }
 }
 
-struct MustUpdateView_Previews: PreviewProvider {
+struct UpdateView_Previews: PreviewProvider {
     static var previews: some View {
-        MustUpdateView()
+        UpdateView()
     }
 }

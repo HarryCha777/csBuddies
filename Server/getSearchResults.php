@@ -17,21 +17,32 @@
   $sort = (int)$_POST["sort"]; // 0 = sort by lastVisit, 1 = sort by lastUpdate, 2 = sort by accountCreation
   $lastSearchDate = $_POST["lastSearchDate"];
 
+  $query = "insert into timeFormats (username, lastSearchDate) values (?, ?);";
+  $stmt = $conn->prepare($query);
+  $stmt->bind_param("ss", $username, $lastSearchDate);
+  $stmt->execute();
+
 	$isValid =
-		isAuthenticated($username, $password) &&
+		($username == "" && $password == "" ||
+		isAuthenticated($username, $password)) &&
 		isValidInt($gender, -1, 2) &&
 		isValidInt($minAge, 0, 100) &&
 		isValidInt($maxAge, $minAge, 100) &&
 		isValidInt($country, -1, 196) &&
 		isValidString($interests, 0, 1000) &&
 		isValidInt($level, -1, 1) &&
-		isValidInt($sort, 0, 2) &&
-		isValidDate($lastSearchDate, True);
+		isValidInt($sort, 0, 2);
+		//isValidDate($lastSearchDate, True);
 	if ($isValid === False) {
 		die("Invalid");
 	}
 
-  $query = "select username, image, birthday, gender, left(interests, 50), left(intro, 50), char_length(gitHub), char_length(linkedIn), ";
+  $query = "update users set lastVisit = current_timestamp where username = ?;";
+  $stmt = $conn->prepare($query);
+  $stmt->bind_param("s", $username);
+  $stmt->execute();
+
+  $query = "select username, image, birthday, gender, intro, char_length(gitHub), char_length(linkedIn), ";
   if ($sort === 0) {
     $query .= "lastVisit ";
   } else if ($sort === 1) {
@@ -123,13 +134,12 @@
       "image" => $row[1],
       "birthday" => $row[2],
       "gender" => $row[3],
-      "shortInterests" => $row[4],
-      "shortIntro" => $row[5],
-      "hasGitHub" => !empty($row[6]),
-      "hasLinkedIn" => !empty($row[7]),
+      "intro" => $row[4],
+      "hasGitHub" => !empty($row[5]),
+      "hasLinkedIn" => !empty($row[6]),
     );
 
-		$lastSearchDate = min($lastSearchDate, $row[8]);
+		$lastSearchDate = min($lastSearchDate, $row[7]);
   }
 
   $rows[$counter++] = array(

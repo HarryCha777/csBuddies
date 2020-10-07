@@ -2,7 +2,7 @@
 
 import SwiftUI
 
-struct LoadingView: View {
+struct ActivityIndicatorView: View {
     @State private var isAnimating: Bool = false
     
     var body: some View {
@@ -24,11 +24,5 @@ struct LoadingView: View {
         .onAppear {
             self.isAnimating = true
         }
-    }
-}
-
-struct LoadingView_Previews: PreviewProvider {
-    static var previews: some View {
-        LoadingView()
     }
 }

@@ -59,16 +59,34 @@ struct SearchView: View {
                 }
                 
                 List {
-                    if global.announcement.count != 0 {
+                    if global.announcementText.count != 0 {
                         HStack {
-                            Text(global.announcement)
-                                .font(.system(size: 14))
-                                .foregroundColor(Color.white)
-                            Spacer()
+                            ZStack {
+                                HStack {
+                                    Text(global.announcementText.replacingOccurrences(of: "\\n", with: "\n"))
+                                        .font(.system(size: 14))
+                                        .foregroundColor(Color.white)
+                                    Spacer()
+                                }
+                                
+                                // Hide navigation link arrow by making invisible navigation link in ZStack.
+                                NavigationLink(destination:
+                                    WebView(request: URLRequest(url: URL(string: global.announcementLink)!))
+                                        .navigationBarTitle("\(global.announcementLink)", displayMode: .inline)
+                                ) {
+                                    EmptyView()
+                                }
+                                .if(UIDevice.current.systemVersion[0...1] == "13") { content in
+                                    // This hides arrow in iOS 13, but disables link in iOS 14.
+                                    content.hidden()
+                                }
+                            }
+                            
                             Image(systemName: "xmark")
+                                .imageScale(.large)
                                 .foregroundColor(Color.white)
                                 .onTapGesture {
-                                    global.announcement = ""
+                                    global.announcementText = ""
                                 }
                         }
                         .listRowBackground(Color.orange)
@@ -99,9 +117,6 @@ struct SearchView: View {
                     } else {
                         Text("End of List")
                     }
-                }
-                .alert(isPresented: $global.showWelcomeAlert) {
-                    Alert(title: Text("Welcome!"), message: Text("We're glad to have you with us.\nPlease feel free to search for coding friends here!"), dismissButton: .default(Text("OK")))
                 }
                 // Using UUID updates search results much faster, but scrolls up to top. So use it when refreshing or filtering but not when scrolling down.
                 .if(mustClearSearchResults) { content in
@@ -197,8 +212,7 @@ struct SearchView: View {
                     username: row["username"] as! String,
                     birthday: (row["birthday"] as! String).toDate(fromFormat: "yyyy-MM-dd", hasTime: false),
                     genderIndex: row["gender"] as! Int,
-                    shortInterests: row["shortInterests"] as! String,
-                    shortIntro: row["shortIntro"] as! String,
+                    intro: row["intro"] as! String,
                     hasGitHub: row["hasGitHub"] as! Bool,
                     hasLinkedIn: row["hasLinkedIn"] as! Bool)
                 self.searchResults.append(searchProfileLinkData)

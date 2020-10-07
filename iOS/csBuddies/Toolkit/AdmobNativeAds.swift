@@ -8,7 +8,7 @@ final class AdmobNativeAds: NSObject, UIViewControllerRepresentable {
     var adLoader: GADAdLoader?
     var templateView: GADTSmallTemplateView?
     let adUnitId = "INSERT ADMOB AD UNIT ID HERE"
-    
+
     func makeUIViewController(context: UIViewControllerRepresentableContext<AdmobNativeAds>) -> UIViewController {
         let templateView = GADTSmallTemplateView()
         self.templateView = templateView
@@ -42,6 +42,6 @@ extension AdmobNativeAds: GADUnifiedNativeAdLoaderDelegate {
 struct AdmobNativeAdsView: View {
     var body: some View {
         AdmobNativeAds()
-            .frame(height: 100)
+            .frame(height: 140)
     }
 }

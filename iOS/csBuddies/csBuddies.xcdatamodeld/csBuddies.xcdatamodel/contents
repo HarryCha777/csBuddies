@@ -13,9 +13,10 @@
         <attribute name="filterMinAge" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="filterSortIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="firstLaunchDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="guestId" optional="YES" attributeType="String"/>
         <attribute name="requestedReview" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
     </entity>
     <elements>
-        <element name="GlobalEntity" positionX="-63" positionY="-18" width="128" height="238"/>
+        <element name="GlobalEntity" positionX="-63" positionY="-18" width="128" height="253"/>
     </elements>
 </model>

@@ -14,8 +14,7 @@ struct SearchProfileLinkData: Identifiable, Codable {
     var username: String
     var birthday: Date
     var genderIndex: Int
-    var shortInterests: String
-    var shortIntro: String
+    var intro: String
     var hasGitHub: Bool
     var hasLinkedIn: Bool
 
@@ -24,8 +23,7 @@ struct SearchProfileLinkData: Identifiable, Codable {
          username: String,
          birthday: Date,
          genderIndex: Int,
-         shortInterests: String,
-         shortIntro: String,
+         intro: String,
          hasGitHub: Bool,
          hasLinkedIn: Bool) {
         self.id = id
@@ -33,8 +31,7 @@ struct SearchProfileLinkData: Identifiable, Codable {
         self.username = username
         self.birthday = birthday
         self.genderIndex = genderIndex
-        self.shortInterests = shortInterests
-        self.shortIntro = shortIntro
+        self.intro = intro
         self.hasGitHub = hasGitHub
         self.hasLinkedIn = hasLinkedIn
     }

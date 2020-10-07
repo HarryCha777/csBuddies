@@ -1,5 +1,5 @@
 //
-//  CheckUserView.swift
+//  LoadingView.swift
 //  csBuddies
 //
 //  Created by Harry Cha on 5/15/20.
@@ -10,40 +10,113 @@ import SwiftUI
 import Firebase
 import TrueTime
 
-struct CheckUserView: View {
+struct LoadingView: View {
     @EnvironmentObject var global: Global
     @FetchRequest(entity: GlobalEntity.entity(), sortDescriptors: []) var globalEntityList: FetchedResults<GlobalEntity>
     
     var body: some View {
-        LoadingView()
+        ActivityIndicatorView()
             .foregroundColor(.blue)
             .onAppear {
-                self.getReferenceTime() { referenceTime in
-                    self.global.referenceTime = referenceTime
-                    self.checkUser()
+                self.readOtherDocument() {
+                    listenToOtherDocument()
+                    if self.global.viewId.id != .maintenance &&
+                        self.global.viewId.id != .update {
+                        self.getReferenceTime() { referenceTime in
+                            self.global.referenceTime = referenceTime
+                            self.checkUser()
+                        }
+                    }
                 }
             }
     }
     
+    func readOtherDocument(completion: @escaping () -> Void) {
+        global.db.collection("global")
+            .document("18")
+            .getDocument() { (document, error) in
+                self.global.announcementText = document!.get("announcementText") as! String
+                self.global.announcementLink = document!.get("announcementLink") as! String
+                let isUnderMaintenance = document!.get("isUnderMaintenance") as! Bool
+                
+                let currentBuild = Int(Bundle.main.infoDictionary?["CFBundleVersion"] as! String)
+                let minimumBuild = document!.get("minimumBuild") as! Int
+                let mustUpdate = currentBuild! < minimumBuild
+                
+                if isUnderMaintenance { // maintenance view takes precedence
+                    self.global.viewId = ViewId(id: .maintenance)
+                } else if mustUpdate {
+                    self.global.viewId = ViewId(id: .update)
+                }
+                completion()
+        }
+    }
+
+    func listenToOtherDocument() {
+        // Prevent listening to others collection when this view is reloaded.
+        if global.isOthersListenerSetUp {
+            return
+        }
+        global.isOthersListenerSetUp = true
+        
+        global.db.collection("global")
+            .whereField("id", isEqualTo: "18")
+            .addSnapshotListener { (snapshot, error) in
+                snapshot!
+                    .documentChanges
+                    .forEach { documentChange in
+                        if documentChange.type == .modified {
+                            self.global.announcementText = documentChange.document.get("announcementText") as! String
+                            self.global.announcementLink = documentChange.document.get("announcementLink") as! String
+                            let isUnderMaintenance = documentChange.document.get("isUnderMaintenance") as! Bool
+
+                            let currentBuild = Int(Bundle.main.infoDictionary?["CFBundleVersion"] as! String)
+                            let minimumBuild = documentChange.document.get("minimumBuild") as! Int
+                            let mustUpdate = currentBuild! < minimumBuild
+                            
+                            if isUnderMaintenance { // maintenance view takes precedence
+                                self.global.viewId = ViewId(id: .maintenance)
+                            } else if mustUpdate {
+                                self.global.viewId = ViewId(id: .update)
+                            } else if self.global.viewId.id == .maintenance ||
+                                self.global.viewId.id == .update {
+                                self.global.mustSearch = true
+                                self.global.viewId = ViewId(id: .loading)
+                            }
+                        }
+                }
+        }
+    }
+
     func getReferenceTime(completion: @escaping (ReferenceTime) -> Void) {
         let client = TrueTimeClient.sharedInstance
+        client.pause() // prepare client to start again when this view is reloaded
         client.start()
-        
-        client.fetchIfNeeded { result in
+
+        client.fetchIfNeeded(completion: { result in
             switch result {
             case let .success(referenceTime):
                 completion(referenceTime)
             case .failure(_):
                 break
             }
-        }
+        })
     }
     
     func checkUser() {
         let user = Auth.auth().currentUser
         if user == nil {
-            self.global.isNewUser = true
-            self.global.isCheckingUser = false
+            if globalEntityList.count == 0 { // first launch
+                global.guestId = UUID().uuidString
+                let postString =
+                    "guestId=\(global.guestId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+                global.runPhp(script: "addGuest", postString: postString) { json in
+                    self.global.viewId = ViewId(id: .tabs)
+                }
+            } else {
+                fetchCoreData()
+                self.global.viewId = ViewId(id: .tabs)
+            }
         } else {
             self.getUser()
         }
@@ -64,24 +137,14 @@ struct CheckUserView: View {
             if isNewUser {
                 try! Auth.auth().signOut()
                 self.global.username = ""
+                self.global.password = ""
                 self.checkUser()
-                return
-            }
-            
-            let minimumBuild = json["minimumBuild"] as! Int
-            let currentBuild = Int(Bundle.main.infoDictionary?["CFBundleVersion"] as! String)
-            if currentBuild! < minimumBuild {
-                self.global.mustUpdate = true
-                self.global.isNewUser = false
-                self.global.isCheckingUser = false
                 return
             }
             
             let isBanned = json["isBanned"] as! Bool
             if isBanned {
-                self.global.isBanned = true
-                self.global.isNewUser = false
-                self.global.isCheckingUser = false
+                self.global.viewId = ViewId(id: .banned)
                 return
             }
             
@@ -99,7 +162,6 @@ struct CheckUserView: View {
             self.global.lastUpdate = (json["lastUpdate"] as! String).toDate(fromFormat: "yyyy-MM-dd HH:mm:ss")
             self.global.accountCreation = (json["accountCreation"] as! String).toDate(fromFormat: "yyyy-MM-dd HH:mm:ss")
             self.global.blockedList = (json["blocks"] as! String).toBlockedList()
-            self.global.announcement = json["announcement"] as! String
             self.global.isPremium = json["isPremium"] as! Bool
             
             self.fetchCoreData()
@@ -111,21 +173,15 @@ struct CheckUserView: View {
                 "password=\(self.global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "buddyUsernames=\(buddyUsernames.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
             self.global.runPhp(script: "getImages", postString: postString) { json in
-                if json.count < 1 {
-                    self.global.listenToNewMessages()
-                    self.global.isNewUser = false
-                    self.global.isCheckingUser = false
-                    return
-                }
-                
-                for i in 1...json.count {
-                    let row = json[String(i)] as! NSDictionary
-                    self.global.buddyImageList[row["username"] as! String] = (row["image"] as! String)
+                if json.count >= 1 {
+                    for i in 1...json.count {
+                        let row = json[String(i)] as! NSDictionary
+                        self.global.buddyImageList[row["username"] as! String] = (row["image"] as! String)
+                    }
                 }
                 
                 self.global.listenToNewMessages()
-                self.global.isNewUser = false
-                self.global.isCheckingUser = false
+                self.global.viewId = ViewId(id: .tabs)
             }
         }
     }
@@ -147,6 +203,7 @@ struct CheckUserView: View {
         global.filterLevelIndex = Int(globalEntity.filterLevelIndex)
         global.filterSortIndex = Int(globalEntity.filterSortIndex)
         global.firstLaunchDate = globalEntity.firstLaunchDate ?? global.getUtcTime()
+        global.guestId = globalEntity.guestId ?? "" // users updated from previous version will not have guestId, so default is a blank string
         global.requestedReview = globalEntity.requestedReview
         global.encodedData = globalEntity.encodedData!
     }
@@ -167,11 +224,5 @@ struct CheckUserView: View {
             buddyUsernames += "&" + key + "&"
         }
         return buddyUsernames
-    }
-}
-
-struct CheckUserView_Previews: PreviewProvider {
-    static var previews: some View {
-        CheckUserView()
     }
 }

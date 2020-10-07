@@ -56,11 +56,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called when the scene will move from an active state to an inactive state.
         // This may occur due to temporary interruptions (ex. an incoming phone call).
         
-        // Handle core data only if user check is finished, user is not banned, and there is no need to update
-        // or all core data will be deleted.
-        if !globalObject.isCheckingUser &&
-            !globalObject.mustUpdate &&
-            !globalObject.isBanned {
+        // Handle core data only when the user is normally using the app or all core data will be deleted.
+        if globalObject.viewId.id == .signUp ||
+            globalObject.viewId.id == .tabs {
             archiveData() // archive first since it will change globalObject.encodedData
             deleteCoreData()
             saveCoreData()
@@ -103,6 +101,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         globalEntity.filterLevelIndex = Int16(globalObject.filterLevelIndex)
         globalEntity.filterSortIndex = Int16(globalObject.filterSortIndex)
         globalEntity.firstLaunchDate = globalObject.firstLaunchDate
+        globalEntity.guestId = globalObject.guestId
         globalEntity.requestedReview = globalObject.requestedReview
         globalEntity.encodedData = globalObject.encodedData
         try? moc.save()
