@@ -1,30 +1,33 @@
 <?php
   include "globalFunctions.php";
   include "/var/www/inc/dbinfo.inc";
-  $conn = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
+  $pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
 
-  $buddyUsername = $_POST["buddyUsername"];
-  $username = $_POST["username"];
+  $myId = $_POST["myId"];
   $password = $_POST["password"];
+  $buddyId = $_POST["buddyId"];
 
 	$isValid =
-		isExistentUsername($buddyUsername) &&
-		isAuthenticated($username, $password);
-	if ($isValid === False) {
+		isAuthenticated($myId, $password) &&
+		isExtantUserId($buddyId);
+	if (!$isValid) {
 		die("Invalid");
 	}
 
-  $query = "select username from blocks where username = ? and buddyUsername = ? limit 1;";
-  $stmt = $conn->prepare($query);
-  $stmt->bind_param("ss", $buddyUsername, $username);
-  $stmt->execute();
-  $result = $stmt->get_result() or die("Error");
+  $query = "select count(block_id) from block where user_id = ? and buddy_id = ? limit 1;";
+  $stmt = $pdo->prepare($query);
+  $stmt->execute(array($buddyId, $myId));
 
-  if (mysqli_num_rows($result) == 1) {
+  $row = $stmt->fetch();
+	$count = $row[0];
+	
+  if ($count == 1) {
     $return = array("isBlocked" => True);
   } else {
     $return = array("isBlocked" => False);
   }
   echo json_encode($return);
+
+	$pdo = null;
 ?>
 

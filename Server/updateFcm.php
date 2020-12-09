@@ -1,22 +1,23 @@
 <?php
   include "globalFunctions.php";
   include "/var/www/inc/dbinfo.inc";
-  $conn = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
+  $pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
 
-  $username = $_POST["username"];
+  $myId = $_POST["myId"];
   $password = $_POST["password"];
   $fcm = $_POST["fcm"];
 
 	$isValid =
-		isAuthenticated($username, $password) &&
+		isAuthenticated($myId, $password) &&
 		isValidString($fcm, 0, 1000);
-	if ($isValid === False) {
+	if (!$isValid) {
 		die("Invalid");
 	}
 
-  $query = "update users set fcm = ? where username = ?;";
-  $stmt = $conn->prepare($query);
-  $stmt->bind_param("ss", $fcm, $username);
-  $stmt->execute();
+  $query = "update account set fcm = ? where user_id = ?;";
+  $stmt = $pdo->prepare($query);
+  $stmt->execute(array($fcm, $myId));
+
+	$pdo = null;
 ?>
 

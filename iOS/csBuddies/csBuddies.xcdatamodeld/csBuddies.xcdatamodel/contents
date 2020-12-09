@@ -1,22 +1,48 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17192" systemVersion="19G2021" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
-    <entity name="GlobalEntity" representedClassName="GlobalEntity" syncable="YES" codeGenerationType="class">
-        <attribute name="encodedData" optional="YES" attributeType="Binary"/>
-        <attribute name="filterCountryIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="filterGenderIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="filterHasGitHub" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
-        <attribute name="filterHasImage" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
-        <attribute name="filterHasLinkedIn" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
-        <attribute name="filterInterests" optional="YES" attributeType="String"/>
-        <attribute name="filterLevelIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="filterMaxAge" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="filterMinAge" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="filterSortIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="firstLaunchDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="guestId" optional="YES" attributeType="String"/>
-        <attribute name="requestedReview" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17511" systemVersion="19H2" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
+    <entity name="User" representedClassName="User" syncable="YES" codeGenerationType="class">
+        <attribute name="bigImage" optional="YES" attributeType="String"/>
+        <attribute name="birthday" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="blocksBinaryData" optional="YES" attributeType="Binary"/>
+        <attribute name="buddiesFilterCountryIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="buddiesFilterGenderIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="buddiesFilterInterests" optional="YES" attributeType="Transformable"/>
+        <attribute name="buddiesFilterMaxAge" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="buddiesFilterMinAge" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="buddiesFilterSortIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="byteDraft" optional="YES" attributeType="String"/>
+        <attribute name="bytesFilterSortIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="bytesFilterTimeIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="bytesMade" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="bytesToday" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="chatBinaryData" optional="YES" attributeType="Binary"/>
+        <attribute name="countryIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="email" optional="YES" attributeType="String"/>
+        <attribute name="firstChatsToday" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="firstLaunchTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="genderIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="gitHub" optional="YES" attributeType="String"/>
+        <attribute name="hasAskedNotification" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="hasAskedReview" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="hasByteNotification" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="hasChatNotification" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="hasCrashed" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="interests" optional="YES" attributeType="Transformable"/>
+        <attribute name="intro" optional="YES" attributeType="String"/>
+        <attribute name="lastFirstChatTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="lastPostTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="lastReceivedChatTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="likesGiven" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="linkedIn" optional="YES" attributeType="String"/>
+        <attribute name="messageDrafts" optional="YES" attributeType="Transformable"/>
+        <attribute name="myId" optional="YES" attributeType="String"/>
+        <attribute name="otherInterests" optional="YES" attributeType="String"/>
+        <attribute name="savedBytesBinaryData" optional="YES" attributeType="Binary"/>
+        <attribute name="savedUsersBinaryData" optional="YES" attributeType="Binary"/>
+        <attribute name="smallImage" optional="YES" attributeType="String"/>
+        <attribute name="username" optional="YES" attributeType="String"/>
     </entity>
     <elements>
-        <element name="GlobalEntity" positionX="-63" positionY="-18" width="128" height="253"/>
+        <element name="User" positionX="0" positionY="0" width="128" height="643"/>
     </elements>
 </model>

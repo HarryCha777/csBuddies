@@ -1,74 +1,65 @@
 <?php
   include "globalFunctions.php";
   include "/var/www/inc/dbinfo.inc";
-  $conn = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
+  $pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
 
-  $username = $_POST["username"];
+  $myId = $_POST["myId"];
   $password = $_POST["password"];
-  $hasImage = toBool($_POST["hasImage"]);
-
-	if (isNewUsername($username)) {
-    $return = array("isNewUser" => True);
-  	echo json_encode($return);
-		exit;
-	}
 
 	$isValid =
-		isAuthenticated($username, $password);
-	if ($isValid === False) {
+		isAuthenticated($myId, $password);
+	if (!$isValid) {
 		die("Invalid");
 	}
 
-  $query = "update users set lastVisit = current_timestamp where username = ?;";
-  $stmt = $conn->prepare($query);
-  $stmt->bind_param("s", $username);
-  $stmt->execute();
+  $query = "update account set must_sync_with_server = false where user_id = ?;";
+  $stmt = $pdo->prepare($query);
+  $stmt->execute(array($myId));
 
-  if ($hasImage) {
-		$image = getImage($username);
-  } else {
-		$image = "";
-	}
+  $query = "select count(byte_id) from byte where is_deleted = false and user_id = ?;";
+  $stmt = $pdo->prepare($query);
+  $stmt->execute(array($myId));
 
-  $query = "select buddyUsername from blocks where username = ?;";
-  $stmt = $conn->prepare($query);
-  $stmt->bind_param("s", $username);
-  $stmt->execute();
-  $result = $stmt->get_result() or die("Error");
+  $row = $stmt->fetch();
+	$bytesMade = $row[0];
 
-	$blocks = "";
-  while($row = mysqli_fetch_array($result)) {
-		$blocks .= "&".$row[0]."&";
-  }
+  $query = "select count(byte_like_id) from byte_like where is_liked = true and user_id = ?;";
+  $stmt = $pdo->prepare($query);
+  $stmt->execute(array($myId));
 
-  $query = "select gender, birthday, country, interests, otherInterests, level, intro, gitHub, linkedIn, lastVisit, lastUpdate, accountCreation, isBanned, lastNewChat, newChats, isPremium from users where username = ? limit 1;";
-  $stmt = $conn->prepare($query);
-  $stmt->bind_param("s", $username);
-  $stmt->execute();
-  $result = $stmt->get_result() or die("Error");
+  $row = $stmt->fetch();
+	$likesGiven = $row[0];
 
-  $row = mysqli_fetch_array($result);
+  $query = "select email, username, small_image, big_image, gender, birthday, country, interests, other_interests, intro, git_hub, linked_in, to_char(last_post_time, 'yyyy-mm-dd hh24:mi:ss.ms'), bytes_today, to_char(last_first_chat_time, 'yyyy-mm-dd hh24:mi:ss.ms'), first_chats_today, to_char(last_received_chat_time, 'yyyy-mm-dd hh24:mi:ss.ms'), has_byte_notification, has_chat_notification from account where user_id = ? limit 1;";
+  $stmt = $pdo->prepare($query);
+  $stmt->execute(array($myId));
+
+  $row = $stmt->fetch();
   $return = array(
-    "isNewUser" => False,
-    "image" => $image,
-    "gender" => $row[0],
-    "birthday" => $row[1],
-    "country" => $row[2],
-    "interests" => $row[3],
-    "otherInterests" => $row[4],
-    "level" => $row[5],
-    "intro" => $row[6],
-    "gitHub" => $row[7],
-    "linkedIn" => $row[8],
-    "lastVisit" => $row[9],
-    "lastUpdate" => $row[10],
-    "accountCreation" => $row[11],
-    "isBanned" => $row[12],
-    "blocks" => $blocks,
-    "lastNewChat" => $row[13],
-    "newChats" => $row[14],
-    "isPremium" => $row[15],
+    "email" => $row[0],
+    "username" => $row[1],
+    "smallImage" => $row[2],
+    "bigImage" => $row[3],
+    "gender" => $row[4],
+    "birthday" => $row[5],
+    "country" => $row[6],
+    "interests" => $row[7],
+    "otherInterests" => $row[8],
+    "intro" => $row[9],
+    "gitHub" => $row[10],
+    "linkedIn" => $row[11],
+    "lastPostTime" => $row[12],
+    "bytesToday" => $row[13],
+    "lastFirstChatTime" => $row[14],
+    "firstChatsToday" => $row[15],
+    "lastReceivedChatTime" => $row[16],
+    "bytesMade" => $bytesMade,
+    "likesGiven" => $likesGiven,
+    "hasByteNotification" => $row[17],
+    "hasChatNotification" => $row[18],
   );
   echo json_encode($return);
+
+	$pdo = null;
 ?>
 

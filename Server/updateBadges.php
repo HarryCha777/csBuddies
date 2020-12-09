@@ -1,21 +1,23 @@
 <?php
   include "globalFunctions.php";
   include "/var/www/inc/dbinfo.inc";
-  $conn = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_DATABASE);
+  $pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
 
-  $username = $_POST["username"];
-  $badges = (int)$_POST["badges"];
+  $myId = $_POST["myId"];
+  $password = $_POST["password"];
+  $badges = $_POST["badges"];
 
 	$isValid =
-		isExistentUsername($username) &&
-		isValidInt($badges, 0, 1000000);
-	if ($isValid === False) {
+		isAuthenticated($myId, $password) &&
+		isValidInt($badges, 0, 30000);
+	if (!$isValid) {
 		die("Invalid");
 	}
 
-  $query = "update users set badges = ? where username = ?;";
-  $stmt = $conn->prepare($query);
-  $stmt->bind_param("ss", $badges, $username);
-  $stmt->execute();
+  $query = "update account set badges = ? where user_id = ?;";
+  $stmt = $pdo->prepare($query);
+  $stmt->execute(array($badges, $myId));
+
+	$pdo = null;
 ?>
 
