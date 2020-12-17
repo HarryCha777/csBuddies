@@ -5,19 +5,19 @@
 
   $myId = $_POST["myId"];
   $password = $_POST["password"];
-  $firstChatsToday = (int)$_POST["firstChatsToday"];
+  $fcm = $_POST["fcm"];
 
 	$isValid =
 		isAuthenticated($myId, $password) &&
-		isValidInt($firstChatsToday, 0, 50);
+		isValidString($fcm, 0, 1000);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 
-  $query = "update account set last_first_chat_time = current_timestamp, first_chats_today = ? where user_id = ?;";
-  $stmt = $pdo->prepare($query);
-  $stmt->execute(array($firstChatsToday, $myId));
+	$query = "update account set fcm = ?, last_sign_in_time = current_timestamp where user_id = ?;";
+	$stmt = $pdo->prepare($query);
+	$stmt->execute(array($fcm, $myId));
 
 	$pdo = null;
 ?>
-

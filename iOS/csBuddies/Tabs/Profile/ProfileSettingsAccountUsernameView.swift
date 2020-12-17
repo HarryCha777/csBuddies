@@ -29,7 +29,7 @@ struct ProfileSettingsAccountUsernameView: View {
             tooLongReason,
             tooLongComments,
             extantUsername,
-            extantUsernameChangeRequest
+            extantRequest
     }
     
     var body: some View {
@@ -69,7 +69,7 @@ struct ProfileSettingsAccountUsernameView: View {
                     } else if comments.count > 1000 {
                         activeAlert = .tooLongComments
                     } else {
-                        checkUsername()
+                        requestUsernameChange(mustReplacePrevious: false)
                     }
                 }) {
                     Text("Request Username Change")
@@ -113,51 +113,34 @@ struct ProfileSettingsAccountUsernameView: View {
                 return Alert(title: Text("Too Long Comments"), message: Text("Your comments must be no longer than 1,000 characters."), dismissButton: .default(Text("OK")))
             case .extantUsername:
                 return Alert(title: Text("Username Already Exists"), message: Text("This username already exists. Please try another username."), dismissButton: .default(Text("OK")))
-            case .extantUsernameChangeRequest:
+            case .extantRequest:
                 return Alert(title: Text("Already Requested"), message: Text("You already have a pending username change request. Would you like to replace the previous request with this one?"), primaryButton: .destructive(Text("Cancel")), secondaryButton: .default(Text("OK"), action: {
                     isRequesting = true
-                    requestUsernameChange()
+                    requestUsernameChange(mustReplacePrevious: true)
                 }))
             }
         }
     }
 
-    func checkUsername() {
-        let postString =
-            "myId=&" +
-            "username=\(newUsername.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-        global.runPhp(script: "isExtantUsername", postString: postString) { json in
-            let isExtantUsername = json["isExtantUsername"] as! Bool
-            if isExtantUsername {
-                activeAlert = .extantUsername
-            } else {
-                checkUsernameChangeRequest()
-            }
-        }
-    }
-    
-    func checkUsernameChangeRequest() {
-        let postString =
-            "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "password=\(global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-        global.runPhp(script: "isExtantUsernameChangeRequest", postString: postString) { json in
-            let isExtantUsernameChangeRequest = json["isExtantUsernameChangeRequest"] as! Bool
-            if isExtantUsernameChangeRequest {
-                activeAlert = .extantUsernameChangeRequest
-            } else {
-                requestUsernameChange()
-            }
-        }
-    }
-    
-    func requestUsernameChange() {
+    func requestUsernameChange(mustReplacePrevious: Bool) {
         let postString =
             "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
             "password=\(global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
             "newUsername=\(newUsername.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
             "reason=\(reason.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "comments=\(comments.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+            "comments=\(comments.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+            "mustReplacePrevious=\(mustReplacePrevious)"
         global.runPhp(script: "requestUsernameChange", postString: postString) { json in
+            if json["isExtantUsername"] != nil {
+                activeAlert = .extantUsername
+                return
+            }
+            
+            if json["isExtantRequest"] != nil {
+                activeAlert = .extantRequest
+                return
+            }
+            
             presentation.wrappedValue.dismiss()
             global.confirmationText = "Requested"
         }

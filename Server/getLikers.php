@@ -10,6 +10,7 @@
 		isExtantByteId($byteId);
 		//isValidDate($bottomLikeTime, True);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 

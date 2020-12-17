@@ -11,6 +11,7 @@
 		isAuthenticated($myId, $password) &&
 		isExtantByteId($byteId);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 
@@ -19,10 +20,11 @@
   $stmt->execute(array($myId, $byteId));
 
   $row = $stmt->fetch();
-  $count = $row[0];
+  $isOwnByte = $row[0] == 1;
   
-  if ($count == 1) {
-		die("Cannot unlike user's own byte");
+  if ($isOwnByte) {
+  	$pdo = null;
+		die("Invalid");
 	}
 
   $query = "select is_liked from byte_like where user_id = ? and byte_id = ? limit 1;";
@@ -30,20 +32,20 @@
   $stmt->execute(array($myId, $byteId));
 
   $row = $stmt->fetch();
-	$hasAlreadyUnliked = $row[0] == 0;
+	$isUnliked = $row[0] == 0;
 
   $query = "update byte_like set like_time = current_timestamp, is_liked = false where user_id = ? and byte_id = ?;";
   $stmt = $pdo->prepare($query);
   $stmt->execute(array($myId, $byteId));
 
-	if (!$hasAlreadyUnliked) {
+	if (!$isUnliked) {
   	$query = "update byte set likes = likes - 1 where byte_id = ?;";
   	$stmt = $pdo->prepare($query);
   	$stmt->execute(array($byteId));
 	}
 
 	$return = array(
-		"hasAlreadyUnliked" => $hasAlreadyUnliked,
+		"isUnliked" => $isUnliked,
 	);
 
 	echo json_encode($return);

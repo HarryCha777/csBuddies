@@ -13,6 +13,7 @@
 		isValidBool($hasByteNotification) &&
 		isValidBool($hasChatNotification);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 

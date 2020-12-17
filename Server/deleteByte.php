@@ -11,6 +11,7 @@
 		isAuthenticated($myId, $password);
 		isExtantByteId($byteId);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 

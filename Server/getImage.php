@@ -10,6 +10,7 @@
 		isExtantUserId($userId) &&
 		($size == "small" || $size == "big");
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 

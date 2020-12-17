@@ -31,6 +31,7 @@
 		//isValidDate($bottomLastVisitTime, True) &&
 		//isValidDate($bottomSignUpTime, True);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 
@@ -55,7 +56,22 @@
     array_push($paramsArray, $country);
   }
 
+	// Select buddies with OR interests.
   if (strlen($interests)) {
+    $query .= "and (false ";
+
+		$interests = substr($interests, 1, -1);
+    $interestsArray = explode("&&", $interests);
+    foreach ($interestsArray as $interest) {
+      $query .= "or interests like ? ";
+    	array_push($paramsArray, "%&".$interest."&%");
+    }
+
+		$query .= ") ";
+	}
+
+	// Select buddies with AND interests.
+  /*if (strlen($interests)) {
     $query .= "and interests like ? ";
     $likeQuery = "%";
 
@@ -65,7 +81,7 @@
       $likeQuery .= "&".$interest."&%";
     }
     array_push($paramsArray, $likeQuery);
-  }
+  }*/
 
 	if ($sort == 0) {
 		# Hide new users who made their accounts up to 1 day ago

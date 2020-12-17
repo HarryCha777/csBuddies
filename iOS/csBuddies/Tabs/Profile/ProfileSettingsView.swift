@@ -46,11 +46,11 @@ struct ProfileSettingsView: View {
 
             // FAQ with info about 5 max chat rooms, future premium plans, SwiftUI app advertisement, etc?
             
-            NavigationLink(destination: ProfileSettingsPrivacyView()) {
+            NavigationLink(destination: ProfileSettingsAboutView()) {
                 HStack {
                     Image(systemName: "info.circle")
                         .font(.title)
-                    Text("Privacy")
+                    Text("About")
                 }
             }
             

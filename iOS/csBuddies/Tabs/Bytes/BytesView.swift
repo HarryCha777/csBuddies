@@ -63,7 +63,7 @@ struct BytesView: View {
                     if bytes.firstIndex(where: { $0.id == bytesPostData.id })! % 10 == 9 &&
                         bytes.firstIndex(where: { $0.id == bytesPostData.id })! < 500 &&
                         !global.isPremium {
-                        //AdmobNativeAdsBytesView()
+                        AdmobNativeAdsBytesView()
                     }
                 }
                 // Do not use .id(UUID()) to prevent calling PHP on each tab change and bytes from staying still when they are liked.

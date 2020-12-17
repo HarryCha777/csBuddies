@@ -11,6 +11,7 @@
 		isAuthenticated($myId, $password) &&
 		isValidInt($badges, 0, 30000);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 

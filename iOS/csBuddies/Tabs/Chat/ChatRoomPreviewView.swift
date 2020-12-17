@@ -27,44 +27,43 @@ struct ChatRoomPreviewView: View {
                     .frame(width: 10)
                 
                 NavigationLinkBorderless(destination: ChatRoomView(buddyId: buddyId, buddyUsername: buddyUsername)) {
-                    HStack {
-                        VStack(alignment: .leading) {
-                            HStack {
-                                Text(buddyUsername)
-                                    .lineLimit(1)
-                                Spacer()
-                                Text(sendTimeDisplay(sendTime: global.chatData[buddyId]!.messages.last!.sendTime))
+                    VStack(alignment: .leading) {
+                        HStack {
+                            Text(buddyUsername)
+                                .lineLimit(1)
+                            Spacer()
+                            Text(sendTimeDisplay(sendTime: global.chatData[buddyId]!.messages.last!.sendTime))
+                                .foregroundColor(Color.gray)
+                        }
+                        HStack {
+                            if global.messageDrafts[buddyId] != nil && global.messageDrafts[buddyId] != "" {
+                                Text("[Draft] \(global.messageDrafts[buddyId]!.replacingOccurrences(of: "\n", with: " "))")
+                                    .frame(height: 45, alignment: .top)
+                                    .foregroundColor(Color.orange)
+                                    .lineLimit(2)
+                            } else {
+                                Text(global.chatData[buddyId]!.messages.last!.content.replacingOccurrences(of: "\n", with: " "))
+                                    .frame(height: 45, alignment: .top)
                                     .foregroundColor(Color.gray)
+                                    .lineLimit(2)
                             }
-                            HStack {
-                                if global.messageDrafts[buddyId] != nil && global.messageDrafts[buddyId] != "" {
-                                    Text("[Draft] \(global.messageDrafts[buddyId]!.replacingOccurrences(of: "\n", with: " "))\n") // Add an extra line to make sure there are at least 2 lines.
-                                        .foregroundColor(Color.orange)
-                                        .lineLimit(2)
+                            Spacer()
+                            if getUnreadCounter() > 0 {
+                                if getUnreadCounter() <= 99 {
+                                    Text("\(getUnreadCounter())")
+                                        .bold()
+                                        .padding(10)
+                                        .foregroundColor(Color.white)
+                                        .background(Circle().fill(Color.blue))
                                 } else {
-                                    Text("\(global.chatData[buddyId]!.messages.last!.content.replacingOccurrences(of: "\n", with: " "))\n") // Add an extra line to make sure there are at least 2 lines.
-                                        .foregroundColor(Color.gray)
-                                        .lineLimit(2)
-                                }
-                                Spacer()
-                                if getUnreadCounter() > 0 {
-                                    if getUnreadCounter() <= 99 {
-                                        Text("\(getUnreadCounter())")
-                                            .bold()
-                                            .padding(10)
-                                            .foregroundColor(Color.white)
-                                            .background(Circle().fill(Color.blue))
-                                    } else {
-                                        Text("99+")
-                                            .bold()
-                                            .padding(10)
-                                            .foregroundColor(Color.white)
-                                            .background(Circle().fill(Color.blue))
-                                    }
+                                    Text("99+")
+                                        .bold()
+                                        .padding(10)
+                                        .foregroundColor(Color.white)
+                                        .background(Circle().fill(Color.blue))
                                 }
                             }
                         }
-                        
                     }
                     .background(Color.black.opacity(0.001)) // Expand button's tappable area to empty spaces.
                 }

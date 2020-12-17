@@ -25,7 +25,7 @@ struct ChatView: View {
         VStack {
             if global.myId == "" {
                 SimpleView(
-                    lottieView: LottieView(name: "chat", size: 300),
+                    lottieView: LottieView(name: "chat", size: 250, padding: 25),
                     subtitle: "Join us to text other users. You only need an email, and we'll send you a magic link!",
                     bottomView: AnyView(Button(action: {
                         global.activeRootView = .join
@@ -36,7 +36,7 @@ struct ChatView: View {
                 VStack {
                     if global.chatData.count == 0 {
                         SimpleView(
-                            lottieView: LottieView(name: "chat", size: 300),
+                            lottieView: LottieView(name: "chat", size: 250, padding: 25),
                             subtitle: "You are not in any chat room.",
                             bottomView: global.hasAskedNotification ? nil :
                                 AnyView(Button(action: {
@@ -94,11 +94,13 @@ struct ChatView: View {
     }
     
     func deleteChatRoom(at offsets: IndexSet) {
-        global.mustUpdateBadges = true
         let buddyId = global.chatData.sorted(by: { $0.value.messages.last!.sendTime > $1.value.messages.last!.sendTime })[offsets.first!].key
         global.chatData[buddyId] = nil
         
-        global.confirmationText = "Cleared"
+        global.updateBadges()
+        DispatchQueue.main.async { // Prevent error on swipe to delete: Simultaneous accesses to 0x10b1af298, but modification requires exclusive access.
+            global.confirmationText = "Cleared"
+        }
     }
     
     func getChatIsOnline() {

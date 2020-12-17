@@ -122,11 +122,7 @@ struct BuddiesProfileContentView: View {
                 }
                 
                 Section(header: Text("Self-Introduction")) {
-                    if userProfileData.intro.count == 0 {
-                        Text("No self-introduction written.")
-                    } else {
-                        TruncatedText(text: userProfileData.intro, hasExpanded: $hasExpanded, hasTruncated: $hasTruncated)
-                    }
+                    TruncatedText(text: userProfileData.intro, hasExpanded: $hasExpanded, hasTruncated: $hasTruncated)
                     if userProfileData.gitHub.count != 0 {
                         NavigationLink(destination:
                                         WebView(request: URLRequest(url: (URL(string: "https://www.github.com/\(userProfileData.gitHub)") ?? URL(string: "https://www.github.com"))!))
@@ -218,7 +214,7 @@ struct BuddiesProfileContentView: View {
                                 if bytes.firstIndex(where: { $0.id == bytesPostData.id })! % 10 == 9 &&
                                     bytes.firstIndex(where: { $0.id == bytesPostData.id })! < 500 &&
                                     !global.isPremium {
-                                    //AdmobNativeAdsBytesView()
+                                    AdmobNativeAdsBytesView()
                                 }
                             }
                             // Do not use .id(UUID()) or bytes do not change when they are liked.
@@ -248,7 +244,7 @@ struct BuddiesProfileContentView: View {
                                 if likedBytes.firstIndex(where: { $0.id == bytesPostData.id })! % 10 == 9 &&
                                     likedBytes.firstIndex(where: { $0.id == bytesPostData.id })! < 500 &&
                                     !global.isPremium {
-                                    //AdmobNativeAdsBytesView()
+                                    AdmobNativeAdsBytesView()
                                 }
                             }
                             // Do not use .id(UUID()) or bytes do not change when they are liked.

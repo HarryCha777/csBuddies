@@ -6,7 +6,7 @@
         <attribute name="blocksBinaryData" optional="YES" attributeType="Binary"/>
         <attribute name="buddiesFilterCountryIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="buddiesFilterGenderIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="buddiesFilterInterests" optional="YES" attributeType="Transformable"/>
+        <attribute name="buddiesFilterInterests" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData"/>
         <attribute name="buddiesFilterMaxAge" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="buddiesFilterMinAge" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="buddiesFilterSortIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
@@ -14,11 +14,9 @@
         <attribute name="bytesFilterSortIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="bytesFilterTimeIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="bytesMade" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="bytesToday" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="chatBinaryData" optional="YES" attributeType="Binary"/>
         <attribute name="countryIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="email" optional="YES" attributeType="String"/>
-        <attribute name="firstChatsToday" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="firstLaunchTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="genderIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="gitHub" optional="YES" attributeType="String"/>
@@ -26,15 +24,12 @@
         <attribute name="hasAskedReview" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="hasByteNotification" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="hasChatNotification" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
-        <attribute name="hasCrashed" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
-        <attribute name="interests" optional="YES" attributeType="Transformable"/>
+        <attribute name="interests" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData"/>
         <attribute name="intro" optional="YES" attributeType="String"/>
-        <attribute name="lastFirstChatTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="lastPostTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="lastReceivedChatTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="likesGiven" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="linkedIn" optional="YES" attributeType="String"/>
-        <attribute name="messageDrafts" optional="YES" attributeType="Transformable"/>
+        <attribute name="messageDrafts" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData"/>
         <attribute name="myId" optional="YES" attributeType="String"/>
         <attribute name="otherInterests" optional="YES" attributeType="String"/>
         <attribute name="savedBytesBinaryData" optional="YES" attributeType="Binary"/>
@@ -43,6 +38,6 @@
         <attribute name="username" optional="YES" attributeType="String"/>
     </entity>
     <elements>
-        <element name="User" positionX="0" positionY="0" width="128" height="643"/>
+        <element name="User" positionX="0" positionY="0" width="128" height="568"/>
     </elements>
 </model>

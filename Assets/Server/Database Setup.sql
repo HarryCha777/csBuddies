@@ -28,6 +28,9 @@ last_received_chat_time timestamp not null default current_timestamp,
 fcm varchar(1000) not null default '',
 badges smallint not null default 0,
 
+last_sign_in_time timestamp not null default current_timestamp,
+last_sign_out_time timestamp not null default current_timestamp,
+
 last_visit_time timestamp not null default current_timestamp,
 last_update_time timestamp not null default current_timestamp,
 sign_up_time timestamp not null default current_timestamp,

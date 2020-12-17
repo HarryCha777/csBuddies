@@ -15,6 +15,7 @@
 		isExtantUserId($userId);
 		//isValidDate($bottomPostTime, True);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 

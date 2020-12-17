@@ -64,7 +64,7 @@ struct ChatRoomView: View {
                 .alert(item: $activeAlert) { alert in
                     switch alert {
                     case .block:
-                        return Alert(title: Text("Block Buddy"), message: Text("You will no longer receive messages or notifications from them. Their activity will also be hidden from your Buddies and Bytes tabs."), primaryButton: .default(Text("Cancel")), secondaryButton: .destructive(Text("Block"), action: {
+                        return Alert(title: Text("Block Buddy"), message: Text("You will no longer receive messages or notifications from them. Their activity will also be hidden from your Buddies and Bytes tabs. They will never know that you blocked them."), primaryButton: .default(Text("Cancel")), secondaryButton: .destructive(Text("Block"), action: {
                             global.block(buddyId: buddyId, buddyUsername: global.chatBuddyUsername)
                         }))
                     case .clear:
@@ -108,20 +108,20 @@ struct ChatRoomView: View {
     }
     
     func markAllRead() {
-        var readBuddyMessage = false
+        var mustUpdateBadges = false
         if global.chatData[buddyId] != nil {
             for index in global.chatData[buddyId]!.messages.indices {
                 if !global.chatData[buddyId]!.messages[index].isMine &&
                     global.chatData[buddyId]!.messages[index].sendTime > global.chatData[buddyId]!.lastBuddyReadTime {
-                    global.mustUpdateBadges = true
-                    readBuddyMessage = true
+                    mustUpdateBadges = true
                 }
             }
         }
-
-        if readBuddyMessage {
+        
+        if mustUpdateBadges {
             let now = global.getUtcTime()
             global.chatData[buddyId]!.lastMyReadTime = now
+            global.updateBadges()
             global.db.collection("messageUpdates")
                 .whereField("myId", isEqualTo: global.myId)
                 .whereField("buddyId", isEqualTo: buddyId)

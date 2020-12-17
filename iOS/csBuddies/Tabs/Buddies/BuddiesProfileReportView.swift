@@ -57,7 +57,7 @@ struct BuddiesProfileReportView: View {
                     } else if comments.count > 1000 {
                         activeAlert = .tooLongComments
                     } else {
-                        checkReport()
+                        reportBuddy(mustReplacePrevious: false)
                     }
                 }) {
                     Text("Report User")
@@ -93,7 +93,7 @@ struct BuddiesProfileReportView: View {
             case .extantReport:
                 return Alert(title: Text("Already Reported"), message: Text("You already reported this user. Would you like to replace the previous report with this one?"), primaryButton: .destructive(Text("Cancel")), secondaryButton: .default(Text("OK"), action: {
                     isReporting = true
-                    reportBuddy()
+                    reportBuddy(mustReplacePrevious: true)
                 }))
             }
         }
@@ -128,31 +128,22 @@ struct BuddiesProfileReportView: View {
         }
         .buttonStyle(PlainButtonStyle())
     }
-    
-    func checkReport() {
-        let postString =
-            "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "password=\(global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "buddyId=\(buddyId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-        global.runPhp(script: "isExtantReport", postString: postString) { json in
-            let isExtantReport = json["isExtantReport"] as! Bool
-            if isExtantReport {
-                activeAlert = .extantReport
-            } else {
-                reportBuddy()
-            }
-        }
-    }
-    
-    func reportBuddy() {
+
+    func reportBuddy(mustReplacePrevious: Bool) {
         let postString =
             "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
             "password=\(global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
             "buddyId=\(buddyId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
             "reason=\(reasonIndex)&" +
             "otherReason=\(otherReason.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "comments=\(comments.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+            "comments=\(comments.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+            "mustReplacePrevious=\(mustReplacePrevious)"
         global.runPhp(script: "reportBuddy", postString: postString) { json in
+            if json["isExtantReport"] != nil {
+                activeAlert = .extantReport
+                return
+            }
+            
             presentation.wrappedValue.dismiss()
             global.confirmationText = "Reported"
         }

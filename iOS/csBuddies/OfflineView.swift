@@ -9,10 +9,17 @@
 import SwiftUI
 
 struct OfflineView: View {
+    @EnvironmentObject var global: Global
+    
     var body: some View {
         SimpleView(
             lottieView: LottieView(name: "offline", size: 300, mustLoop: true),
             title: "You are Offline",
-            subtitle: "We will automatically continue when you are connected to the internet.")
+            subtitle: "Please try again after connecting to the Internet.",
+            bottomView: AnyView(Button(action: {
+                    global.isOffline = !Reachability.isConnectedToNetwork()
+                }) {
+                    global.blueButton(title: "Retry")
+                }))
     }
 }

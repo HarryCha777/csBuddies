@@ -15,48 +15,58 @@
   $intro = $_POST["intro"];
   $gitHub = $_POST["gitHub"];
   $linkedIn = $_POST["linkedIn"];
+  $fcm = $_POST["fcm"];
 
 	$isValid =
 		isValidString($email, 3, 320) &&
 		isValidUsername($username) &&
-		!isExtantUsername($emptyUuid, $username) &&
 		isValidString($smallImage, 1, 30000) &&
 		isValidString($bigImage, 1, 300000) &&
 		isValidInt($gender, 0, 3) &&
 		//isValidDate($birthday, False) &&
 		isValidInt($country, 0, 196) &&
 		isValidInterests($interests) &&
-		isValidInterests($otherInterests) &&
+		isValidString($otherInterests, 0, 100) &&
 		isValidString($intro, 1, 256) &&
 		isValidString($gitHub, 0, 39) &&
-		isValidString($linkedIn, 0, 100);
+		isValidString($linkedIn, 0, 100) &&
+		isValidString($fcm, 0, 1000);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 
-  $query = "select count(user_id) from account where email = ?;";
+	if (isExtantUsername($emptyUuid, $username)) {
+    $return = array("isExtantUsername" => True);
+  	echo json_encode($return);
+		$pdo = null;
+		exit;
+	}
+
+  $query = "select count(user_id) from account where email = ? limit 1;";
   $stmt = $pdo->prepare($query);
   $stmt->execute(array($email));
 
   $row = $stmt->fetch();
-  $count = $row[0];
-
-	if ($count == 0) {
-		$password = bin2hex(openssl_random_pseudo_bytes(6));
-
-  	$query = "insert into account (email, username, password, small_image, big_image, gender, birthday, country, interests, other_interests, intro, git_hub, linked_in) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) returning user_id;";
-  	$stmt = $pdo->prepare($query);
-  	$stmt->execute(array($email, $username, $password, $smallImage, $bigImage, $gender, $birthday, $country, $interests, $otherInterests, $intro, $gitHub, $linkedIn));
-
-    $row = $stmt->fetch();
-    $myId = $row[0];
+  $isExtantEmail = $row[0] == 1;
+  if ($isExtantEmail) {
+  	$pdo = null;
+		die("Invalid");
 	}
+
+	$password = bin2hex(openssl_random_pseudo_bytes(6));
+
+ 	$query = "insert into account (email, username, password, small_image, big_image, gender, birthday, country, interests, other_interests, intro, git_hub, linked_in, fcm) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) returning user_id;";
+ 	$stmt = $pdo->prepare($query);
+	$stmt->execute(array($email, $username, $password, $smallImage, $bigImage, $gender, $birthday, $country, $interests, $otherInterests, $intro, $gitHub, $linkedIn, $fcm));
+
+  $row = $stmt->fetch();
+  $myId = $row[0];
 
   $return = array(
     "myId" => $myId,
     "password" => $password,
   );
   echo json_encode($return);
-
 	$pdo = null;
 ?>

@@ -11,6 +11,7 @@
 		isAuthenticated($myId, $password) &&
 		isExtantUserId($buddyId);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 

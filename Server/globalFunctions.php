@@ -7,6 +7,11 @@
 		return $string == "true" || $string == "false";
 	}
 
+	function toBool($string) {
+		// True in "true" in Swift.
+		return $string == "true";
+	}
+
 	function isValidDate($date, $hasTime) {
 		$format = $hasTime ? "Y-m-d H:i:s.u" : "Y-m-d";
 		$d = DateTime::createFromFormat($format, $date);
@@ -59,6 +64,14 @@
 		return False;
 	}
 
+	function startsWith($string, $startString) {
+	  return substr_compare($string, $startString, 0, strlen(utf8_decode($startString))) == 0;
+	}
+
+	function endsWith($string, $endString) {
+	  return substr_compare($string, $endString, -strlen(utf8_decode($endString))) == 0;
+	}
+
 	function isExtantUserId($userId) {
 		$pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
 	  $query = "select count(user_id) from account where user_id = ? limit 1;";
@@ -66,9 +79,7 @@
 	  $stmt->execute(array($userId));
 
     $row = $stmt->fetch();
-	  $count = $row[0];
-	
-		return $count == 1;
+	  return $row[0] == 1;
 	}
 
 	function isExtantUsername($myId, $username) {
@@ -78,9 +89,7 @@
 	  $stmt->execute(array($myId, $username));
 	
     $row = $stmt->fetch();
-	  $count = $row[0];
-	
-		return $count == 1;
+	  return $row[0] == 1;
 	}
 
 	function isExtantByteId($byteId) {
@@ -90,30 +99,61 @@
 	  $stmt->execute(array($byteId));
 	
     $row = $stmt->fetch();
-	  $count = $row[0];
-	
-		return $count == 1;
+	  return $row[0] == 1;
 	}
 
 	// When checking isAuthenticated, there is no need to check if userId and password are valid.
-	function isAuthenticated($myId, $password) {
+	function isAuthenticated($myId, $password, $mustBeActive = true) {
 		$pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
-	  $query = "select count(user_id) from account where user_id = ? and password = ? limit 1;";
+
+	  $query = "select count(user_id) from account where user_id = ? and password = ? ";
+		$query .= $mustBeActive ? "and is_banned = false and is_deleted = false " : "";
+		$query .= "limit 1;";
+
 	  $stmt = $pdo->prepare($query);
 	  $stmt->execute(array($myId, $password));
 
     $row = $stmt->fetch();
-	  $count = $row[0];
-	
-		return $count == 1;
+	  return $row[0] == 1;
 	}
 
-	function startsWith($string, $startString) {
-	  return substr_compare($string, $startString, 0, strlen(utf8_decode($startString))) == 0;
-	}
+	function sendNotification($fcm, $title, $body, $hasNotification, $badges, $myId, $type) {
+  	$serverKey = getenv("FIREBASE_SERVER_KEY");
 
-	function endsWith($string, $endString) {
-	  return substr_compare($string, $endString, -strlen(utf8_decode($endString))) == 0;
+		$notification = array();
+		if ($hasNotification) {
+			$notification = array (
+				"title"	=> $title,
+				"body" => $body,
+				"sound"	=> "default",
+			);
+		}
+
+		if ($badges != -1) {
+			$notification["badge"] = $badges + 1;
+		}
+		
+		$fields = array (
+			"registration_ids" => array($fcm),
+			"priority" => "high",
+			"notification" => $notification,
+			"data" => array("myId" => $myId, "type" => $type)
+		);
+		 
+		$headers = array (
+			"Authorization: key=$serverKey",
+			"Content-Type: application/json"
+		);
+		 
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, "https://fcm.googleapis.com/fcm/send");
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+		curl_exec($ch);
+		curl_close($ch);
 	}
 ?>
 

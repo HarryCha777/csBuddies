@@ -8,19 +8,35 @@
 
 import Firebase
 
-class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
     var window: UIWindow?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         application.registerForRemoteNotifications()
+        Messaging.messaging().delegate = self // This is needed for messaging(messaging, didReceiveRegistrationToken) function.
         return true
     }
     
-    // Source: https://stackoverflow.com/a/64516576
-    // Contrary to the source, it seems only this function is needed.
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        // Source: https://stackoverflow.com/a/64516576
+        // Contrary to the source, it seems only this line is needed.
         Messaging.messaging().apnsToken = deviceToken
+    }
+    
+    // Run code when FCM Token is retrieved.
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        globalObject.fcmTokenCounter += 1
+
+        // Update FCM since FCM changes and is fetched twice on app reinstall.
+        if globalObject.myId != "" &&
+            globalObject.fcmTokenCounter == 2 {
+            let postString =
+                "myId=\(globalObject.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "password=\(globalObject.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "fcm=\(fcmToken!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+            globalObject.runPhp(script: "updateFcm", postString: postString) { json in }
+        }
     }
     
     // Receive notifications even when app is on foreground.
@@ -34,19 +50,5 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             (userInfo["type"] as! String == "byte") {
             completionHandler([.alert, .badge, .sound])
         }
-    }
-    
-    // Run code when notification is tapped.
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        let userInfo = response.notification.request.content.userInfo
-        if userInfo["type"] != nil &&
-            (userInfo["type"] as! String == "chat" || userInfo["type"] as! String == "byte") {
-            globalObject.hasClickedNotification = true
-            globalObject.notificationBuddyId = userInfo["myId"] as! String
-            globalObject.notificationBuddyUsername = ((userInfo["aps"] as! NSDictionary)["alert"] as! NSDictionary)["title"] as! String
-            globalObject.notificationType = userInfo["type"] as! String
-        }
-
-        completionHandler()
     }
 }

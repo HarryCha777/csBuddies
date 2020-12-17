@@ -69,8 +69,6 @@ struct BytesPostView: View {
                         }
                         
                         TruncatedText(text: bytesPostData.content, hasExpanded: $hasExpanded, hasTruncated: $hasTruncated)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .frame(maxWidth: .infinity, alignment: .leading)
                             .background(Color.black.opacity(0.001)) // Expand button's tappable area to empty spaces.
                             .onTapGesture { } // Prevent scrolling from being disabled due to onLongPressGesture.
                             // onTapGesture(count: x) is disabled due to UITapGestureRecognizer in csBuddiesApp.
@@ -108,16 +106,9 @@ struct BytesPostView: View {
                                                 isUpdatingLike = false
                                                 
                                                 // User may have already liked the byte on another screen.
-                                                let hasAlreadyLiked = json["hasAlreadyLiked"] as! Bool
-                                                if !hasAlreadyLiked {
+                                                let isLiked = json["isLiked"] as! Bool
+                                                if !isLiked {
                                                     global.likesGiven += 1
-                                                    
-                                                    let isFirstLike = json["isFirstLike"] as! Bool
-                                                    if isFirstLike {
-                                                        let fcm = json["fcm"] as! String
-                                                        let badges = json["badges"] as! Int
-                                                        global.sendNotification(body: "\(global.username) liked your byte: \"\(bytesPostData.content)\"", fcm: fcm, badges: badges, type: "byte")
-                                                    }
                                                 }
                                             }
                                         }
@@ -142,8 +133,8 @@ struct BytesPostView: View {
                                             isUpdatingLike = false
                                             
                                             // User may have already unliked the byte on another screen.
-                                            let hasAlreadyUnliked = json["hasAlreadyUnliked"] as! Bool
-                                            if !hasAlreadyUnliked {
+                                            let isUnliked = json["isUnliked"] as! Bool
+                                            if !isUnliked {
                                                 global.likesGiven -= 1
                                             }
                                         }
@@ -210,7 +201,7 @@ struct BytesPostView: View {
                     global.activeRootView = .join
                 }))
             case .block:
-                return Alert(title: Text("Block Buddy"), message: Text("You will no longer receive messages or notifications from them. Their activity will also be hidden from your Buddies and Bytes tabs."), primaryButton: .default(Text("Cancel")), secondaryButton: .destructive(Text("Block"), action: {
+                return Alert(title: Text("Block Buddy"), message: Text("You will no longer receive messages or notifications from them. Their activity will also be hidden from your Buddies and Bytes tabs. They will never know that you blocked them."), primaryButton: .default(Text("Cancel")), secondaryButton: .destructive(Text("Block"), action: {
                     global.block(buddyId: bytesPostData.userId, buddyUsername: bytesPostData.username)
                 }))
             case .delete:

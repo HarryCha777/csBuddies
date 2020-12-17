@@ -25,7 +25,7 @@ struct BuddiesPreviewView: View {
                     SmallImageView(userId: userPreviewData.userId, isOnline: userPreviewData.isOnline, size: 75, myImage: myImage)
 
                     Spacer()
-                        .frame(width: 10)
+                        .frame(width: 20)
 
                     // Set spacing to 0 to preveng GitHub and LinkedIn logos from taking unnecessary vertical space.
                     VStack(spacing: 0) {
@@ -92,13 +92,8 @@ struct BuddiesPreviewView: View {
                     }
                 }
                 
-                if userPreviewData.intro == "" {
-                    Text("No self-introduction written.")
-                } else {
-                    TruncatedText(text: userPreviewData.intro, hasExpanded: $hasExpanded, hasTruncated: $hasTruncated)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                TruncatedText(text: userPreviewData.intro, hasExpanded: $hasExpanded, hasTruncated: $hasTruncated)
+                    .frame(maxWidth: .infinity, alignment: .leading) // Prevent any extra paddings.
             }
             .padding(.vertical)
         }

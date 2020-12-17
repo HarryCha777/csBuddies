@@ -18,10 +18,7 @@ struct TabsView: View {
             ZStack(alignment: .bottomLeading) {
                 TabView(selection: $global.tabIndex) {
                     NavigationView {
-                        ZStack {
-                            BuddiesView()
-                            NotificationView()
-                        }
+                        BuddiesView()
                     }
                     .navigationViewStyle(StackNavigationViewStyle())
                     .tabItem {
@@ -32,10 +29,7 @@ struct TabsView: View {
                     .tag(0)
                     
                     NavigationView {
-                        ZStack {
-                            BytesView()
-                            NotificationView()
-                        }
+                        BytesView()
                     }
                     .navigationViewStyle(StackNavigationViewStyle())
                     .tabItem {
@@ -46,10 +40,7 @@ struct TabsView: View {
                     .tag(1)
                     
                     NavigationView {
-                        ZStack {
-                            ChatView()
-                            NotificationView()
-                        }
+                        ChatView()
                     }
                     .navigationViewStyle(StackNavigationViewStyle())
                     .tabItem {
@@ -60,10 +51,7 @@ struct TabsView: View {
                     .tag(2)
                     
                     NavigationView {
-                        ZStack {
-                            ProfileView()
-                            NotificationView()
-                        }
+                        ProfileView()
                     }
                     .navigationViewStyle(StackNavigationViewStyle())
                     .tabItem {

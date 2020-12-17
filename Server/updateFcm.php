@@ -11,6 +11,7 @@
 		isAuthenticated($myId, $password) &&
 		isValidString($fcm, 0, 1000);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 

@@ -29,6 +29,12 @@ struct LoadingView: View {
         }
         .padding()
         .onAppear {
+            global.hasUserDataLoaded = false // Make sure user data does not get changed while loading on sign in.
+            if !Reachability.isConnectedToNetwork() {
+                global.isOffline = true
+                return
+            }
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                 showLoadingIndicator = true
             }
@@ -155,8 +161,8 @@ struct LoadingView: View {
             
             global.mustSyncWithServer =
                 json["mustSyncWithServer"] as! Bool ||
-                global.hasLoggedIn || // User may have changed user data on another device.
-                getHasCrashed()
+                global.hasSignedIn || // User may have changed user data on another device.
+                users.firstIndex(where: { $0.myId == global.myId }) == nil // The app does not have user's core data.
             getUser()
         }
     }
@@ -183,47 +189,27 @@ struct LoadingView: View {
             global.intro = json["intro"] as! String
             global.gitHub = json["gitHub"] as! String
             global.linkedIn = json["linkedIn"] as! String
-            global.lastPostTime = (json["lastPostTime"] as! String).toDate()
-            global.bytesToday = json["bytesToday"] as! Int
-            global.lastFirstChatTime = (json["lastFirstChatTime"] as! String).toDate()
-            global.firstChatsToday = json["firstChatsToday"] as! Int
-            global.lastReceivedChatTime = (json["lastReceivedChatTime"] as! String).toDate()
             global.bytesMade = json["bytesMade"] as! Int
             global.likesGiven = json["likesGiven"] as! Int
+            global.lastReceivedChatTime = (json["lastReceivedChatTime"] as! String).toDate()
             global.hasByteNotification = json["hasByteNotification"] as! Bool
             global.hasChatNotification = json["hasChatNotification"] as! Bool
-            
-            global.smallImageCaches.setObject(ImageCache(image: global.smallImage, lastCacheTime: global.getUtcTime()), forKey: global.myId as NSString)
-            global.bigImageCaches.setObject(ImageCache(image: global.bigImage, lastCacheTime: global.getUtcTime()), forKey: global.myId as NSString)
-            
-            let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "password=\(global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-            global.runPhp(script: "getBlocks", postString: postString) { json in
-                if json.count > 0 {
-                    for i in 1...json.count {
-                        let row = json[String(i)] as! NSDictionary
-                        let userRowData = UserRowData(
-                            userId: row["buddyId"] as! String,
-                            username: row["username"] as! String,
-                            isOnline: false,
-                            appendTime: (row["blockTime"] as! String).toDate())
-                        global.blocks.append(userRowData)
-                    }
+
+            global.blocks = [UserRowData]() // Clear in case mustSyncWithServer is set in server and the app refreshes via CheckUser.
+            // If json["blocks"] is empty, it will be NSArray. If not, it will be NSDictionary. So there's no need to make sure blocks.count > 0.
+            if let blocks = json["blocks"] as? NSDictionary {
+                for i in 1...blocks.count {
+                    let row = blocks[String(i)] as! NSDictionary
+                    let userRowData = UserRowData(
+                        userId: row["buddyId"] as! String,
+                        username: row["username"] as! String,
+                        isOnline: false,
+                        appendTime: (row["blockTime"] as! String).toDate())
+                    global.blocks.append(userRowData)
                 }
-                
-                global.activeRootView = .welcome
             }
+            
+            global.activeRootView = .welcome
         }
-    }
-    
-    func getHasCrashed() -> Bool {
-        let index = users.firstIndex(where: { $0.myId == global.myId })
-        if index == nil {
-            return true
-        }
-        
-        let user = users[index!]
-        return user.hasCrashed
     }
 }

@@ -149,7 +149,7 @@ struct EmailConfirmationView: View {
                     if displayName == "" { // Check if user is a new user.
                         activeEmailConfirmationView = .signingUpSucceededNewUser
                     } else { // Check if user is a returning user.
-                        global.hasLoggedIn = true
+                        global.hasSignedIn = true
                         global.activeRootView = .loading
                     }
                 }

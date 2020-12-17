@@ -63,20 +63,20 @@ struct SmallImageView: View {
                 }
             }
             
-            if isOnline {
-                VStack {
+            VStack {
+                Spacer()
+                    .frame(width: size * 0.9)
+                HStack {
                     Spacer()
                         .frame(width: size * 0.9)
-                    HStack {
-                        Spacer()
-                            .frame(width: size * 0.9)
-                        Circle()
-                            .frame(width: size / 4, height: size / 4)
-                            .overlay(Circle().stroke(Color.white, lineWidth: size / 25))
-                            .foregroundColor(Color.green)
-                    }
+                    Circle()
+                        .frame(width: size / 4, height: size / 4)
+                        .overlay(Circle().stroke(Color.white, lineWidth: size / 25))
+                        .foregroundColor(Color.green)
                 }
             }
+            .opacity(isOnline ? 1 : 0) // Use opacity instead of if condition to place online and offline images on same position.
         }
+        .frame(width: size, height: size) // Frame the entire view once more to ensure the view doesn't take up any unnecessary space, such as space below the view in ChatRoomMessageView.
     }
 }

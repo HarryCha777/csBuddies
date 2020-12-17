@@ -26,61 +26,59 @@ struct ChatRoomMessageView: View {
                         Spacer()
                     }
                     
-                    VStack(alignment: (chatRoomMessageData.isMine ? .trailing: .leading), spacing: 0) {
-                        Spacer()
-                            .frame(height: 10)
-                        
-                        HStack {
-                            if !chatRoomMessageData.isMine {
-                                VStack {
-                                    NavigationLinkBorderless(destination: BuddiesProfileView(buddyId: buddyId)) {
-                                        SmallImageView(userId: buddyId, isOnline: false, size: 35, myImage: global.smallImage)
-                                    }
-                                    Spacer()
+                    HStack {
+                        if !chatRoomMessageData.isMine {
+                            VStack {
+                                NavigationLinkBorderless(destination: BuddiesProfileView(buddyId: buddyId)) {
+                                    SmallImageView(userId: buddyId, isOnline: false, size: 35, myImage: global.smallImage)
                                 }
+                                Spacer()
                             }
+                        }
+                        
+                        Spacer()
+                            .frame(width: 10)
+                        
+                        VStack(alignment: chatRoomMessageData.isMine ? .trailing: .leading, spacing: 0) {
+                            VStack(alignment: .leading) {
+                                TruncatedText(text: chatRoomMessageData.content, hasExpanded: $hasExpanded, hasTruncated: $hasTruncated)
+                                    .foregroundColor(Color.white)
+                                    .onTapGesture { } // Prevent scrolling from being disabled due to onLongPressGesture.
+                                    // onTapGesture(count: x) is disabled due to UITapGestureRecognizer in csBuddiesApp.
+                                    .onLongPressGesture {
+                                        showActionSheet = true
+                                    }
+                            }
+                            .padding(8)
+                            .background(chatRoomMessageData.isMine ? Color.green: Color.orange)
+                            .cornerRadius(10)
+                            .fixedSize(horizontal: false, vertical: true)
                             
                             Spacer()
-                                .frame(width: 10)
+                                .frame(height: 3)
                             
-                            VStack(alignment: chatRoomMessageData.isMine ? .trailing: .leading, spacing: 0) {
-                                VStack(alignment: .leading) {
-                                    //Text(chatRoomMessageData.content)
-                                    TruncatedText(text: chatRoomMessageData.content, hasExpanded: $hasExpanded, hasTruncated: $hasTruncated)
-                                        .foregroundColor(Color.white)
-                                        .onTapGesture { } // Prevent scrolling from being disabled due to onLongPressGesture.
-                                        // onTapGesture(count: x) is disabled due to UITapGestureRecognizer in csBuddiesApp.
-                                        .onLongPressGesture {
-                                            showActionSheet = true
-                                        }
-                                }
-                                .padding(8)
-                                .background(chatRoomMessageData.isMine ? Color.green: Color.orange)
-                                .cornerRadius(10)
-                                .fixedSize(horizontal: false, vertical: true)
-                                
-                                HStack {
-                                    if chatRoomMessageData.isMine &&
-                                        chatRoomMessageData.sendTime <= global.chatData[buddyId]!.lastBuddyReadTime {
-                                        Text("Read")
-                                            .bold()
-                                            .foregroundColor(Color.gray)
-                                    }
-                                    
-                                    Text(sendTimeDisplay(sendTime: chatRoomMessageData.sendTime))
-                                        .foregroundColor(Color.gray)
-                                }
-                                
+                            HStack {
                                 if chatRoomMessageData.isMine &&
-                                    chatRoomMessageData.sendTime > global.chatData[buddyId]!.lastBuddyReadTime &&
-                                    chatRoomMessageData.sendTime == global.chatData[buddyId]!.messages.last!.sendTime {
-                                    Text("Delivered")
+                                    chatRoomMessageData.sendTime <= global.chatData[buddyId]!.lastBuddyReadTime {
+                                    Text("Read")
                                         .bold()
                                         .foregroundColor(Color.gray)
                                 }
+                                
+                                Text(sendTimeDisplay(sendTime: chatRoomMessageData.sendTime))
+                                    .foregroundColor(Color.gray)
+                            }
+                            
+                            if chatRoomMessageData.isMine &&
+                                chatRoomMessageData.sendTime > global.chatData[buddyId]!.lastBuddyReadTime &&
+                                chatRoomMessageData.sendTime == global.chatData[buddyId]!.messages.last!.sendTime {
+                                Text("Delivered")
+                                    .bold()
+                                    .foregroundColor(Color.gray)
                             }
                         }
                     }
+                    .padding(5)
                     
                     if !chatRoomMessageData.isMine {
                         Spacer()

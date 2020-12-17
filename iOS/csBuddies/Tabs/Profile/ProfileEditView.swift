@@ -389,8 +389,5 @@ struct ProfileEditView: View {
         global.intro = global.newIntro
         global.gitHub = global.newGitHub
         global.linkedIn = global.newLinkedIn
-        
-        global.smallImageCaches.setObject(ImageCache(image: global.newSmallImage, lastCacheTime: global.getUtcTime()), forKey: global.myId as NSString)
-        global.bigImageCaches.setObject(ImageCache(image: global.newBigImage, lastCacheTime: global.getUtcTime()), forKey: global.myId as NSString)
     }
 }

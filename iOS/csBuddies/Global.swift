@@ -14,6 +14,12 @@ import TrueTime
 var globalObject = Global()
 
 class Global: ObservableObject {
+    // AppDelegate
+    @Published var fcmTokenCounter = 0
+    
+    // AppView
+    @Published var isOffline = false
+
     // LoadingView
     @Published var db = Firestore.firestore()
     @Published var webServerLink = ""
@@ -21,13 +27,13 @@ class Global: ObservableObject {
     @Published var activeRootView: RootViews = .loading
     @Published var myId = ""
     @Published var isGlobalListenerSetUp = false
-    @Published var firstLaunchTime = Date()
-    @Published var hasAskedReview = false
+    @Published var firstLaunchTime = Date() { didSet { saveUserData() } }
+    @Published var hasAskedReview = false { didSet { saveUserData() } }
     @Published var hasUserDataLoaded = false
-    @Published var onlineTimeout = 60 * 5
+    @Published var onlineTimeout = 60 * 3
     
     // WelcomeView
-    @Published var hasLoggedIn = false
+    @Published var hasSignedIn = false
     @Published var mustSyncWithServer = false
     @Published var isMessageUpdatesListenerSetUp = false
     @Published var messageUpdatesListener: ListenerRegistration?
@@ -39,44 +45,50 @@ class Global: ObservableObject {
     @Published var updateText = ""
     
     // TypeEmailView
-    @Published var email = ""
+    @Published var email = "" { didSet { saveUserData() } }
     
     // SetInterestsView
     // Sort interestsOptions case insensitive for words like "iOS".
     @Published var interestOptions = ["C", "C#", "C++", "CSS", "Dart", "Go", "HTML", "Java", "JavaScript", "Kotlin", "MATLAB", "Obj-C", "Perl", "PHP", "Python", "R", "Ruby", "Rust", "Scala", "SQL", "Swift", "TypeScript", "Visual Basic",
                                        "AngularJS", "Django", "Firebase", "Flask", "Flutter", "Kali Linux", "NodeJS", "React Native", "ReactJS", "SwiftUI", "Unity3D", "VueJS", "Weebly", "Wix", "WordPress", "Xamarin",
                                        "AI", "Android Dev", "Architecture", "Competitive Programming", "Cybersecurity", "Data Science", "DB", "Game Dev", "Hardware", "iOS Dev", "IoT", "Network", "OS", "Robotics", "UI / UX Design", "Web Dev"]
-    @Published var interests = [String]()
-    @Published var otherInterests = ""
+    @Published var interests = [String]() { didSet { saveUserData() } }
+    @Published var otherInterests = "" { didSet { saveUserData() } }
 
     // SetProfileView
     @Published var genderOptions = ["Male", "Female", "Other", "Private"]
-    @Published var genderIndex = 0
-    @Published var birthday = Date(timeIntervalSince1970: 946684800) // Default birthday is 1/1/2000 12:00:00 AM UTC.
+    @Published var genderIndex = 0 { didSet { saveUserData() } }
+    @Published var birthday = Date(timeIntervalSince1970: 946684800) { didSet { saveUserData() } } // Default birthday is 1/1/2000 12:00:00 AM UTC.
     @Published var countryOptions = ["Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo, Democratic Republic of the", "Congo, Republic of the", "Costa Rica", "Cote d'Ivoire", "Croatia", "Cuba", "Cyprus", "Czechia", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"]
-    @Published var countryIndex = 187 // Default country is US.
-    @Published var gitHub = ""
-    @Published var linkedIn = ""
+    @Published var countryIndex = 187 { didSet { saveUserData() } } // Default country is US.
+    @Published var gitHub = "" { didSet { saveUserData() } }
+    @Published var linkedIn = "" { didSet { saveUserData() } }
     
     // TypeIntroView
-    @Published var username = ""
-    @Published var smallImage = ""
-    @Published var bigImage = ""
+    @Published var username = "" { didSet { saveUserData() } }
+    @Published var smallImage = "" {
+        didSet {
+            saveUserData()
+            smallImageCaches.setObject(ImageCache(image: smallImage, lastCacheTime: getUtcTime()), forKey: myId as NSString)
+        }
+    }
+    @Published var bigImage = "" {
+        didSet {
+            saveUserData()
+            bigImageCaches.setObject(ImageCache(image: bigImage, lastCacheTime: getUtcTime()), forKey: myId as NSString)
+        }
+    }
     @Published var smallImageCaches = NSCache<NSString, ImageCache>()
     @Published var bigImageCaches = NSCache<NSString, ImageCache>()
     @Published var hasImageCachesUpdated = false
-    @Published var intro = ""
+    @Published var intro = "" { didSet { saveUserData() } }
     @Published var password = ""
     @Published var isPremium = false
     @Published var tabIndex = 0
     
     // TabsView
     @Published var isKeyboardHidden = true
-    @Published var hasClickedNotification = false
-    @Published var notificationBuddyId = ""
-    @Published var notificationBuddyUsername = ""
-    @Published var notificationType = ""
-    
+
     // ConfirmationView
     @Published var confirmationText = ""
 
@@ -85,16 +97,16 @@ class Global: ObservableObject {
     @Published var announcementLink = ""
     
     // BuddiesProfileView
-    @Published var savedUsers = [UserRowData]()
-    @Published var blocks = [UserRowData]()
+    @Published var savedUsers = [UserRowData]() { didSet { saveUserData() } }
+    @Published var blocks = [UserRowData]() { didSet { saveUserData() } }
 
     // BuddiesFilterView
-    @Published var buddiesFilterGenderIndex = 0
-    @Published var buddiesFilterMinAge = 13
-    @Published var buddiesFilterMaxAge = 130
-    @Published var buddiesFilterCountryIndex = 0
-    @Published var buddiesFilterInterests = [String]()
-    @Published var buddiesFilterSortIndex = 0
+    @Published var buddiesFilterGenderIndex = 0 { didSet { saveUserData() } }
+    @Published var buddiesFilterMinAge = 13 { didSet { saveUserData() } }
+    @Published var buddiesFilterMaxAge = 130 { didSet { saveUserData() } }
+    @Published var buddiesFilterCountryIndex = 0 { didSet { saveUserData() } }
+    @Published var buddiesFilterInterests = [String]() { didSet { saveUserData() } }
+    @Published var buddiesFilterSortIndex = 0 { didSet { saveUserData() } }
 
     @Published var newBuddiesFilterGenderIndex = 0
     @Published var newBuddiesFilterMinAge = 13
@@ -104,40 +116,39 @@ class Global: ObservableObject {
     @Published var newBuddiesFilterSortIndex = 0
 
     // BytesView
-    @Published var lastPostTime = Date()
-    @Published var bytesToday = 0
-    @Published var firebaseServerKey = "INSERT FIREBASE SERVER KEY HERE"
-    @Published var savedBytes = [BytesPostData]()
+    @Published var savedBytes = [BytesPostData]() { didSet { saveUserData() } }
     
     // BytesFilterView
-    @Published var bytesFilterSortIndex = 1
-    @Published var bytesFilterTimeIndex = 0
+    @Published var bytesFilterSortIndex = 1 { didSet { saveUserData() } }
+    @Published var bytesFilterTimeIndex = 0 { didSet { saveUserData() } }
 
     @Published var newBytesFilterSortIndex = 1
     @Published var newBytesFilterTimeIndex = 0
     
     // BytesWriteView
-    @Published var byteDraft = ""
+    @Published var byteDraft = "" { didSet { saveUserData() } }
 
     // ChatView
-    @Published var hasAskedNotification = false
-    @Published var lastReceivedChatTime = Date()
+    @Published var hasAskedNotification = false { didSet { saveUserData() } }
+    @Published var lastReceivedChatTime = Date() { didSet { saveUserData() } }
     
     @Published var chatBuddyId = ""
     @Published var chatBuddyUsername = ""
-    @Published var lastFirstChatTime = Date()
-    @Published var firstChatsToday = 0
-    @Published var mustUpdateBadges = false
-    
-    @Published var chatData = [String: ChatRoomData]()
+
+    @Published var chatData = [String: ChatRoomData]() {
+        didSet {
+            saveUserData()
+            UIApplication.shared.applicationIconBadgeNumber = self.getUnreadCounter()
+        }
+    }
 
     // ChatRoomInputView
-    @Published var messageDrafts = [String: String]()
+    @Published var messageDrafts = [String: String]() { didSet { saveUserData() } }
 
     // ProfileView
-    @Published var bytesMade = 0
+    @Published var bytesMade = 0 { didSet { saveUserData() } }
     @Published var likesReceived = 0
-    @Published var likesGiven = 0
+    @Published var likesGiven = 0 { didSet { saveUserData() } }
 
     // ProfileEditView
     @Published var newSmallImage = ""
@@ -152,11 +163,12 @@ class Global: ObservableObject {
     @Published var newIntro = ""
     
     // ProfileSettingsAccountView
-    @Published var hasByteNotification = true
-    @Published var hasChatNotification = true
+    @Published var hasByteNotification = true { didSet { updateNotifications() } }
+    @Published var hasChatNotification = true { didSet { updateNotifications() } }
 
     // Global Functions
     func resetUserData() {
+        hasUserDataLoaded = false
         myId = ""
         email = ""
         username = ""
@@ -185,26 +197,10 @@ class Global: ObservableObject {
     }
     
     func saveUserData() {
-        // Archive data.
-        let savedUsersArchiver = NSKeyedArchiver(requiringSecureCoding: true)
-        try! savedUsersArchiver.encodeEncodable(savedUsers, forKey: "savedUsers")
-        savedUsersArchiver.finishEncoding()
-        let savedUsersBinaryData = savedUsersArchiver.encodedData
-        
-        let savedBytesArchiver = NSKeyedArchiver(requiringSecureCoding: true)
-        try! savedBytesArchiver.encodeEncodable(savedBytes, forKey: "savedBytes")
-        savedBytesArchiver.finishEncoding()
-        let savedBytesBinaryData = savedBytesArchiver.encodedData
-        
-        let blocksArchiver = NSKeyedArchiver(requiringSecureCoding: true)
-        try! blocksArchiver.encodeEncodable(blocks, forKey: "blocks")
-        blocksArchiver.finishEncoding()
-        let blocksBinaryData = blocksArchiver.encodedData
-        
-        let chatDataArchiver = NSKeyedArchiver(requiringSecureCoding: true)
-        try! chatDataArchiver.encodeEncodable(chatData, forKey: "chatData")
-        chatDataArchiver.finishEncoding()
-        let chatBinaryData = chatDataArchiver.encodedData
+        // Make sure user data is loaded or user data will reset.
+        if !hasUserDataLoaded {
+            return
+        }
 
         // Find user.
         let moc = PersistenceController.shared.container.viewContext
@@ -237,9 +233,9 @@ class Global: ObservableObject {
         user.hasAskedNotification = hasAskedNotification
         user.hasByteNotification = hasByteNotification
         user.hasChatNotification = hasChatNotification
-        user.savedUsersBinaryData = savedUsersBinaryData
-        user.savedBytesBinaryData = savedBytesBinaryData
-        user.chatBinaryData = chatBinaryData
+        user.savedUsersBinaryData = try? JSONEncoder().encode(savedUsers)
+        user.savedBytesBinaryData = try? JSONEncoder().encode(savedBytes)
+        user.chatBinaryData = try? JSONEncoder().encode(chatData)
 
         // Save server data.
         user.email = email
@@ -256,12 +252,8 @@ class Global: ObservableObject {
         user.linkedIn = linkedIn
         user.bytesMade = Int16(bytesMade)
         user.likesGiven = Int16(likesGiven)
-        user.lastPostTime = lastPostTime
-        user.bytesToday = Int16(bytesToday)
-        user.lastFirstChatTime = lastFirstChatTime
-        user.firstChatsToday = Int16(firstChatsToday)
         user.lastReceivedChatTime = lastReceivedChatTime
-        user.blocksBinaryData = blocksBinaryData
+        user.blocksBinaryData = try? JSONEncoder().encode(blocks)
         try? moc.save()
     }
     
@@ -270,21 +262,26 @@ class Global: ObservableObject {
     }
     
     func runPhp(script: String, postString: String, completion: @escaping (NSDictionary) -> Void) {
-        print("script: \(script)")
-        print("postString: \(postString)")
+        if !Reachability.isConnectedToNetwork() {
+            isOffline = true
+            return
+        }
+
+        //print("script: \(script)")
+        //print("postString: \(postString)")
         
-        let scriptUrl = URL(string: "\(webServerLink)/19/\(script).php");
+        let scriptUrl = URL(string: "\(webServerLink)/20/\(script).php");
         var request = URLRequest(url: scriptUrl!)
         request.httpMethod = "POST"
         request.httpBody = postString.data(using: String.Encoding.utf8)
         
         let task = URLSession.shared.dataTask(with: request) { (data: Data?, response: URLResponse?, error: Error?) in
             let responseString = NSString(data: data!, encoding: String.Encoding.utf8.rawValue)
-            if script == "getImage" {
+            /*if script == "getImage" {
                 print("response string = some image probably")
             } else {
                 print("response string = \(String(describing: responseString))")
-            }
+            }*/
             
             let json = try? JSONSerialization.jsonObject(with: data!, options: .mutableContainers) as? NSDictionary
             DispatchQueue.main.async {
@@ -305,34 +302,43 @@ class Global: ObservableObject {
                 DispatchQueue.main.async {
                     self.hasAskedNotification = true
                 }
-                if granted == true && error == nil { // Check if permission is granted.
-                    // FCM takes time to be received and FCM may be received twice on app reinstall, so set FCM here instead of when launching the app.
-                    let postString =
-                        "myId=\(self.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                        "password=\(self.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                        "fcm=\(Messaging.messaging().fcmToken!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-                    self.runPhp(script: "updateFcm", postString: postString) { json in }
-                }
             }
     }
     
-    func sendNotification(body: String, fcm: String, badges: Int, type: String) {
-        let urlString = "https://fcm.googleapis.com/fcm/send"
-        let url = NSURL(string: urlString)!
-        let params: [String: Any] = ["to": fcm,
-                                     "priority": "high",
-                                     "notification": ["title": username, "body": body, "badge": badges + 1, "sound": "default"],
-                                     "data": ["myId": myId, "type": type]
-        ]
-
-        let request = NSMutableURLRequest(url: url as URL)
-        request.httpMethod = "POST"
-        request.httpBody = try? JSONSerialization.data(withJSONObject: params, options: [.prettyPrinted])
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("key=\(firebaseServerKey)", forHTTPHeaderField: "Authorization")
+    func updateNotifications() {
+        if !hasUserDataLoaded {
+            return
+        }
         
-        let task = URLSession.shared.dataTask(with: request as URLRequest) { (data: Data?, response: URLResponse?, error: Error?) in }
-        task.resume()
+        let postString =
+            "myId=\(myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+            "password=\(password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+            "hasByteNotification=\(hasByteNotification)&" +
+            "hasChatNotification=\(hasChatNotification)"
+        runPhp(script: "updateNotifications", postString: postString) { json in
+            self.saveUserData()
+        }
+    }
+
+    func updateBadges() {
+        let postString =
+            "myId=\(self.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+            "password=\(self.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+            "badges=\(self.getUnreadCounter())"
+        self.runPhp(script: "updateBadges", postString: postString) { json in }
+    }
+    
+    func getUnreadCounter() -> Int {
+        var unreadCounter = 0
+        for (_, chatRoomData) in chatData {
+            for chatRoomMessageData in chatRoomData.messages {
+                if !chatRoomMessageData.isMine &&
+                    chatRoomMessageData.sendTime > chatRoomData.lastMyReadTime {
+                    unreadCounter += 1
+                }
+            }
+        }
+        return unreadCounter
     }
 
     func linkToReview() {
@@ -406,19 +412,6 @@ class Global: ObservableObject {
         return imageData!.base64EncodedString(options: Data.Base64EncodingOptions.lineLength64Characters)
     }
     
-    func getUnreadCounter() -> Int {
-        var unreadCounter = 0
-        for (_, chatRoomData) in chatData {
-            for chatRoomMessageData in chatRoomData.messages {
-                if !chatRoomMessageData.isMine &&
-                    chatRoomMessageData.sendTime > chatRoomData.lastMyReadTime {
-                    unreadCounter += 1
-                }
-            }
-        }
-        return unreadCounter
-    }
-
     func saveUser(buddyId: String, buddyUsername: String) {
         let userRowData = UserRowData(userId: buddyId, username: buddyUsername, isOnline: false, appendTime: getUtcTime())
         savedUsers.append(userRowData)

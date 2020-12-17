@@ -24,11 +24,12 @@
 		//isValidDate($birthday, False) &&
 		isValidInt($country, 0, 196) &&
 		isValidInterests($interests) &&
-		isValidInterests($otherInterests) &&
+		isValidString($otherInterests, 0, 100) &&
 		isValidString($intro, 1, 256) &&
 		isValidString($gitHub, 0, 39) &&
 		isValidString($linkedIn, 0, 100);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 

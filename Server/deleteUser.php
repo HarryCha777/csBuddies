@@ -9,6 +9,7 @@
 	$isValid =
 		isAuthenticated($myId, $password);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 

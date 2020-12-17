@@ -8,10 +8,11 @@
 	$isValid =
 		isExtantUserId($buddyId);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 
-  $query = "select is_banned, is_deleted from account where user_id = ?;";
+  $query = "select is_banned, is_deleted from account where user_id = ? limit 1;";
   $stmt = $pdo->prepare($query);
   $stmt->execute(array($buddyId));
 
@@ -20,21 +21,21 @@
 	$isDeleted = $row[1];
 
 	if (!$isBanned && !$isDeleted) {
-	  $query = "select count(byte_id) from byte where is_deleted = false and user_id = ?;";
+	  $query = "select count(byte_id) from byte where is_deleted = false and user_id = ? limit 1;";
 	  $stmt = $pdo->prepare($query);
 	  $stmt->execute(array($buddyId));
 	
 	  $row = $stmt->fetch();
 		$bytesMade = $row[0];
 	
-	  $query = "select count(byte.user_id) from byte left join byte_like on byte.byte_id = byte_like.byte_id where byte.byte_id = byte_like.byte_id and byte_like.is_liked = true and byte.user_id = ?;";
+	  $query = "select count(byte.user_id) from byte left join byte_like on byte.byte_id = byte_like.byte_id where byte.byte_id = byte_like.byte_id and byte_like.is_liked = true and byte.user_id = ? limit 1;";
 	  $stmt = $pdo->prepare($query);
 	  $stmt->execute(array($buddyId));
 	
 	  $row = $stmt->fetch();
 		$likesReceived = $row[0];
 	
-	  $query = "select count(user_id) from byte_like where is_liked = true and user_id = ?;";
+	  $query = "select count(user_id) from byte_like where is_liked = true and user_id = ? limit 1;";
 	  $stmt = $pdo->prepare($query);
 	  $stmt->execute(array($buddyId));
 	

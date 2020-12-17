@@ -12,11 +12,11 @@ import Firebase
 struct AppView: View {
     @EnvironmentObject var global: Global
     
-    @State private var checkUserTimer = Timer.publish(every: 60 * 2, on: .main, in: .common).autoconnect()
+    @State private var checkUserTimer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
     var body: some View {
         VStack {
-            if !Reachability.isConnectedToNetwork() {
+            if global.isOffline {
                 OfflineView()
             } else {
                 switch global.activeRootView {
@@ -30,8 +30,7 @@ struct AppView: View {
                     ZStack {
                         TabsView()
                             .disabled(global.confirmationText != "")
-                        ConfirmationView()
-                        // Show ConfirmationView on AppView since it does not work in NavigationLink if it is placed in TabsView.
+                        ConfirmationView() // Show ConfirmationView on AppView since it does not work inside NavigationLink if it is placed in TabsView.
                     }
                 case .maintenance:
                     MaintenanceView()

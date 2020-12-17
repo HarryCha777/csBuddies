@@ -1,7 +1,6 @@
 // Source: https://qiita.com/YoshihisaMasaki/items/87e1acf383127b706e03
 
-/*
- import SwiftUI
+import SwiftUI
 import Combine
 import Firebase
 
@@ -88,4 +87,3 @@ struct AdmobNativeAdsBytesView: View {
             .frame(height: 100)
     }
 }
-*/

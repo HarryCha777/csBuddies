@@ -11,23 +11,23 @@
 		isAuthenticated($myId, $password) &&
 		isExtantUserId($buddyId);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 
-  $query = "select count(block_Id) from block where user_id = ? and buddy_id = ? limit 1;";
+  $query = "select count(block_id) from block where user_id = ? and buddy_id = ? limit 1;";
   $stmt = $pdo->prepare($query);
   $stmt->execute(array($myId, $buddyId));
 
   $row = $stmt->fetch();
-  $count = $row[0];
+  $isBlocked = $row[0] == 1;
 
-  if ($count == 1) {
-		die("Cannot block account again");
+	// Buddy might have already been blocked from another device.
+  if (!$isBlocked) {
+  	$query = "insert into block (user_id, buddy_id, block_time) values (?, ?, current_timestamp);";
+  	$stmt = $pdo->prepare($query);
+  	$stmt->execute(array($myId, $buddyId));
   }
-
-  $query = "insert into block (user_id, buddy_id, block_time) values (?, ?, current_timestamp);";
-  $stmt = $pdo->prepare($query);
-  $stmt->execute(array($myId, $buddyId));
 
 	$pdo = null;
 ?>

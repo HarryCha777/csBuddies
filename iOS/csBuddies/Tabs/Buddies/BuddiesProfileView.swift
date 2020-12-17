@@ -125,7 +125,7 @@ struct BuddiesProfileView: View {
                     global.activeRootView = .join
                 }))
             case .block:
-                return Alert(title: Text("Block Buddy"), message: Text("You will no longer receive messages or notifications from them. Their activity will also be hidden from your Buddies and Bytes tabs."), primaryButton: .default(Text("Cancel")), secondaryButton: .destructive(Text("Block"), action: {
+                return Alert(title: Text("Block Buddy"), message: Text("You will no longer receive messages or notifications from them. Their activity will also be hidden from your Buddies and Bytes tabs. They will never know that you blocked them."), primaryButton: .default(Text("Cancel")), secondaryButton: .destructive(Text("Block"), action: {
                     global.block(buddyId: buddyId, buddyUsername: userProfileData.username)
                 }))
             }

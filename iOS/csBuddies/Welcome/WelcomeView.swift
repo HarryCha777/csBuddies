@@ -17,35 +17,33 @@ struct WelcomeView: View {
         WelcomeAnimationView()
             .onAppear {
                 loadUserData()
+                global.hasUserDataLoaded = true
                 if global.myId != "" {
                     listenToMessageUpdates()
                 }
-                if !global.hasLoggedIn {
+                if global.hasSignedIn {
+                    signIn()
+                    global.hasSignedIn = false
+                } else {
                     global.activeRootView = .tabs
                 }
-                global.hasLoggedIn = false
             }
     }
     
     func loadUserData() {
-        // Find user and set hasCrashed to true.
+        // Find user.
         let moc = PersistenceController.shared.container.viewContext
         let index = users.firstIndex(where: { $0.myId == global.myId })
-        
+
         if index == nil {
             let user = User(context: moc)
             user.myId = global.myId
-            user.hasCrashed = true
             try? moc.save()
-
-            global.hasUserDataLoaded = true
             return
         }
         
         let user = users[index!]
-        user.hasCrashed = true
-        try? moc.save()
-        
+
         // Save client data, which may not be up to date if the app was previously crashed or reinstalled.
         global.buddiesFilterGenderIndex = Int(user.buddiesFilterGenderIndex)
         global.buddiesFilterMinAge = Int(user.buddiesFilterMinAge)
@@ -68,28 +66,13 @@ struct WelcomeView: View {
         global.hasAskedNotification = user.hasAskedNotification
         global.hasByteNotification = user.hasByteNotification
         global.hasChatNotification = user.hasChatNotification
+        
+        do {
+            global.savedUsers = try JSONDecoder().decode([UserRowData].self, from: user.savedUsersBinaryData ?? Data())
+            global.savedBytes = try JSONDecoder().decode([BytesPostData].self, from: user.savedBytesBinaryData ?? Data())
+            global.chatData = try JSONDecoder().decode([String: ChatRoomData].self, from: user.chatBinaryData ?? Data())
+        } catch {}
 
-        do {
-            let savedUsersBinaryData = user.savedUsersBinaryData ?? Data()
-            let savedUsersUnarchiver = try NSKeyedUnarchiver(forReadingFrom: savedUsersBinaryData)
-            global.savedUsers = savedUsersUnarchiver.decodeDecodable([UserRowData].self, forKey: "savedUsers") ?? [UserRowData]()
-            savedUsersUnarchiver.finishDecoding()
-        } catch {}
-        
-        do {
-            let savedBytesBinaryData = user.savedBytesBinaryData ?? Data()
-            let savedBytesUnarchiver = try NSKeyedUnarchiver(forReadingFrom: savedBytesBinaryData)
-            global.savedBytes = savedBytesUnarchiver.decodeDecodable([BytesPostData].self, forKey: "savedBytes") ?? [BytesPostData]()
-            savedBytesUnarchiver.finishDecoding()
-        } catch {}
-        
-        do {
-            let chatBinaryData = user.chatBinaryData ?? Data()
-            let chatDataUnarchiver = try NSKeyedUnarchiver(forReadingFrom: chatBinaryData)
-            global.chatData = chatDataUnarchiver.decodeDecodable([String: ChatRoomData].self, forKey: "chatData") ?? [String: ChatRoomData]()
-            chatDataUnarchiver.finishDecoding()
-        } catch {}
-        
         // Save server data, which will always be in sync.
         if !global.mustSyncWithServer {
             global.email = user.email ?? ""
@@ -106,27 +89,24 @@ struct WelcomeView: View {
             global.linkedIn = user.linkedIn ?? ""
             global.bytesMade = Int(user.bytesMade)
             global.likesGiven = Int(user.likesGiven)
-            global.lastPostTime = user.lastPostTime ?? global.getUtcTime()
-            global.bytesToday = Int(user.bytesToday)
-            global.lastFirstChatTime = user.lastFirstChatTime ?? global.getUtcTime()
-            global.firstChatsToday = Int(user.firstChatsToday)
             global.lastReceivedChatTime = user.lastReceivedChatTime ?? global.getUtcTime()
-
+            
             do {
-                let blocksBinaryData = user.blocksBinaryData ?? Data()
-                let blocksUnarchiver = try NSKeyedUnarchiver(forReadingFrom: blocksBinaryData)
-                global.blocks = blocksUnarchiver.decodeDecodable([UserRowData].self, forKey: "blocks") ?? [UserRowData]()
-                blocksUnarchiver.finishDecoding()
+                global.blocks = try JSONDecoder().decode([UserRowData].self, from: user.blocksBinaryData ?? Data())
             } catch {}
-
-            global.smallImageCaches.setObject(ImageCache(image: global.smallImage, lastCacheTime: global.getUtcTime()), forKey: global.myId as NSString)
-            global.bigImageCaches.setObject(ImageCache(image: global.bigImage, lastCacheTime: global.getUtcTime()), forKey: global.myId as NSString)
         }
         
         global.mustSyncWithServer = false
-        global.hasUserDataLoaded = true
     }
     
+    func signIn() {
+        let postString =
+            "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+            "password=\(global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+            "fcm=\(Messaging.messaging().fcmToken!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+        global.runPhp(script: "signIn", postString: postString) { json in }
+    }
+
     func listenToMessageUpdates() {
         if global.isMessageUpdatesListenerSetUp {
             return
@@ -149,25 +129,23 @@ struct WelcomeView: View {
 
                                 if global.chatData[buddyId] == nil {
                                     global.chatData[buddyId] = ChatRoomData(username: buddyUsername)
-                                    print("ChatRoomData added")
                                 } else if global.chatData[buddyId]!.username != buddyUsername {
                                     global.chatData[buddyId]?.username = buddyUsername
                                 }
                                 
+                                var mustUpdateBadges = false
                                 if global.chatData[buddyId]!.lastBuddyReadTime < lastBuddyReadTime {
-                                    print("lastBuddyReadTime")
                                     global.chatData[buddyId]?.lastBuddyReadTime = lastBuddyReadTime
                                     for index in global.chatData[buddyId]!.messages.indices {
                                         if !global.chatData[buddyId]!.messages[index].isMine &&
                                             global.chatData[buddyId]!.messages[index].sendTime <= lastBuddyReadTime {
-                                            global.mustUpdateBadges = true
+                                            mustUpdateBadges = true
                                         }
                                     }
                                 }
                                 
                                 if global.chatData[buddyId]!.lastBuddySendTime < lastBuddySendTime {
-                                    print("lastBuddySendTime")
-                                    getMessages(buddyId: buddyId, lastBuddySendTime: lastBuddyReadTime)
+                                    getMessages(buddyId: buddyId, lastBuddySendTime: lastBuddyReadTime, mustUpdateBadges: mustUpdateBadges)
                                 }
                             }
                     }
@@ -175,7 +153,7 @@ struct WelcomeView: View {
         }
     }
     
-    func getMessages(buddyId: String, lastBuddySendTime: Date) {
+    func getMessages(buddyId: String, lastBuddySendTime: Date, mustUpdateBadges: Bool) {
         let postString =
             "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
             "password=\(global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
@@ -210,6 +188,7 @@ struct WelcomeView: View {
                 UIApplication.shared.applicationState == .active {
                 let now = global.getUtcTime()
                 global.chatData[buddyId]!.lastMyReadTime = now
+                global.updateBadges()
                 global.db.collection("messageUpdates")
                     .whereField("myId", isEqualTo: global.myId)
                     .whereField("buddyId", isEqualTo: buddyId)

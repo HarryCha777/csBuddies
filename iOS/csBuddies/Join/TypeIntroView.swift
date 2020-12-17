@@ -190,7 +190,7 @@ struct TypeIntroView: View {
                     } else if !agreed {
                         activeAlert = .didNotAgree
                     } else {
-                        checkUsername()
+                        addUser()
                     }
                 }) {
                     Text("Finish")
@@ -244,20 +244,6 @@ struct TypeIntroView: View {
         }
     }
     
-    func checkUsername() {
-        let postString =
-            "myId=&" +
-            "username=\(global.username.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-        global.runPhp(script: "isExtantUsername", postString: postString) { json in
-            let isExtantUsername = json["isExtantUsername"] as! Bool
-            if isExtantUsername {
-                activeAlert = .extantUsername
-            } else {
-                addUser()
-            }
-        }
-    }
-    
     func addUser() {
         let postString =
             "email=\(global.email.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
@@ -271,14 +257,17 @@ struct TypeIntroView: View {
             "otherInterests=\(global.otherInterests.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
             "intro=\(global.intro.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
             "gitHub=\(global.gitHub.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "linkedIn=\(global.linkedIn.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+            "linkedIn=\(global.linkedIn.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+            "fcm=\(Messaging.messaging().fcmToken!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
         global.runPhp(script: "addUser", postString: postString) { json in
+            if json["isExtantUsername"] != nil {
+                activeAlert = .extantUsername
+                return
+            }
+            
             global.myId = json["myId"] as! String
             global.password = json["password"] as! String
-            
-            global.smallImageCaches.setObject(ImageCache(image: global.smallImage, lastCacheTime: global.getUtcTime()), forKey: global.myId as NSString)
-            global.bigImageCaches.setObject(ImageCache(image: global.bigImage, lastCacheTime: global.getUtcTime()), forKey: global.myId as NSString)
-            
+
             setDisplayName()
         }
     }
@@ -300,7 +289,7 @@ struct TypeIntroView: View {
             .setData([
                         "myId": global.myId,
                         "password": global.password]) { error in
-                global.hasLoggedIn = true
+                global.hasSignedIn = true
                 global.activeRootView = .welcome
             }
     }

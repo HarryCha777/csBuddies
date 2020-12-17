@@ -7,8 +7,9 @@
   $password = $_POST["password"];
 
 	$isValid =
-		isAuthenticated($myId, $password);
+		isAuthenticated($myId, $password, false);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 
@@ -16,7 +17,7 @@
 	$stmt = $pdo->prepare($query);
 	$stmt->execute(array($myId));
 
-  $query = "select count(byte.user_id) from byte left join byte_like on byte.byte_id = byte_like.byte_id where byte.byte_id = byte_like.byte_id and byte_like.is_liked = true and byte.user_id = ?;";
+  $query = "select count(byte.user_id) from byte left join byte_like on byte.byte_id = byte_like.byte_id where byte.byte_id = byte_like.byte_id and byte_like.is_liked = true and byte.user_id = ? limit 1;";
   $stmt = $pdo->prepare($query);
   $stmt->execute(array($myId));
 

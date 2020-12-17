@@ -100,7 +100,7 @@ struct BuddiesView: View {
                     if buddies.firstIndex(where: { $0.id == userPreviewData.id })! % 10 == 9 &&
                         buddies.firstIndex(where: { $0.id == userPreviewData.id })! < 500 &&
                         !global.isPremium {
-                        //AdmobNativeAdsBuddiesView()
+                        AdmobNativeAdsBuddiesView()
                     }
                 }
                 // Do not use .id(UUID()) to prevent calling PHP on each tab change.

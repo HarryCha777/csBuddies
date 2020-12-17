@@ -13,6 +13,7 @@
 		isExtantUserId($buddyId);
 		//isValidDate($lastReceivedChatTime, True);
 	if (!$isValid) {
+  	$pdo = null;
 		die("Invalid");
 	}
 

@@ -60,13 +60,7 @@ struct BytesWriteView: View {
                     if global.byteDraft.count > 256 {
                         activeAlert = .tooLongByte
                     } else {
-                        madeTooManyBytesToday() { madeTooManyBytesToday in
-                            if madeTooManyBytesToday {
-                                activeAlert = .tooManyBytesToday
-                            } else {
-                                makeByte()
-                            }
-                        }
+                        makeByte()
                     }
                 }) {
                     Text("Post")
@@ -88,42 +82,17 @@ struct BytesWriteView: View {
         }
     }
     
-    func madeTooManyBytesToday(completion: @escaping (Bool) -> Void) {
-        if global.isPremium {
-            completion(false)
-            return
-        }
-        
-        if Calendar.current.isDate(global.getUtcTime(), inSameDayAs: global.lastPostTime) {
-            if global.bytesToday < 50 {
-                global.bytesToday += 1
-                let postString =
-                    "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                    "password=\(global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                    "bytesToday=\(global.bytesToday + 1)"
-                global.runPhp(script: "updateBytesToday", postString: postString) { json in }
-                completion(false)
-            } else {
-                completion(true)
-            }
-        } else {
-            global.lastPostTime = global.getUtcTime()
-            global.bytesToday = 1
-            let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "password=\(global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "bytesToday=1"
-            global.runPhp(script: "updateBytesToday", postString: postString) { json in }
-            completion(false)
-        }
-    }
-
     func makeByte() {
         let postString =
             "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
             "password=\(global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
             "content=\(global.byteDraft.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
         global.runPhp(script: "addByte", postString: postString) { json in
+            if json["canMakeByte"] != nil {
+                activeAlert = .tooManyBytesToday
+                return
+            }
+            
             global.byteDraft = ""
             global.bytesMade += 1
             global.bytesFilterSortIndex = 0
