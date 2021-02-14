@@ -39,7 +39,7 @@ struct BuddiesFilterView: View {
                         Text("Age")
                         Spacer()
                         Text("\(global.newBuddiesFilterMinAge) - \(global.newBuddiesFilterMaxAge)")
-                            .foregroundColor(Color.gray)
+                            .foregroundColor(.gray)
                     }
                 }
                 
@@ -64,9 +64,7 @@ struct BuddiesFilterView: View {
                         if global.newBuddiesFilterInterests.count == 0 {
                             Text("Interests")
                         } else {
-                            TagsView(
-                                data: global.newBuddiesFilterInterests
-                            ) { interest in
+                            TagsView(data: global.newBuddiesFilterInterests) { interest in
                                 InterestsButtonDisabledView(interest: interest, interests: global.newBuddiesFilterInterests)
                             }
                         }
@@ -87,7 +85,7 @@ struct BuddiesFilterView: View {
         .navigationBarTitle("Filter Buddies", displayMode: .inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                global.backButton(presentation: presentation, title: "Cancel")
+                BackButton(title: "Cancel", presentation: presentation)
             }
             ToolbarItem(placement: .primaryAction) {
                 Button(action: {

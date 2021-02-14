@@ -12,101 +12,122 @@ import Firebase
 struct BytesView: View {
     @EnvironmentObject var global: Global
     
+    @State private var byteIds = [String]()
     @State private var mustGetBytes = true
-    @State private var bytes = [BytesPostData]()
-    @State private var bottomPostTime = Date()
-    @State private var bottomTrendingScore = 30000.0
-    @State private var bottomLikes = 30000
     @State private var isLoading = false
-    @State private var isRefreshing = false
     @State private var canLoadMore = false
+    @State private var bottomPostedAt = Date()
+    @State private var bottomHotScore = 30000.0
+    
+    @State private var newByteId = ""
     
     @State var activeAlert: Alerts?
     enum Alerts: Identifiable {
         var id: Int { self.hashValue }
         case
-            joinToPost
+            joinForInbox,
+            joinToWrite
     }
     
     @State var activeSheet: Sheets?
     enum Sheets: Identifiable {
         var id: Int { self.hashValue }
         case
-            bytesWrite,
-            bytesFilter
+            bytesFilter,
+            bytesWrite
     }
 
     var body: some View {
         ZStack {
-            if mustGetBytes {
-                Spacer()
-                    .onAppear {
-                        mustGetBytes = false
-                        bottomPostTime = global.getUtcTime()
-                        bottomTrendingScore = 30000.0
-                        bottomLikes = 30000
-                        bytes.removeAll()
-                        getBytes()
-                    }
-            }
-            
             List {
                 // Indices will not update the views when more profiles are loaded.
                 // Using enumerated or zip will require ad banner to stick to a profile using Vstack.
                 // Also, using enumerated or zip will cause a glitch when more profiles are loaded after clicking on a banner ad.
                 // AdmobNativeAdsView slows down the app, so stop showing them at some point.
-                ForEach(bytes) { bytesPostData in
-                    if !global.blocks.contains(where: { $0.userId == bytesPostData.userId }) {
-                        BytesPostView(bytesPostData: bytesPostData)
+                ForEach(byteIds, id: \.self) { byteId in
+                    if !global.blockedBuddyIds.contains(global.bytes[byteId]!.userId) {
+                        BytePreviewView(byteId: byteId)
                     }
-
-                    if bytes.firstIndex(where: { $0.id == bytesPostData.id })! % 10 == 9 &&
-                        bytes.firstIndex(where: { $0.id == bytesPostData.id })! < 500 &&
+                    
+                    if byteIds.firstIndex(where: { $0 == byteId })! % 10 == 9 &&
+                        byteIds.firstIndex(where: { $0 == byteId })! < 500 &&
                         !global.isPremium {
                         AdmobNativeAdsBytesView()
                     }
                 }
                 // Do not use .id(UUID()) to prevent calling PHP on each tab change and bytes from staying still when they are liked.
-
-                HStack {
-                    Spacer()
-                    if isLoading {
-                        LottieView(name: "load", size: 300, padding: -50, mustLoop: true)
-                    } else if bytes.count == 0 {
-                        LottieView(name: "noData", size: 300, padding: -50)
-                    } else {
-                        Text("End")
-                            .onAppear {
-                                if canLoadMore {
-                                    getBytes()
-                                }
-                            }
-                    }
-                    Spacer()
+                
+                InfiniteScrollView(isLoading: isLoading, isEmpty: byteIds.count == 0, canLoadMore: canLoadMore, loadMore: getBytes)
+            }
+            
+            FloatingActionButton(systemName: "pencil") {
+                if global.myId == "" {
+                    activeAlert = .joinToWrite
+                } else {
+                    activeSheet = .bytesWrite
                 }
             }
-            .listStyle(InsetGroupedListStyle())
         }
+        .listStyle(InsetGroupedListStyle())
         .navigationBarTitle("Bytes")
-        .pullToRefresh(isShowing: $isRefreshing) {
-            bottomPostTime = global.getUtcTime()
-            bottomTrendingScore = 30000.0
-            bottomLikes = 30000
-            bytes.removeAll()
+        .refresh(isRefreshing: $mustGetBytes, isRefreshingBool: mustGetBytes) {
+            bottomPostedAt = global.getUtcTime()
+            bottomHotScore = 30000.0
+            byteIds.removeAll()
             getBytes()
         }
+        .overlay(
+            VStack {
+                if newByteId != "" {
+                    Spacer()
+                        .onAppear {
+                            byteIds.insert(newByteId, at: 0)
+                            newByteId = ""
+                        }
+                }
+            }
+        )
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 HStack { // Having at least 2 views inside HStack is necessary to make Image larger.
-                    Button(action: {
-                        if global.myId == "" {
-                            activeAlert = .joinToPost
-                        } else {
-                            activeSheet = .bytesWrite
+                    if global.myId == "" {
+                        Button(action: {
+                            activeAlert = .joinForInbox
+                        }) {
+                            Image(systemName: "bell")
+                                .font(.largeTitle)
                         }
-                    }) {
-                        Image(systemName: "square.and.pencil")
-                            .font(.largeTitle)
+                    } else {
+                        NavigationLink(destination: InboxView()) {
+                            ZStack {
+                                Image(systemName: "bell")
+                                    .font(.largeTitle)
+                                
+                                if global.getUnreadNotificationsCounter() > 0 {
+                                    VStack {
+                                        HStack {
+                                            Spacer()
+                                            ZStack {
+                                                Circle()
+                                                    .foregroundColor(.red)
+                                                
+                                                if global.getUnreadNotificationsCounter() <= 99 {
+                                                    Text("\(global.getUnreadNotificationsCounter())")
+                                                        .foregroundColor(.white)
+                                                        .font(Font.system(size: 10))
+                                                } else {
+                                                    Text("99+")
+                                                        .foregroundColor(.white)
+                                                        .font(Font.system(size: 10))
+                                                }
+                                            }
+                                            .frame(width: 20, height: 20)
+                                        }
+                                        Spacer()
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     Button(action: {
@@ -123,7 +144,7 @@ struct BytesView: View {
             switch sheet {
             case .bytesWrite:
                 NavigationView {
-                    BytesWriteView(mustGetBytes: $mustGetBytes)
+                    ByteWriteView(newByteId: $newByteId)
                         .environmentObject(globalObject)
                 }
                 .navigationViewStyle(StackNavigationViewStyle())
@@ -137,7 +158,11 @@ struct BytesView: View {
         }
         .alert(item: $activeAlert) { alert in
             switch alert {
-            case .joinToPost:
+            case .joinForInbox:
+                return Alert(title: Text("Join us to have your inbox."), primaryButton: .destructive(Text("Cancel")), secondaryButton: .default(Text("Join"), action: {
+                    global.activeRootView = .join
+                }))
+            case .joinToWrite:
                 return Alert(title: Text("Join us to write a byte."), primaryButton: .destructive(Text("Cancel")), secondaryButton: .default(Text("Join"), action: {
                     global.activeRootView = .join
                 }))
@@ -147,7 +172,6 @@ struct BytesView: View {
     
     func setNewFilterVars() {
         global.newBytesFilterSortIndex = global.bytesFilterSortIndex
-        global.newBytesFilterTimeIndex = global.bytesFilterTimeIndex
     }
 
     func getBytes() {
@@ -157,52 +181,46 @@ struct BytesView: View {
         isLoading = true
         canLoadMore = true
         
-        let postString =
-            "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "sort=\(global.bytesFilterSortIndex)&" +
-            "time=\(global.bytesFilterTimeIndex)&" +
-            "bottomPostTime=\(bottomPostTime.toString())&" +
-            "bottomTrendingScore=\(bottomTrendingScore)&" +
-            "bottomLikes=\(bottomLikes)"
-        global.runPhp(script: "getFilteredBytes", postString: postString) { json in
-            if json.count <= 1 {
-                isLoading = false
-                isRefreshing = false
-                canLoadMore = false
-                return
+        global.getTokenIfSignedIn { token in
+            let postString =
+                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "token=\(token.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "sort=\(global.bytesFilterSortIndex)&" +
+                "bottomPostedAt=\(bottomPostedAt.toString())&" +
+                "bottomHotScore=\(bottomHotScore)"
+            global.runPhp(script: "getTabBytes", postString: postString) { json in
+                if json.count <= 1 {
+                    mustGetBytes = false
+                    isLoading = false
+                    canLoadMore = false
+                    return
+                }
+                
+                for i in 1...json.count - 1 {
+                    let row = json[String(i)] as! NSDictionary
+                    let byteData = ByteData(
+                        byteId: row["byteId"] as! String,
+                        userId: row["userId"] as! String,
+                        username: row["username"] as! String,
+                        lastVisitedAt: (row["lastVisitedAt"] as! String).toDate(),
+                        content: row["content"] as! String,
+                        likes: row["likes"] as! Int,
+                        comments: row["comments"] as! Int,
+                        isLiked: row["isLiked"] as! Bool,
+                        postedAt: (row["postedAt"] as! String).toDate())
+                    byteData.updateClientData()
+                    byteIds.append(byteData.byteId)
+                }
+                
+                let lastRow = json[String(json.count)] as! NSDictionary
+                bottomPostedAt = (lastRow["bottomPostedAt"] as! String).toDate()
+                bottomHotScore = lastRow["bottomHotScore"] as! Double
+                
+                mustGetBytes = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { // Prevent calling PHP twice on each load.
+                    isLoading = false
+                }
             }
-            
-            for i in 1...json.count - 1 {
-                let row = json[String(i)] as! NSDictionary
-                let bytesPostData = BytesPostData(
-                    byteId: row["byteId"] as! String,
-                    userId: row["userId"] as! String,
-                    username: row["username"] as! String,
-                    isOnline: global.isOnline(lastVisitTimeAny: row["lastVisitTime"]),
-                    content: row["content"] as! String,
-                    likes: row["likes"] as! Int,
-                    isLiked: row["isLiked"] as! Bool,
-                    postTime: (row["postTime"] as! String).toDate())
-                bytes.append(bytesPostData)
-                updateClientData(bytesPostData: bytesPostData)
-            }
-            
-            let lastRow = json[String(json.count)] as! NSDictionary
-            bottomPostTime = (lastRow["bottomPostTime"] as! String).toDate()
-            bottomTrendingScore = lastRow["bottomTrendingScore"] as! Double
-            bottomLikes = lastRow["bottomLikes"] as! Int
-            
-            isRefreshing = false
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { // Prevent calling PHP twice on each load.
-                isLoading = false
-            }
-        }
-    }
-    
-    func updateClientData(bytesPostData: BytesPostData) {
-        if global.savedBytes.contains(where: { $0.byteId == bytesPostData.byteId }) {
-            let index = global.savedBytes.firstIndex(where: { $0.byteId == bytesPostData.byteId })
-            global.savedBytes[index!] = bytesPostData
         }
     }
 }

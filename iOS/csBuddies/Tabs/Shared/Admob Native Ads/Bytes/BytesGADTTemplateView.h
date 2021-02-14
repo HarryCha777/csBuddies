@@ -28,10 +28,10 @@ typedef NSString* BytesGADTNativeTemplateStyleKey NS_STRING_ENUM;
 /// Call to action font. Expects a UIFont.
 extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeyCallToActionFont;
 
-/// Call to action font color. Expects a UIColor.
+/// Call to action font  Expects a UI
 extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeyCallToActionFontColor;
 
-/// Call to action background color. Expects a UIColor.
+/// Call to action background  Expects a UI
 extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeyCallToActionBackgroundColor;
 
 /// The font, font color and background color for the first row of text in the template.
@@ -41,10 +41,10 @@ extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeyCall
 /// Primary text font. Expects a UIFont.
 extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeyPrimaryFont;
 
-/// Primary text font color. Expects a UIColor.
+/// Primary text font  Expects a UI
 extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeyPrimaryFontColor;
 
-/// Primary text background color. Expects a UIColor.
+/// Primary text background  Expects a UI
 extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeyPrimaryBackgroundColor;
 
 /// The font, font color and background color for the second row of text in the template.
@@ -55,10 +55,10 @@ extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeyPrim
 /// Secondary text font. Expects a UIFont.
 extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeySecondaryFont;
 
-/// Secondary text font color. Expects a UIColor.
+/// Secondary text font  Expects a UI
 extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeySecondaryFontColor;
 
-/// Secondary text background color. Expects a UIColor.
+/// Secondary text background  Expects a UI
 extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeySecondaryBackgroundColor;
 
 /// The font, font color and background color for the third row of text in the template.
@@ -68,15 +68,15 @@ extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeySeco
 /// Tertiary text font. Expects a UIFont.
 extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeyTertiaryFont;
 
-/// Tertiary text font color. Expects a UIColor.
+/// Tertiary text font  Expects a UI
 extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeyTertiaryFontColor;
 
-/// Tertiary text background color. Expects a UIColor.
+/// Tertiary text background  Expects a UI
 extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeyTertiaryBackgroundColor;
 
 #pragma mark - Additional Style Options
 
-/// The background color for the bulk of the ad. Expects a UIColor.
+/// The background color for the bulk of the ad. Expects a UI
 extern BytesGADTNativeTemplateStyleKey const BytesGADTNativeTemplateStyleKeyMainBackgroundColor;
 
 /// The corner rounding radius for the icon view and call to action. Expects an NSNumber.

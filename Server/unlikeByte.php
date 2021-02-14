@@ -1,28 +1,15 @@
 <?php
-  include "globalFunctions.php";
-  include "/var/www/inc/dbinfo.inc";
+  require "globalFunctions.php";
   $pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
 
   $myId = $_POST["myId"];
-  $password = $_POST["password"];
+  $token = $_POST["token"];
   $byteId = $_POST["byteId"];
 
 	$isValid =
-		isAuthenticated($myId, $password) &&
+		isAuthenticated($myId, $token) &&
 		isExtantByteId($byteId);
 	if (!$isValid) {
-  	$pdo = null;
-		die("Invalid");
-	}
-
-  $query = "select count(byte_id) from byte where user_id = ? and byte_id = ? limit 1;";
-  $stmt = $pdo->prepare($query);
-  $stmt->execute(array($myId, $byteId));
-
-  $row = $stmt->fetch();
-  $isOwnByte = $row[0] == 1;
-  
-  if ($isOwnByte) {
   	$pdo = null;
 		die("Invalid");
 	}
@@ -32,17 +19,11 @@
   $stmt->execute(array($myId, $byteId));
 
   $row = $stmt->fetch();
-	$isUnliked = $row[0] == 0;
+	$isUnliked = !$row[0];
 
-  $query = "update byte_like set like_time = current_timestamp, is_liked = false where user_id = ? and byte_id = ?;";
+  $query = "update byte_like set last_updated_at = current_timestamp, is_liked = false where user_id = ? and byte_id = ?;";
   $stmt = $pdo->prepare($query);
   $stmt->execute(array($myId, $byteId));
-
-	if (!$isUnliked) {
-  	$query = "update byte set likes = likes - 1 where byte_id = ?;";
-  	$stmt = $pdo->prepare($query);
-  	$stmt->execute(array($byteId));
-	}
 
 	$return = array(
 		"isUnliked" => $isUnliked,

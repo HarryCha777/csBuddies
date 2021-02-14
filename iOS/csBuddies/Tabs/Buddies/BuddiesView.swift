@@ -24,14 +24,13 @@ struct BuddiesView: View {
     let afterOpeningSayYes = "Sure, take me there!"
     let afterOpeningSayNo = "No, don't ask again."
     
+    @State private var buddyIds = [String]()
     @State private var mustGetBuddies = true
-    @State private var buddies = [UserPreviewData]()
-    @State private var bottomLastVisitTime = Date()
-    @State private var bottomSignUpTime = Date()
     @State private var isLoading = false
-    @State private var isRefreshing = false
     @State private var canLoadMore = false
-
+    @State private var bottomLastVisitedAt = Date()
+    @State private var bottomSignedUpAt = Date()
+    
     @State private var refreshCounter = 0
 
     @State var activeAlert: Alerts?
@@ -42,93 +41,41 @@ struct BuddiesView: View {
             yes,
             no
     }
-
+    
     @State var activeSheet: Sheets?
     enum Sheets: Identifiable {
         var id: Int { self.hashValue }
         case
             buddiesFilter
     }
-
+    
     var body: some View {
-        ZStack {
-            if mustGetBuddies {
-                Spacer()
-                    .onAppear {
-                        mustGetBuddies = false
-                        bottomLastVisitTime = global.getUtcTime()
-                        bottomSignUpTime = global.getUtcTime()
-                        buddies.removeAll()
-                        refreshCounter += 1
-                        getBuddies()
-                    }
-            }
-            
-            List {
-                if global.announcementText.count != 0 {
-                    HStack {
-                        NavigationLinkNoArrow(destination:
-                                                WebView(request: URLRequest(url: URL(string: global.announcementLink)!))
-                                                .navigationBarTitle(global.announcementLink, displayMode: .inline)) {
-                            HStack {
-                                Text(global.announcementText.replacingOccurrences(of: "\\n", with: "\n"))
-                                    .font(.system(size: 14))
-                                    .foregroundColor(Color.white)
-                                Spacer()
-                            }
-                        }
-                        
-                        Image(systemName: "xmark")
-                            .imageScale(.large)
-                            .foregroundColor(Color.white)
-                            .onTapGesture {
-                                global.announcementText = ""
-                            }
-                    }
-                    .listRowBackground(Color.orange)
+        List {
+            // Indices will not update the views when more profiles are loaded.
+            // Using enumerated or zip will require ad banner to stick to a profile using Vstack.
+            // Also, using enumerated or zip will cause a glitch when more profiles are loaded after clicking on a banner ad.
+            // Admob Native Ads View slows down the app, so stop showing them at some point.
+            ForEach(buddyIds, id: \.self) { buddyId in
+                if !global.blockedBuddyIds.contains(buddyId) {
+                    UserPreviewView(userId: buddyId)
                 }
                 
-                // Indices will not update the views when more profiles are loaded.
-                // Using enumerated or zip will require ad banner to stick to a profile using Vstack.
-                // Also, using enumerated or zip will cause a glitch when more profiles are loaded after clicking on a banner ad.
-                // Admob Native Ads View slows down the app, so stop showing them at some point.
-                ForEach(buddies) { userPreviewData in
-                    if !global.blocks.contains(where: { $0.userId == userPreviewData.userId }) {
-                        BuddiesPreviewView(userPreviewData: userPreviewData, myImage: global.smallImage)
-                    }
-
-                    if buddies.firstIndex(where: { $0.id == userPreviewData.id })! % 10 == 9 &&
-                        buddies.firstIndex(where: { $0.id == userPreviewData.id })! < 500 &&
-                        !global.isPremium {
-                        AdmobNativeAdsBuddiesView()
-                    }
-                }
-                // Do not use .id(UUID()) to prevent calling PHP on each tab change.
-
-                HStack {
-                    Spacer()
-                    if isLoading {
-                        LottieView(name: "load", size: 300, padding: -50, mustLoop: true)
-                    } else if buddies.count == 0 {
-                        LottieView(name: "noData", size: 300, padding: -50)
-                    } else {
-                        Text("End")
-                            .onAppear {
-                                if canLoadMore {
-                                    getBuddies()
-                                }
-                            }
-                    }
-                    Spacer()
+                if buddyIds.firstIndex(where: { $0 == buddyId })! % 10 == 9 &&
+                    buddyIds.firstIndex(where: { $0 == buddyId })! < 500 &&
+                    !global.isPremium {
+                    AdmobNativeAdsUsersView()
                 }
             }
-            .listStyle(InsetGroupedListStyle())
+            // Do not use .id(UUID()) to prevent calling PHP on each tab change.
+            
+            InfiniteScrollView(isLoading: isLoading, isEmpty: buddyIds.count == 0, canLoadMore: canLoadMore, loadMore: getBuddies)
         }
+        .listStyle(InsetGroupedListStyle())
         .navigationBarTitle("Buddies")
-        .pullToRefresh(isShowing: $isRefreshing) {
-            bottomLastVisitTime = global.getUtcTime()
-            bottomSignUpTime = global.getUtcTime()
-            buddies.removeAll()
+        .refresh(isRefreshing: $mustGetBuddies, isRefreshingBool: mustGetBuddies) {
+            bottomLastVisitedAt = global.getUtcTime()
+            bottomSignedUpAt = global.getUtcTime()
+            buddyIds.removeAll()
             refreshCounter += 1
             getBuddies()
         }
@@ -194,53 +141,55 @@ struct BuddiesView: View {
         isLoading = true
         canLoadMore = true
         
-        let postString =
-            "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "gender=\(global.buddiesFilterGenderIndex - 1)&" +
-            "minAge=\(global.buddiesFilterMinAge)&" +
-            "maxAge=\(global.buddiesFilterMaxAge)&" +
-            "country=\(global.buddiesFilterCountryIndex - 1)&" +
-            "interests=\(global.buddiesFilterInterests.toInterestsString().addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "sort=\(global.buddiesFilterSortIndex)&" +
-            "bottomLastVisitTime=\(bottomLastVisitTime.toString())&" +
-            "bottomSignUpTime=\(bottomSignUpTime.toString())"
-        global.runPhp(script: "getFilteredBuddies", postString: postString) { json in
-            if json.count <= 1 {
-                isLoading = false
-                isRefreshing = false
-                canLoadMore = false
-                return
-            }
-            
-            for i in 1...json.count - 1 {
-                let row = json[String(i)] as! NSDictionary
-                let userPreviewData = UserPreviewData(
-                    userId: row["buddyId"] as! String,
-                    username: row["username"] as! String,
-                    birthday: (row["birthday"] as! String).toDate(fromFormat: "yyyy-MM-dd"),
-                    genderIndex: row["gender"] as! Int,
-                    intro: row["intro"] as! String,
-                    hasGitHub: row["hasGitHub"] as! Bool,
-                    hasLinkedIn: row["hasLinkedIn"] as! Bool,
-                    isOnline: global.isOnline(lastVisitTimeAny: row["lastVisitTime"]),
-                    lastVisitTime: (row["lastVisitTime"] as! String).toDate())
-                buddies.append(userPreviewData)
-            }
-            
-            let lastRow = json[String(json.count)] as! NSDictionary
-            bottomLastVisitTime = (lastRow["bottomLastVisitTime"] as! String).toDate()
-            bottomSignUpTime = (lastRow["bottomSignUpTime"] as! String).toDate()
-            
-            isRefreshing = false
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { // Prevent calling PHP twice on each load.
-                isLoading = false
-            }
-            
-            if !global.hasAskedReview &&
-                refreshCounter > 3 &&
-                global.getUtcTime().timeIntervalSince(global.firstLaunchTime) > 60 * 60 * 24 * 1 {
-                global.hasAskedReview = true
-                activeAlert = .opening
+        global.getTokenIfSignedIn { token in
+            let postString =
+                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "token=\(token.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "gender=\(global.buddiesFilterGenderIndex - 1)&" +
+                "minAge=\(global.buddiesFilterMinAge)&" +
+                "maxAge=\(global.buddiesFilterMaxAge)&" +
+                "country=\(global.buddiesFilterCountryIndex - 1)&" +
+                "interests=\(global.buddiesFilterInterests.toInterestsString().addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "sort=\(global.buddiesFilterSortIndex)&" +
+                "bottomLastVisitedAt=\(bottomLastVisitedAt.toString())&" +
+                "bottomSignedUpAt=\(bottomSignedUpAt.toString())"
+            global.runPhp(script: "getTabBuddies", postString: postString) { json in
+                if json.count <= 1 {
+                    mustGetBuddies = false
+                    isLoading = false
+                    canLoadMore = false
+                    return
+                }
+                
+                for i in 1...json.count - 1 {
+                    let row = json[String(i)] as! NSDictionary
+                    let userPreviewData = UserPreviewData(
+                        userId: row["buddyId"] as! String,
+                        username: row["username"] as! String,
+                        birthday: (row["birthday"] as! String).toDate(fromFormat: "yyyy-MM-dd"),
+                        genderIndex: row["gender"] as! Int,
+                        countryIndex: row["country"] as! Int,
+                        intro: row["intro"] as! String,
+                        lastVisitedAt: (row["lastVisitedAt"] as! String).toDate())
+                    userPreviewData.updateClientData()
+                    buddyIds.append(userPreviewData.userId)
+                }
+                
+                let lastRow = json[String(json.count)] as! NSDictionary
+                bottomLastVisitedAt = (lastRow["bottomLastVisitedAt"] as! String).toDate()
+                bottomSignedUpAt = (lastRow["bottomSignedUpAt"] as! String).toDate()
+                
+                mustGetBuddies = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { // Prevent calling PHP twice on each load.
+                    isLoading = false
+                }
+                
+                if !global.hasAskedReview &&
+                    refreshCounter > 3 &&
+                    global.getUtcTime().timeIntervalSince(global.firstLaunchedAt) > 60 * 60 * 24 * 1 {
+                    global.hasAskedReview = true
+                    activeAlert = .opening
+                }
             }
         }
     }

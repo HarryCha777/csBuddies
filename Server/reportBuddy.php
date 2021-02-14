@@ -1,21 +1,18 @@
 <?php
-  include "globalFunctions.php";
-  include "/var/www/inc/dbinfo.inc";
+  require "globalFunctions.php";
   $pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
 
   $myId = $_POST["myId"];
-  $password = $_POST["password"];
+  $token = $_POST["token"];
   $buddyId = $_POST["buddyId"];
   $reason = (int)$_POST["reason"];
-  $otherReason = $_POST["otherReason"];
   $comments = $_POST["comments"];
   $mustReplacePrevious = $_POST["mustReplacePrevious"];
 
 	$isValid =
-		isAuthenticated($myId, $password) &&
+		isAuthenticated($myId, $token) &&
 		isExtantUserId($buddyId) &&
-		isValidInt($reason, 0, 5) &&
-		isValidString($otherReason, 0, 100) &&
+		isValidInt($reason, 0, 6) &&
 		isValidString($comments, 0, 1000) &&
 		isValidBool($mustReplacePrevious);
 	if (!$isValid) {
@@ -23,13 +20,27 @@
 		die("Invalid");
 	}
 
+	$query = "select count(user_id) = 1 from account where user_id = ? and became_admin_at is not null limit 1;";
+	$stmt = $pdo->prepare($query);
+	$stmt->execute(array($buddyId));
+
+  $row = $stmt->fetch();
+	$isAdmin = $row[0];
+
+	if ($isAdmin) {
+    $return = array("isAdmin" => True);
+  	echo json_encode($return);
+		$pdo = null;
+		exit;
+	}
+
 	if (!toBool($mustReplacePrevious)) {
-		$query = "select count(report_id) from report where user_id = ? and buddy_id = ? limit 1;";
+		$query = "select count(report_id) = 1 from report where user_id = ? and buddy_id = ? and reviewed_at is null limit 1;";
 		$stmt = $pdo->prepare($query);
 		$stmt->execute(array($myId, $buddyId));
 
   	$row = $stmt->fetch();
-		$isExtantReport = $row[0] == 1;
+		$isExtantReport = $row[0];
 
 		if ($isExtantReport) {
   	  $return = array("isExtantReport" => True);
@@ -40,14 +51,14 @@
 	}
 
 	if (toBool($mustReplacePrevious)) {
-  	$query = "delete from report where user_id = ? and buddy_id = ? and is_reviewed = false;";
+  	$query = "delete from report where user_id = ? and buddy_id = ? and reviewed_at is null;";
   	$stmt = $pdo->prepare($query);
   	$stmt->execute(array($myId, $buddyId));
 	}
 
-  $query = "insert into report (user_id, buddy_id, reason, other_reason, comments, report_time) values (?, ?, ?, ?, ?, current_timestamp);";
+  $query = "insert into report (user_id, buddy_id, reason, comments) values (?, ?, ?, ?);";
   $stmt = $pdo->prepare($query);
-  $stmt->execute(array($myId, $buddyId, $reason, $otherReason, $comments));
+  $stmt->execute(array($myId, $buddyId, $reason, $comments));
 
 	$pdo = null;
 ?>

@@ -1,19 +1,25 @@
 <?php
-  include "globalFunctions.php";
-  include "/var/www/inc/dbinfo.inc";
+  require "globalFunctions.php";
   $pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
 
   $myId = $_POST["myId"];
-  $password = $_POST["password"];
+  $token = $_POST["token"];
 
 	$isValid =
-		isAuthenticated($myId, $password);
+		isAuthenticated($myId, $token);
 	if (!$isValid) {
   	$pdo = null;
 		die("Invalid");
 	}
 
-  $query = "select account.user_id, to_char(account.last_visit_time, 'yyyy-mm-dd hh24:mi:ss.ms') from account left join message on account.user_id = message.buddy_id where message.user_id = ? group by account.user_id;";
+  $query = "
+		select account.user_id,
+		       account.last_visited_at
+		from   account
+		       left join message
+		              on account.user_id = message.buddy_id
+		where  message.user_id = ?
+		group  by account.user_id;";
   $stmt = $pdo->prepare($query);
   $stmt->execute(array($myId));
 
@@ -22,7 +28,7 @@
   while($row = $stmt->fetch()) {
     $rows[$counter++] = array(
       "buddyId" => $row[0],
-      "lastVisitTime" => $row[1],
+      "lastVisitedAt" => $row[1],
     );
   }
 

@@ -1,52 +1,49 @@
-// Source: https://github.com/zntfdr/FiveStarsCodeSamples/tree/main/Tags-SwiftUI
+// Source: https://github.com/zntfdr/FiveStarsCodeSamples/tree/main/Flexible-SwiftUI
 
 import SwiftUI
 
 struct TagsView<Data: Collection, Content: View>: View where Data.Element: Hashable {
     let data: Data
-    let spacing: CGFloat = 8
     let content: (Data.Element) -> Content
     @State private var availableWidth: CGFloat = 0
     
+    let spacing: CGFloat = 8
+    @State private var elementsSize: [Data.Element: CGSize] = [:]
+    @State private var isLoading = false
+    
     var body: some View {
         ZStack(alignment: Alignment(horizontal: .leading, vertical: .center)) {
-            Color.clear
-                .frame(height: 1)
-                .readSize { size in
-                    availableWidth = size.width
-                }
-            
-            _TagsView(
-                availableWidth: availableWidth,
-                data: data,
-                spacing: spacing,
-                alignment: .leading,
-                content: content
-            )
-        }
-    }
-}
-
-struct _TagsView<Data: Collection, Content: View>: View where Data.Element: Hashable {
-    let availableWidth: CGFloat
-    let data: Data
-    let spacing: CGFloat
-    let alignment: HorizontalAlignment
-    let content: (Data.Element) -> Content
-    @State private var elementsSize: [Data.Element: CGSize] = [:]
-    
-    var body : some View {
-        VStack(alignment: alignment, spacing: spacing) {
-            ForEach(computeRows(), id: \.self) { rowElements in
-                HStack(spacing: spacing) {
-                    ForEach(rowElements, id: \.self) { element in
-                        content(element)
-                            .fixedSize()
-                            .readSize { size in
-                                elementsSize[element] = size
+            if !isLoading {
+                Color.clear
+                    .frame(height: 0.001)
+                    .readSize { size in
+                        availableWidth = size.width
+                    }
+                
+                VStack(alignment: .leading, spacing: spacing) {
+                    ForEach(computeRows(), id: \.self) { rowElements in
+                        HStack(spacing: spacing) {
+                            ForEach(rowElements, id: \.self) { element in
+                                content(element)
+                                    .fixedSize()
+                                    .readSize { size in
+                                        elementsSize[element] = size
+                                    }
                             }
+                        }
                     }
                 }
+            }
+        }
+        .onAppear {
+            if isLoading {
+                return
+            }
+            isLoading = true
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.001) { // Prevent the view from having unnecessary extra height in List by updating the view.
+                // Unlike waiting to prevent calling PHP twice on each load, wait for only 0.001 seconds since it is much faster than 0.1 seconds.
+                isLoading = false
             }
         }
     }

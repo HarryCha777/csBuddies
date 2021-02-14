@@ -9,17 +9,6 @@ public struct SlidingTabView : View {
     @Binding var selection: Int
     let tabs: [String]
     
-    let font = Font.body
-    let animation = Animation.spring()
-    let activeAccentColor = Color.blue
-    let inactiveAccentColor = Color.black.opacity(0.4)
-    let selectionBarColor = Color.blue
-    let inactiveTabColor = Color.clear
-    let activeTabColor = Color.clear
-    let selectionBarHeight = CGFloat(2)
-    let selectionBarBackgroundColor = Color.gray.opacity(0.2)
-    let selectionBarBackgroundHeight = CGFloat(1)
-
     public var body: some View {
         assert(tabs.count > 1, "Must have at least 2 tabs")
         
@@ -32,35 +21,34 @@ public struct SlidingTabView : View {
                     }) {
                         HStack {
                             Spacer()
-                            Text(tab).font(font)
+                            Text(tab)
+                                .scaledToFill()
+                                .minimumScaleFactor(0.5)
+                                .multilineTextAlignment(.center)
                             Spacer()
                         }
                     }
                     .buttonStyle(BorderlessButtonStyle()) // Prevent button from being triggered when anywhere on view is clicked.
                     .padding(.vertical, 16)
-                    .accentColor(
-                        isSelected(tabIdentifier: tab)
-                            ? activeAccentColor
-                            : colorScheme == .light ? inactiveAccentColor : Color.white)
-                    .background(
-                        isSelected(tabIdentifier: tab)
-                            ? activeTabColor
-                            : inactiveTabColor)
+                    .accentColor(isSelected(tabIdentifier: tab) ? .blue : colorScheme == .light ? Color.black.opacity(0.4) : .white)
+                    .background(Color.clear)
                 }
             }
+            
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     Rectangle()
-                        .fill(selectionBarColor)
-                        .frame(width: tabWidth(from: geometry.size.width), height: selectionBarHeight, alignment: .leading)
+                        .fill(Color.blue)
+                        .frame(width: tabWidth(from: geometry.size.width), height: CGFloat(2), alignment: .leading)
                         .offset(x: selectionBarXOffset(from: geometry.size.width), y: 0)
-                        .animation(animation)
+                        .animation(.spring())
                     Rectangle()
-                        .fill(selectionBarBackgroundColor)
-                        .frame(width: geometry.size.width, height: selectionBarBackgroundHeight, alignment: .leading)
-                }.fixedSize(horizontal: false, vertical: true)
-            }.fixedSize(horizontal: false, vertical: true)
-            
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(width: geometry.size.width, height: CGFloat(1), alignment: .leading)
+                }
+                .fixedSize(horizontal: false, vertical: true)
+            }
+            .fixedSize(horizontal: false, vertical: true)
         }
     }
     

@@ -26,16 +26,15 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     
     // Run code when FCM Token is retrieved.
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        globalObject.fcmTokenCounter += 1
-
-        // Update FCM since FCM changes and is fetched twice on app reinstall.
-        if globalObject.myId != "" &&
-            globalObject.fcmTokenCounter == 2 {
-            let postString =
-                "myId=\(globalObject.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "password=\(globalObject.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "fcm=\(fcmToken!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-            globalObject.runPhp(script: "updateFcm", postString: postString) { json in }
+        // Update FCM since FCM changes on app reinstall.
+        if globalObject.myId != "" {
+            globalObject.firebaseUser!.getIDToken(completion: { (token, error) in
+                let postString =
+                    "myId=\(globalObject.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                    "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                    "fcm=\(fcmToken!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+                globalObject.runPhp(script: "updateFcm", postString: postString) { json in }
+            })
         }
     }
     
@@ -45,9 +44,12 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         // Show notification as long as user is not currently chatting with the buddy.
         let userInfo = notification.request.content.userInfo
         if userInfo["type"] == nil ||
-            (userInfo["type"] as! String == "chat" &&
-            userInfo["myId"] as! String != globalObject.chatBuddyId) ||
-            (userInfo["type"] as! String == "byte") {
+            userInfo["type"] as! String == "byte like" ||
+            userInfo["type"] as! String == "comment like" ||
+            userInfo["type"] as! String == "byte comment" ||
+            userInfo["type"] as! String == "comment reply" ||
+            (userInfo["type"] as! String == "message" &&
+            userInfo["myId"] as! String != globalObject.chatBuddyId) {
             completionHandler([.alert, .badge, .sound])
         }
     }

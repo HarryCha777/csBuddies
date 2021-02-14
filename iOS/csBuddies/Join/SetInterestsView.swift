@@ -34,7 +34,7 @@ struct SetInterestsView: View {
             .listStyle(PlainListStyle())
             // Do not use .removeHeaderPadding() because of .listStyle(PlainListStyle()).
             
-            NavigationLinkEmpty(destination: SetProfileView(), isActive: $mustVisitSetProfile)
+            NavigationLinkEmpty(destination: SetUserProfileView(), isActive: $mustVisitSetProfile)
         }
         .navigationBarTitle("Interests", displayMode: .inline)
         .toolbar {

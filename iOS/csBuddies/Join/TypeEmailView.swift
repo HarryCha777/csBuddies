@@ -12,16 +12,18 @@ import Firebase
 struct TypeEmailView: View {
     @EnvironmentObject var global: Global
     
+    @State private var isVerifyingEmail = false
     @State private var mustVisitEmailConfirmation = false
-
+    
     @State var activeAlert: Alerts?
     enum Alerts: Identifiable {
         var id: Int { self.hashValue }
         case
             tooLongEmail,
-            notValidEmail
+            notValidEmail,
+            deletedEmail
     }
-
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -40,7 +42,8 @@ struct TypeEmailView: View {
                     Spacer()
                 }
                 .padding()
-
+                .disabledOnLoad(isLoading: isVerifyingEmail)
+                
                 NavigationLinkEmpty(destination: EmailConfirmationView(), isActive: $mustVisitEmailConfirmation)
             }
             .navigationBarTitle("Email")
@@ -54,12 +57,14 @@ struct TypeEmailView: View {
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Button(action: {
+                        isVerifyingEmail = true
+                        
                         if global.email.count > 320 {
                             activeAlert = .tooLongEmail
                         } else if !isValidEmail() {
                             activeAlert = .notValidEmail
                         } else {
-                            mustVisitEmailConfirmation = true
+                            checkDeletedEmail()
                         }
                     }) {
                         Text("Next")
@@ -68,11 +73,17 @@ struct TypeEmailView: View {
                 }
             }
             .alert(item: $activeAlert) { alert in
+                DispatchQueue.main.async {
+                    isVerifyingEmail = false
+                }
+                
                 switch alert {
                 case .tooLongEmail:
                     return Alert(title: Text("Too Long Email"), message: Text("Your email must be no longer than 320 characters."), dismissButton: .default(Text("OK")))
                 case .notValidEmail:
                     return Alert(title: Text("Invalid Email"), message: Text("Your email is not valid. Please double-check your spelling."), dismissButton: .default(Text("OK")))
+                case .deletedEmail:
+                    return Alert(title: Text("Deleted Email"), message: Text("This email is already used to create and delete an account. Please use another email."), dismissButton: .default(Text("OK")))
                 }
             }
         }
@@ -84,5 +95,19 @@ struct TypeEmailView: View {
         
         let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
         return emailPred.evaluate(with: global.email)
+    }
+    
+    func checkDeletedEmail() {
+        let postString =
+            "email=\(global.email.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+        global.runPhp(script: "isDeletedEmail", postString: postString) { json in
+            if json["isDeletedEmail"] as! Bool {
+                activeAlert = .deletedEmail
+                return
+            }
+            
+            isVerifyingEmail = false // Set isVerifyingEmail to false in case user presses back button on the next screen.
+            mustVisitEmailConfirmation = true
+        }
     }
 }

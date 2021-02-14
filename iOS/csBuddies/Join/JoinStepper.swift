@@ -45,15 +45,15 @@ struct InterestsCircleView: View {
     var body: some View {
         Circle()
             .frame(width: 30, height: 30)
-            .foregroundColor(step == 1 ? Color.blue : Color.green)
+            .foregroundColor(step == 1 ? .blue : .green)
             .overlay(
                 VStack {
                     if step == 1 {
                         Text("1")
-                            .foregroundColor(Color.white)
+                            .foregroundColor(.white)
                     } else {
                         Image(systemName: "checkmark")
-                            .foregroundColor(Color.white)
+                            .foregroundColor(.white)
                     }
                 }
             )
@@ -67,18 +67,18 @@ struct ProfileCircleView: View {
     var body: some View {
         Circle()
             .frame(width: 30, height: 30)
-            .foregroundColor(step == 1 ? lightGrayColor : step == 2 ? Color.blue : Color.green)
+            .foregroundColor(step == 1 ? lightGrayColor : step == 2 ? .blue : .green)
             .overlay(
                 VStack {
                     if step == 1 {
                         Text("2")
-                            .foregroundColor(Color.black)
+                            .foregroundColor(.black)
                     } else if step == 1 || step == 2 {
                         Text("2")
-                            .foregroundColor(Color.white)
+                            .foregroundColor(.white)
                     } else {
                         Image(systemName: "checkmark")
-                            .foregroundColor(Color.white)
+                            .foregroundColor(.white)
                     }
                 }
             )
@@ -92,10 +92,10 @@ struct IntroCircleView: View {
     var body: some View {
         Circle()
             .frame(width: 30, height: 30)
-            .foregroundColor(step < 3 ? lightGrayColor : Color.blue)
+            .foregroundColor(step < 3 ? lightGrayColor : .blue)
             .overlay(
                 Text("3")
-                    .foregroundColor(step < 3 ? Color.black : Color.white)
+                    .foregroundColor(step < 3 ? .black : .white)
             )
     }
 }

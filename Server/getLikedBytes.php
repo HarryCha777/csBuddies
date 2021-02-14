@@ -1,47 +1,86 @@
 <?php
-  include "globalFunctions.php";
-  include "/var/www/inc/dbinfo.inc";
+  require "globalFunctions.php";
   $pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
 
   $myId = $_POST["myId"];
+  $token = $_POST["token"];
   $userId = $_POST["userId"];
-  $bottomLikeTime = $_POST["bottomLikeTime"];
+  $bottomLastUpdatedAt = $_POST["bottomLastUpdatedAt"];
 
 	if (empty($myId)) {
 		$myId = $emptyUuid;
 	}
 
 	$isValid =
-		isExtantUserId($userId);
-		//isValidDate($bottomLikeTime, True);
+		($myId == $emptyUuid || isAuthenticated($myId, $token)) &&
+		isExtantUserId($userId) &&
+		isValidTime($bottomLastUpdatedAt);
 	if (!$isValid) {
   	$pdo = null;
 		die("Invalid");
 	}
 
-  $query = "select account.user_id, account.username, to_char(account.last_visit_time, 'yyyy-mm-dd hh24:mi:ss.ms'), byte.byte_id, byte.content, byte.likes, to_char(byte.post_time, 'yyyy-mm-dd hh24:mi:ss.ms'), case when byte_like_2.user_id = ? then true else false end, to_char(byte_like.like_time, 'yyyy-mm-dd hh24:mi:ss.ms') from byte left join byte_like on byte.byte_id = byte_like.byte_id left join byte_like as byte_like_2 on byte.byte_id = byte_like_2.byte_id and byte_like_2.user_id = ? left join account on byte.user_id = account.user_id where byte.is_invisible = false and byte.is_deleted = false and byte_like.is_liked = true and byte_like.user_id = ? and byte_like.like_time < ? order by byte_like.like_time desc limit 20;";
+  $query = "
+		select byte.byte_id,
+		       account.user_id,
+		       account.username,
+		       account.last_visited_at,
+		       byte.content,
+           coalesce(all_byte_like.likes, 0),
+           coalesce(comment.comments, 0),
+           case when my_byte_like.byte_like_id is null then false else true end,
+		       byte.posted_at,
+		       user_byte_like.last_updated_at
+		from   byte
+		       left join account
+		              on account.user_id = byte.user_id
+           left join (select byte_id,
+                             count(comment_id) as comments
+                      from   comment
+                      where  deleted_at is null
+                      group  by byte_id) as comment
+                  on comment.byte_id = byte.byte_id
+           left join (select byte_id,
+                             count(byte_like_id) as likes
+                      from   byte_like
+                      where  is_liked = true
+                      group  by byte_id) as all_byte_like
+                  on all_byte_like.byte_id = byte.byte_id
+		       left join byte_like as my_byte_like
+		              on my_byte_like.byte_id = byte.byte_id
+		                 and my_byte_like.is_liked = true
+		                 and my_byte_like.user_id = ?
+		       left join byte_like as user_byte_like
+		              on user_byte_like.byte_id = byte.byte_id
+		                 and user_byte_like.is_liked = true
+		                 and user_byte_like.user_id = ?
+		where  byte.deleted_at is null
+		       and user_byte_like.last_updated_at < ?
+		order  by user_byte_like.last_updated_at desc
+		limit  20;";
   $stmt = $pdo->prepare($query);
-  $stmt->execute(array($myId, $myId, $userId, $bottomLikeTime));
+  $stmt->execute(array($myId, $userId, $bottomLastUpdatedAt));
 
   $counter = 1; // PHP arrays start from 1
   $rows = array();
   while($row = $stmt->fetch()) {
     $rows[$counter++] = array(
-      "userId" => $row[0],
-      "username" => $row[1],
-      "lastVisitTime" => $row[2],
-      "byteId" => $row[3],
+      "byteId" => $row[0],
+      "userId" => $row[1],
+      "username" => $row[2],
+      "lastVisitedAt" => $row[3],
       "content" => $row[4],
       "likes" => $row[5],
-      "postTime" => $row[6],
+      "comments" => $row[6],
       "isLiked" => $row[7],
+      "postedAt" => $row[8],
     );
 
-		$bottomLikeTime = $row[8];
+		$bottomLastUpdatedAt = $row[9];
   }
 
   $rows[$counter++] = array(
-    "bottomLikeTime" => $bottomLikeTime,
+    "bottomLastUpdatedAt" => $bottomLastUpdatedAt,
   );
 
   echo json_encode($rows);

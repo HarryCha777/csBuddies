@@ -1,29 +1,28 @@
 <?php
-  include "globalFunctions.php";
-  include "/var/www/inc/dbinfo.inc";
+  require "globalFunctions.php";
   $pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
 
   $myId = $_POST["myId"];
-  $password = $_POST["password"];
+  $token = $_POST["token"];
   $byteId = $_POST["byteId"];
 
 	$isValid =
-		isAuthenticated($myId, $password);
+		isAuthenticated($myId, $token) &&
 		isExtantByteId($byteId);
 	if (!$isValid) {
   	$pdo = null;
 		die("Invalid");
 	}
 
-  $query = "select count(byte_id) from byte where is_deleted = false and byte_id = ? limit 1;";
+  $query = "select count(byte_id) = 0 from byte where deleted_at is null and byte_id = ? limit 1;";
   $stmt = $pdo->prepare($query);
   $stmt->execute(array($byteId));
 
   $row = $stmt->fetch();
-	$hasAlreadyDeleted = $row[0] == 0;
+	$hasAlreadyDeleted = $row[0];
 
 	if (!$hasAlreadyDeleted) {
-  	$query = "update byte set is_deleted = true where byte_id = ?;";
+  	$query = "update byte set deleted_at = current_timestamp where byte_id = ?;";
   	$stmt = $pdo->prepare($query);
   	$stmt->execute(array($byteId));
 	}

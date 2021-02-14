@@ -189,7 +189,7 @@ static NSString* const BytesGADTBlue = @"#5C84F0";
 
 /// Styles the Ad Badge according to best practices.
 - (void)styleAdBadge {
-    /*_adBadge.layer.borderColor = _adBadge.textColor.CGColor;
+    /*_adBadge.layer.borderColor = _adBadge.textCGColor;
      _adBadge.layer.borderWidth = 1.0;
      _adBadge.layer.cornerRadius = 3.0;*/
 }

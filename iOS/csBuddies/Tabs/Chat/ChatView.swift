@@ -11,14 +11,15 @@ import SwiftUI
 struct ChatView: View {
     @EnvironmentObject var global: Global
 
-    @State private var hasRunOnAppear = false
-    @State private var isRefreshing = false
+    @State private var mustGetChatIsOnline = true
+    @State private var chatRoomIndex = 0
     
     @State var activeAlert: Alerts?
     enum Alerts: Identifiable {
         var id: Int { self.hashValue }
         case
-            prepermission
+            prepermission,
+            clear
     }
     
     var body: some View {
@@ -30,7 +31,7 @@ struct ChatView: View {
                     bottomView: AnyView(Button(action: {
                         global.activeRootView = .join
                     }) {
-                        global.blueButton(title: "Get Magic Link")
+                        ColoredButton(title: "Get Magic Link")
                     }))
             } else {
                 VStack {
@@ -42,12 +43,12 @@ struct ChatView: View {
                                 AnyView(Button(action: {
                                     activeAlert = .prepermission
                                 }) {
-                                    global.blueButton(title: "Turn on Notification")
+                                    ColoredButton(title: "Turn on Notification")
                                 }))
                     } else {
                         List {
-                            ForEach(global.chatData.sorted(by: { min($0.value.messages.count, $1.value.messages.count) == 0 ? false : $0.value.messages.last!.sendTime > $1.value.messages.last!.sendTime }), id: \.key) { key, value in
-                                ChatRoomPreviewView(buddyId: key, buddyUsername: global.chatData[key]!.username, isOnline: global.chatData[key]!.isOnline)
+                            ForEach(global.chatData.sorted(by: { $0.value.messages.last!.sentAt > $1.value.messages.last!.sentAt }), id: \.key) { key, value in
+                                ChatRoomPreviewView(chatRoomPreviewData: ChatRoomPreviewData(buddyId: key, buddyUsername: global.chatData[key]!.username, lastVisitedAt: global.chatData[key]!.lastVisitedAt))
                             }
                             .onDelete(perform: deleteChatRoom)
 
@@ -60,19 +61,12 @@ struct ChatView: View {
                             }
                         }
                         .listStyle(InsetGroupedListStyle())
-                        .pullToRefresh(isShowing: $isRefreshing) {
+                        .refresh(isRefreshing: $mustGetChatIsOnline, isRefreshingBool: mustGetChatIsOnline) {
                             getChatIsOnline()
                         }
                         .toolbar {
                             ToolbarItem(placement: .primaryAction) {
                                 EditButton()
-                            }
-                        }
-                        .onAppear {
-                            // Code below may prevent NotificationView from working in Chat tab, so fix it.
-                            if !hasRunOnAppear && global.myId != "" {
-                                hasRunOnAppear = true
-                                getChatIsOnline()
                             }
                         }
                     }
@@ -89,43 +83,46 @@ struct ChatView: View {
                       secondaryButton: .default(Text("Notify Me"), action: {
                         global.askNotification()
                       }))
+            case .clear:
+                return Alert(title: Text("Are you sure?"), message: Text("You cannot undo this action."), primaryButton: .default(Text("Cancel")
+                ), secondaryButton: .destructive(Text("Clear"), action: {
+                    let buddyId = global.chatData.sorted(by: { $0.value.messages.last!.sentAt > $1.value.messages.last!.sentAt })[chatRoomIndex].key
+                    global.chatData[buddyId] = nil
+                    global.updateBadges()
+                    
+                    global.confirmationText = "Cleared"
+                }))
             }
         }
     }
     
     func deleteChatRoom(at offsets: IndexSet) {
-        let buddyId = global.chatData.sorted(by: { $0.value.messages.last!.sendTime > $1.value.messages.last!.sendTime })[offsets.first!].key
-        global.chatData[buddyId] = nil
-        
-        global.updateBadges()
-        DispatchQueue.main.async { // Prevent error on swipe to delete: Simultaneous accesses to 0x10b1af298, but modification requires exclusive access.
-            global.confirmationText = "Cleared"
-        }
+        chatRoomIndex = offsets.first!
+        activeAlert = .clear
     }
     
     func getChatIsOnline() {
-        // Below is a redundant call since the chat rooms may have been deleted.
-        let postString =
-            "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "password=\(global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-        global.runPhp(script: "getChatIsOnline", postString: postString) { json in
-            if json.count > 0 {
-                for i in 1...json.count {
-                    let row = json[String(i)] as! NSDictionary
-                    let buddyId = row["buddyId"] as! String
-                    let isOnline = global.isOnline(lastVisitTimeAny: row["lastVisitTime"])
-                    if global.chatData[buddyId] != nil {
-                        global.chatData[buddyId]!.isOnline = isOnline
+        if global.myId == "" {
+            return
+        }
+        
+        // Below is a .redundant call since the chat rooms may have been deleted.
+        global.firebaseUser!.getIDToken(completion: { (token, error) in
+            let postString =
+                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+            global.runPhp(script: "getChatIsOnline", postString: postString) { json in
+                if json.count > 0 {
+                    for i in 1...json.count {
+                        let row = json[String(i)] as! NSDictionary
+                        let buddyId = row["buddyId"] as! String
+                        if global.chatData[buddyId] != nil {
+                            global.chatData[buddyId]!.lastVisitedAt = (row["lastVisitedAt"] as! String).toDate()
+                        }
                     }
                 }
+                mustGetChatIsOnline = false
             }
-            isRefreshing = false
-        }
-    }
-}
-
-struct ChatView_Previews: PreviewProvider {
-    static var previews: some View {
-        ChatView()
+        })
     }
 }

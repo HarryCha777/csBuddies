@@ -1,5 +1,5 @@
 //
-//  SetProfileView.swift
+//  SetUserProfileView.swift
 //  csBuddies
 //
 //  Created by Harry Cha on 5/16/20.
@@ -9,7 +9,7 @@
 import SwiftUI
 import Firebase
 
-struct SetProfileView: View {
+struct SetUserProfileView: View {
     @EnvironmentObject var global: Global
 
     @State private var mustVisitTypeIntro = false
@@ -210,9 +210,9 @@ struct SetProfileView: View {
     }
 }
 
-struct SetProfileView_Previews: PreviewProvider {
+struct SetUserProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        SetProfileView()
+        SetUserProfileView()
             .environmentObject(globalObject)
     }
 }

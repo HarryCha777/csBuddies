@@ -1,48 +1,47 @@
 <?php
-  include "globalFunctions.php";
-  include "/var/www/inc/dbinfo.inc";
-	$pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
+  require "globalFunctions.php";
+  $pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
 
   $myId = $_POST["myId"];
-  $password = $_POST["password"];
+  $token = $_POST["token"];
   $content = $_POST["content"];
 
 	$isValid =
-		isAuthenticated($myId, $password) &&
+		isAuthenticated($myId, $token) &&
 		isValidString($content, 1, 256);
 	if (!$isValid) {
   	$pdo = null;
 		die("Invalid");
 	}
 
-  $query = "select last_post_time, bytes_today from account where user_id = ? limit 1;";
+  $query = "select count(byte_id) from byte where user_id = ? and date(posted_at) = current_date limit 1;";
   $stmt = $pdo->prepare($query);
   $stmt->execute(array($myId));
 
   $row = $stmt->fetch();
-  $lastPostTime = $row[0];
-  $bytesToday = $row[1];
+  $dailyBytes = $row[0];
 
-	if (gmdate("Y-m-d") == date("Y-m-d", strtotime($lastPostTime))) {
-		if ($bytesToday < 50) {
-  		$query = "update account set bytes_today = bytes_today + 1 where user_id = ?;";
-  		$stmt = $pdo->prepare($query);
-  		$stmt->execute(array($myId));
-		} else {
-    		$return = array("canMakeByte" => False);
-  			echo json_encode($return);
-				$pdo = null;
-				exit;
-		}
-	} else {
-  	$query = "update account set bytes_today = 1, last_post_time = current_timestamp where user_id = ?;";
-  	$stmt = $pdo->prepare($query);
-  	$stmt->execute(array($myId));
+	if ($dailyBytes >= 50) {
+   		$return = array(
+				"dailyLimit" => 50,
+				"isTooMany" => True,
+			);
+  		echo json_encode($return);
+			$pdo = null;
+			exit;
 	}
 
-  $query = "insert into byte (user_id, content, likes, post_time, is_deleted) values (?, ?, 0, current_timestamp, false);";
+  $query = "insert into byte (user_id, content) values (?, ?) returning byte_id;";
   $stmt = $pdo->prepare($query);
   $stmt->execute(array($myId, $content));
+
+  $row = $stmt->fetch();
+  $byteId = $row[0];
+
+  $return = array(
+    "byteId" => $byteId
+  );
+  echo json_encode($return);
 
   $pdo = null;
 ?>

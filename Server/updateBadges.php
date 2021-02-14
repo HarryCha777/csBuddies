@@ -1,14 +1,13 @@
 <?php
-  include "globalFunctions.php";
-  include "/var/www/inc/dbinfo.inc";
+  require "globalFunctions.php";
   $pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
 
   $myId = $_POST["myId"];
-  $password = $_POST["password"];
+  $token = $_POST["token"];
   $badges = $_POST["badges"];
 
 	$isValid =
-		isAuthenticated($myId, $password) &&
+		isAuthenticated($myId, $token) &&
 		isValidInt($badges, 0, 30000);
 	if (!$isValid) {
   	$pdo = null;

@@ -14,16 +14,18 @@ struct ProfileEditView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.presentationMode) var presentation
     
+    @Binding var mustUpdateProfile: Bool
+    
     private let introExample =
         "Example:\n" +
-            "Hello everybody! My name's Bob.\n" +
-            "I'm a college student studying Computer Science in the US.\n\n" +
-            "My favorite programming language is C#, and I use it to program video games on Unity3D.\n" +
-            "You can check out some of my games on my GitHub profile.\n" +
-            "Thanks for reading!"
-
+        "Hello everybody! My name's Bob.\n" +
+        "I'm a college student studying Computer Science in the US.\n\n" +
+        "My favorite programming language is C#, and I use it to program video games on Unity3D.\n" +
+        "You can check out some of my games on my GitHub profile.\n" +
+        "Thanks for reading!"
+    
     @State private var isUpdating = false
-
+    
     @State var activeAlert: Alerts?
     enum Alerts: Identifiable {
         var id: Int { self.hashValue }
@@ -43,7 +45,7 @@ struct ProfileEditView: View {
             blankIntro,
             tooLongIntro
     }
-
+    
     @State var activeSheet: Sheets?
     enum Sheets: Identifiable {
         var id: Int { self.hashValue }
@@ -52,203 +54,179 @@ struct ProfileEditView: View {
     }
     
     var body: some View {
-        ZStack {
-            List {
-                Section(header: Text("Image")) {
-                    Button(action: {
-                        activeSheet = .imagePicker
-                    }) {
-                        HStack {
-                            Spacer()
-                            SmallImageView(userId: global.myId, isOnline: false, size: 75, myImage: global.newSmallImage)
-                            Spacer()
-                        }
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-            
-                Section(header: Text("Gender")) {
-                    Picker("", selection: $global.newGenderIndex) {
-                        ForEach(global.genderOptions.indices) { index in
-                            if index != global.genderOptions.count - 1 {
-                                Text(global.genderOptions[index])
-                            }
-                        }
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                    .disabled(global.newGenderIndex == global.genderOptions.count - 1)
-            
-                    Button(action: {
-                        if global.newGenderIndex == global.genderOptions.count - 1 {
-                            global.newGenderIndex = global.genderOptions.count - 2
-                        } else {
-                            global.newGenderIndex = global.genderOptions.count - 1
-                            activeAlert = .privateGender
-                        }
-                    }) {
-                        HStack {
-                            Text("I prefer not to say.")
-                            Spacer()
-                            if global.newGenderIndex == global.genderOptions.count - 1 {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.blue)
-                                        .frame(width: 20, height: 20)
-                                    Circle()
-                                        .fill(Color.white)
-                                        .frame(width: 8, height: 8)
-                                }
-                            } else {
-                                Circle()
-                                    .fill(Color.white)
-                                    .frame(width: 20, height: 20)
-                                    .overlay(Circle().stroke(Color.gray, lineWidth: 1))
-                            }
-                        }
-                        .background(Color.black.opacity(0.001)) // Expand button's tappable area to empty spaces.
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-
-                Section(header: Text("Birthday")) {
-                    Text("This is used to calculate your age.\nIt won't be shown to anyone.")
-            
-                    DatePicker("Date Label", selection: $global.newBirthday, in: ...global.getUtcTime(), displayedComponents: .date)
-                        .labelsHidden()
-                        .disabled(global.newBirthday.toString()[0] == "0")
-
-                    Button(action: {
-                        if global.newBirthday.toString()[0] == "0" {
-                            global.newBirthday = global.getUtcTime()
-                        } else {
-                            var dateComponents = DateComponents()
-                            dateComponents.year = 0
-                            global.newBirthday = Calendar.current.date(from: dateComponents)!
-                            activeAlert = .privateBirthday
-                        }
-                    }) {
-                        HStack {
-                            Text("I prefer not to say.")
-                            Spacer()
-                            if global.newBirthday.toString()[0] == "0" {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.blue)
-                                        .frame(width: 20, height: 20)
-                                    Circle()
-                                        .fill(Color.white)
-                                        .frame(width: 8, height: 8)
-                                }
-                            } else {
-                                Circle()
-                                    .fill(Color.white)
-                                    .frame(width: 20, height: 20)
-                                    .overlay(Circle().stroke(Color.gray, lineWidth: 1))
-                            }
-                        }
-                        .background(Color.black.opacity(0.001)) // Expand button's tappable area to empty spaces.
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-            
-                Section(header: Text("Country")) {
-                    Picker("Where are you from?", selection: $global.newCountryIndex) {
-                        ForEach(global.countryOptions.indices) { index in
-                            Text(global.countryOptions[index])
-                        }
-                    }
-                }
-            
-                Section(header: Text("Self-Introduction")) {
-                    VStack {
-                        BetterTextEditor(placeholder: introExample, text: $global.newIntro)
+        List {
+            Section(header: Text("Image")) {
+                Button(action: {
+                    activeSheet = .imagePicker
+                }) {
+                    HStack {
                         Spacer()
-                        HStack {
-                            Spacer()
-                            Text("\(global.newIntro.count)/256")
-                                .padding()
-                                .foregroundColor(global.newIntro.count > 256 ? Color.red : colorScheme == .light ? Color.black : Color.white)
+                        SmallImageView(userId: global.myId, isOnline: false, size: 75, isUpdating: true)
+                        Spacer()
+                    }
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            
+            Section(header: Text("Gender")) {
+                Picker("", selection: $global.newGenderIndex) {
+                    ForEach(global.genderOptions.indices) { index in
+                        if index != global.genderOptions.count - 1 {
+                            Text(global.genderOptions[index])
                         }
                     }
                 }
-            
-                Section(header: Text("Optional")) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("GitHub")
-                        HStack(spacing: 0) {
-                            Text("github.com/")
-                            TextField("Username", text: $global.newGitHub)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .autocapitalization(.none)
-                        }
+                .pickerStyle(SegmentedPickerStyle())
+                .disabled(global.newGenderIndex == global.genderOptions.count - 1)
+                
+                Button(action: {
+                    if global.newGenderIndex == global.genderOptions.count - 1 {
+                        global.newGenderIndex = global.genderOptions.count - 2
+                    } else {
+                        global.newGenderIndex = global.genderOptions.count - 1
+                        activeAlert = .privateGender
                     }
-            
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("LinkedIn")
-                        HStack(spacing: 0) {
-                            Text("linkedin.com/in/")
-                            TextField("Profile URL", text: $global.newLinkedIn)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .autocapitalization(.none)
-                        }
-                    }
-                }
-            
-                Section(header: Text("Interests")) {
-                    NavigationLink(
-                        destination:
-                            List {
-                                InterestsView(interests: $global.newInterests)
-                                    .environmentObject(globalObject)
+                }) {
+                    HStack {
+                        Text("I prefer not to say.")
+                        Spacer()
+                        if global.newGenderIndex == global.genderOptions.count - 1 {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.blue)
+                                    .frame(width: 20, height: 20)
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 8, height: 8)
                             }
-                            .listStyle(PlainListStyle())
-                            .navigationBarTitle("Edit Interests", displayMode: .inline)
-                    ) {
-                        if global.newInterests.count == 0 {
-                            Text("Interests")
                         } else {
-                            TagsView(
-                                data: global.newInterests
-                            ) { interest in
-                                InterestsButtonDisabledView(interest: interest, interests: global.newInterests)
-                            }
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 20, height: 20)
+                                .overlay(Circle().stroke(Color.gray, lineWidth: 1))
                         }
                     }
-            
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("Others")
-                        TextField("Ex: Design, Desktop, Graphics, etc", text: $global.newOtherInterests)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                    }
+                    .background(Color.black.opacity(0.001)) // Expand button's tappable area to empty spaces.
                 }
+                .buttonStyle(PlainButtonStyle())
+            }
             
-                Section(header: Text("Preview")) {
-                    Text("Preview depends on the screen width.")
-                    BuddiesPreviewView(userPreviewData: UserPreviewData(
-                                            userId: global.myId,
-                                            username: global.username,
-                                            birthday: global.newBirthday,
-                                            genderIndex: global.newGenderIndex,
-                                            intro: global.newIntro,
-                                            hasGitHub: global.newGitHub.count != 0,
-                                            hasLinkedIn: global.newLinkedIn.count != 0,
-                                            isOnline: true,
-                                            lastVisitTime: global.getUtcTime()),
-                                    myImage: global.newSmallImage)
+            Section(header: Text("Birthday")) {
+                Text("This is used to calculate your age.\nIt won't be shown to anyone.")
+                
+                DatePicker("Date Label", selection: $global.newBirthday, in: ...global.getUtcTime(), displayedComponents: .date)
+                    .labelsHidden()
+                    .disabled(global.newBirthday.toString()[0] == "0")
+                
+                Button(action: {
+                    if global.newBirthday.toString()[0] == "0" {
+                        global.newBirthday = global.getUtcTime()
+                    } else {
+                        var dateComponents = DateComponents()
+                        dateComponents.year = 0
+                        global.newBirthday = Calendar.current.date(from: dateComponents)!
+                        activeAlert = .privateBirthday
+                    }
+                }) {
+                    HStack {
+                        Text("I prefer not to say.")
+                        Spacer()
+                        if global.newBirthday.toString()[0] == "0" {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.blue)
+                                    .frame(width: 20, height: 20)
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 8, height: 8)
+                            }
+                        } else {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 20, height: 20)
+                                .overlay(Circle().stroke(Color.gray, lineWidth: 1))
+                        }
+                    }
+                    .background(Color.black.opacity(0.001)) // Expand button's tappable area to empty spaces.
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            
+            Section(header: Text("Country")) {
+                Picker("Where are you from?", selection: $global.newCountryIndex) {
+                    ForEach(global.countryOptions.indices) { index in
+                        Text(global.countryOptions[index])
+                    }
                 }
             }
-            .listStyle(InsetGroupedListStyle())
-            .disabled(isUpdating)
-            .opacity(isUpdating ? 0.3 : 1)
             
-            if isUpdating {
-                LottieView(name: "load", size: 300, mustLoop: true)
+            Section(header: Text("Self-Introduction")) {
+                VStack {
+                    BetterTextEditor(placeholder: introExample, text: $global.newIntro)
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Text("\(global.newIntro.count)/256")
+                            .padding()
+                            .foregroundColor(global.newIntro.count > 256 ? .red : colorScheme == .light ? .black : .white)
+                    }
+                }
+            }
+            
+            Section(header: Text("Optional")) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("GitHub")
+                    HStack(spacing: 0) {
+                        Text("github.com/")
+                        TextField("Username", text: $global.newGitHub)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .autocapitalization(.none)
+                    }
+                }
+                
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("LinkedIn")
+                    HStack(spacing: 0) {
+                        Text("linkedin.com/in/")
+                        TextField("Profile URL", text: $global.newLinkedIn)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .autocapitalization(.none)
+                    }
+                }
+            }
+            
+            Section(header: Text("Interests")) {
+                NavigationLink(
+                    destination:
+                        List {
+                            InterestsView(interests: $global.newInterests)
+                                .environmentObject(globalObject)
+                        }
+                        .listStyle(PlainListStyle())
+                        .navigationBarTitle("Edit Interests", displayMode: .inline)
+                ) {
+                    if global.newInterests.count == 0 {
+                        Text("Interests")
+                    } else {
+                        TagsView(data: global.newInterests) { interest in
+                            InterestsButtonDisabledView(interest: interest, interests: global.newInterests)
+                        }
+                    }
+                }
+                
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Others")
+                    TextField("Ex: Design, Desktop, Graphics, etc", text: $global.newOtherInterests)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                }
             }
         }
+        .listStyle(InsetGroupedListStyle())
+        .disabledOnLoad(isLoading: isUpdating)
         .navigationBarTitle("Edit Profile", displayMode: .inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                global.backButton(presentation: presentation, title: "Cancel")
+                BackButton(title: "Cancel", presentation: presentation)
             }
             ToolbarItem(placement: .primaryAction) {
                 Button(action: {
@@ -259,7 +237,7 @@ struct ProfileEditView: View {
                     } else if global.newBirthday.toAge() < 13 {
                         activeAlert = .mustBeAtLeast13
                     } else if global.newBirthday.toAge() > 130 &&
-                        global.newBirthday.toString()[0] != "0" {
+                                global.newBirthday.toString()[0] != "0" {
                         activeAlert = .mustBeAtMost130
                     } else if global.newOtherInterests.count > 100 {
                         activeAlert = .tooLongOtherInterests
@@ -337,7 +315,7 @@ struct ProfileEditView: View {
             case .tooLongIntro:
                 return Alert(title: Text("Your intro is too long."), message: Text("You currently typed \(global.newIntro.count) characters. Please type no more than 256 characters."), dismissButton: .default(Text("OK")))
             }
-    }
+        }
     }
     
     func didNotEdit() -> Bool {
@@ -355,29 +333,32 @@ struct ProfileEditView: View {
         }
         return false
     }
-
+    
     func updateUser() {
-        let postString =
-            "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "password=\(global.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "smallImage=\(global.newSmallImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "bigImage=\(global.newBigImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "gender=\(global.newGenderIndex)&" +
-            "birthday=\(global.newBirthday.toString(toFormat: "yyyy-MM-dd"))&" +
-            "country=\(global.newCountryIndex)&" +
-            "interests=\(global.newInterests.toInterestsString().addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "otherInterests=\(global.newOtherInterests.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "intro=\(global.newIntro.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "gitHub=\(global.newGitHub.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "linkedIn=\(global.newLinkedIn.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-        global.runPhp(script: "updateUser", postString: postString) { json in
-            updateGlobalProfile()
-            
-            presentation.wrappedValue.dismiss()
-            global.confirmationText = "Updated"
-        }
+        global.firebaseUser!.getIDToken(completion: { (token, error) in
+            let postString =
+                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "smallImage=\(global.newSmallImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "bigImage=\(global.newBigImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "gender=\(global.newGenderIndex)&" +
+                "birthday=\(global.newBirthday.toString(toFormat: "yyyy-MM-dd"))&" +
+                "country=\(global.newCountryIndex)&" +
+                "interests=\(global.newInterests.toInterestsString().addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "otherInterests=\(global.newOtherInterests.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "intro=\(global.newIntro.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "gitHub=\(global.newGitHub.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "linkedIn=\(global.newLinkedIn.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+            global.runPhp(script: "updateUser", postString: postString) { json in
+                updateGlobalProfile()
+                
+                mustUpdateProfile = true
+                presentation.wrappedValue.dismiss()
+                global.confirmationText = "Updated"
+            }
+        })
     }
-
+    
     func updateGlobalProfile() {
         global.smallImage = global.newSmallImage
         global.bigImage = global.newBigImage

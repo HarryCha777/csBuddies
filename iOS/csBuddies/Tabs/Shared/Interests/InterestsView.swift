@@ -15,27 +15,21 @@ struct InterestsView: View {
 
     var body: some View {
         Section(header: Text("Languages")) {
-            TagsView(
-                data: global.interestOptions[0 ..< 23]
-            ) { interest in
+            TagsView(data: global.interestOptions[0 ..< 23]) { interest in
                 InterestsButtonEnabledView(interest: interest, interests: $interests)
                     .environmentObject(globalObject)
             }
         }
         
         Section(header: Text("Tools")) {
-            TagsView(
-                data: global.interestOptions[23 ..< 23 + 16]
-            ) { interest in
+            TagsView(data: global.interestOptions[23 ..< 23 + 16]) { interest in
                 InterestsButtonEnabledView(interest: interest, interests: $interests)
                     .environmentObject(globalObject)
             }
         }
         
         Section(header: Text("Subjects")) {
-            TagsView(
-                data: global.interestOptions[23 + 16 ..< global.interestOptions.count]
-            ) { interest in
+            TagsView(data: global.interestOptions[23 + 16 ..< global.interestOptions.count]) { interest in
                 InterestsButtonEnabledView(interest: interest, interests: $interests)
                     .environmentObject(globalObject)
             }

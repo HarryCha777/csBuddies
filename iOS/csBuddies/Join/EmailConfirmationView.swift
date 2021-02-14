@@ -30,17 +30,17 @@ struct EmailConfirmationView: View {
         VStack {
             switch activeEmailConfirmationView {
             case .sendingEmail:
-                sendingEmail()
+                sendingEmail
             case .sendingEmailFailed:
-                sendingEmailFailed()
+                sendingEmailFailed
             case .sendingEmailSucceeded:
-                sendingEmailSucceeded()
+                sendingEmailSucceeded
             case .signingUp:
-                signingUp()
+                signingUp
             case .signingUpFailed:
-                signingUpFailed()
+                signingUpFailed
             case .signingUpSucceededNewUser:
-                signingUpSucceededNewUser()
+                signingUpSucceededNewUser
             }
         }
         .onOpenURL(perform: { url in
@@ -59,7 +59,7 @@ struct EmailConfirmationView: View {
         }
     }
     
-    func sendingEmail() -> some View {
+    var sendingEmail: some View {
         SimpleView(
             lottieView: LottieView(name: "sendEmail", size: 400, speed: 2, mustLoop: true),
             subtitle: "Emailing you a magic link...")
@@ -68,7 +68,7 @@ struct EmailConfirmationView: View {
             }
     }
     
-    func sendingEmailFailed() -> some View {
+    var sendingEmailFailed: some View {
         SimpleView(
             lottieView: LottieView(name: "error", size: 200),
             title: "Oops, we could not email you.",
@@ -77,21 +77,21 @@ struct EmailConfirmationView: View {
                 activeEmailConfirmationView = .sendingEmail
                 sendEmail()
             }) {
-                global.blueButton(title: "Try Sending Email Again")
+                ColoredButton(title: "Try Sending Email Again")
             }))
     }
     
-    func sendingEmailSucceeded() -> some View {
+    var sendingEmailSucceeded: some View {
         SimpleView(
             lottieView: LottieView(name: "openEmail", size: 400, padding: -100),
             title: "We emailed you the magic link!",
             subtitle: "Please check your email and tap the link we sent to \(global.email). You may need to check your spam folder.",
             bottomView: AnyView(Link(destination: URL(string: "message://")!) {
-                global.blueButton(title: "Open Email App")
+                ColoredButton(title: "Open Email App")
             }))
     }
 
-    func signingUp() -> some View {
+    var signingUp: some View {
         SimpleView(
             lottieView: LottieView(name: "load", size: 300, mustLoop: true),
             subtitle: "Signing you up...")
@@ -100,7 +100,7 @@ struct EmailConfirmationView: View {
             }
     }
     
-    func signingUpFailed() -> some View {
+    var signingUpFailed: some View {
         SimpleView(
             lottieView: LottieView(name: "error", size: 200),
             title: "Oops, we could not sign you up.",
@@ -109,11 +109,11 @@ struct EmailConfirmationView: View {
                 activeEmailConfirmationView = .sendingEmail
                 sendEmail()
             }) {
-                global.blueButton(title: "Send Email Again")
+                ColoredButton(title: "Send Email Again")
             }))
     }
     
-    func signingUpSucceededNewUser() -> some View {
+    var signingUpSucceededNewUser: some View {
         SimpleView(
             lottieView: LottieView(name: "checkMark", size: 300),
             title: "Awesome, you are signed up!",
@@ -145,13 +145,16 @@ struct EmailConfirmationView: View {
                 if error != nil {
                     activeEmailConfirmationView = .signingUpFailed
                 } else {
-                    let displayName = Auth.auth().currentUser?.displayName ?? ""
-                    if displayName == "" { // Check if user is a new user.
-                        activeEmailConfirmationView = .signingUpSucceededNewUser
-                    } else { // Check if user is a returning user.
+                    global.firebaseUser = Auth.auth().currentUser
+                    global.firebaseUser!.getIDTokenResult(completion: { (result, error) in
+                        if result!.claims["userId"] as? String == nil { // User verified email but didn't make a profile.
+                            activeEmailConfirmationView = .signingUpSucceededNewUser
+                            return
+                        }
+                        
                         global.hasSignedIn = true
                         global.activeRootView = .loading
-                    }
+                    })
                 }
             }
         } else {

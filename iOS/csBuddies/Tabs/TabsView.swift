@@ -14,74 +14,112 @@ struct TabsView: View {
     @ObservedObject private var keyboardDetector = KeyboardDetector()
     
     var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .bottomLeading) {
-                TabView(selection: $global.tabIndex) {
-                    NavigationView {
-                        BuddiesView()
+        ZStack {
+            GeometryReader { geometry in
+                ZStack(alignment: .bottomLeading) {
+                    TabView(selection: $global.tabIndex) {
+                        NavigationView {
+                            BuddiesView()
+                                .overlay(
+                                    VStack {
+                                        Spacer()
+                                        AnnouncementView()
+                                    }
+                                )
+                        }
+                        .navigationViewStyle(StackNavigationViewStyle())
+                        .tabItem {
+                            Image(systemName: "person.3")
+                                .font(.title)
+                            Text("Buddies")
+                        }
+                        .tag(0)
+                        
+                        NavigationView {
+                            BytesView()
+                        }
+                        .navigationViewStyle(StackNavigationViewStyle())
+                        .tabItem {
+                            Image(systemName: "pencil.circle")
+                                .font(.title)
+                            Text("Bytes")
+                        }
+                        .tag(1)
+                        
+                        NavigationView {
+                            ChatView()
+                        }
+                        .navigationViewStyle(StackNavigationViewStyle())
+                        .tabItem {
+                            Image(systemName: "text.bubble")
+                                .font(.title)
+                            Text("Chat")
+                        }
+                        .tag(2)
+                        
+                        NavigationView {
+                            ProfileView()
+                        }
+                        .navigationViewStyle(StackNavigationViewStyle())
+                        .tabItem {
+                            Image(systemName: "person")
+                                .font(.title)
+                            Text("Profile")
+                        }
+                        .tag(3)
                     }
-                    .navigationViewStyle(StackNavigationViewStyle())
-                    .tabItem {
-                        Image(systemName: "person.3")
-                            .font(.title)
-                        Text("Buddies")
-                    }
-                    .tag(0)
                     
-                    NavigationView {
-                        BytesView()
-                    }
-                    .navigationViewStyle(StackNavigationViewStyle())
-                    .tabItem {
-                        Image(systemName: "pencil.circle")
-                            .font(.title)
-                        Text("Bytes")
-                    }
-                    .tag(1)
-                    
-                    NavigationView {
-                        ChatView()
-                    }
-                    .navigationViewStyle(StackNavigationViewStyle())
-                    .tabItem {
-                        Image(systemName: "text.bubble")
-                            .font(.title)
-                        Text("Chat")
-                    }
-                    .tag(2)
-                    
-                    NavigationView {
-                        ProfileView()
-                    }
-                    .navigationViewStyle(StackNavigationViewStyle())
-                    .tabItem {
-                        Image(systemName: "person")
-                            .font(.title)
-                        Text("Profile")
-                    }
-                    .tag(3)
-                }
-                
-                if global.isKeyboardHidden &&
-                    global.getUnreadCounter() > 0 {
-                    ZStack {
-                        Circle()
-                            .foregroundColor(.red)
-                    
-                        if global.getUnreadCounter() <= 99 {
-                            Text("\(global.getUnreadCounter())")
-                                .foregroundColor(.white)
-                                .font(Font.system(size: 10))
-                        } else {
-                            Text("99+")
-                                .foregroundColor(.white)
-                                .font(Font.system(size: 10))
+                    if global.isKeyboardHidden {
+                        if global.getUnreadNotificationsCounter() > 0 {
+                            ZStack {
+                                Circle()
+                                    .foregroundColor(.red)
+                                
+                                if global.getUnreadNotificationsCounter() <= 99 {
+                                    Text("\(global.getUnreadNotificationsCounter())")
+                                        .foregroundColor(.white)
+                                        .font(Font.system(size: 10))
+                                } else {
+                                    Text("99+")
+                                        .foregroundColor(.white)
+                                        .font(Font.system(size: 10))
+                                }
+                            }
+                            .frame(width: 20, height: 20)
+                            // Offset x: (tab index * 2 - 1) * (geometry.size.width / (number of tabs * 2).
+                            .offset(x: (2 * 2 - 1) * (geometry.size.width / (4 * 2)), y: -30)
+                        }
+                        
+                        if global.getUnreadMessagesCounter() > 0 {
+                            ZStack {
+                                Circle()
+                                    .foregroundColor(.red)
+                                
+                                if global.getUnreadMessagesCounter() <= 99 {
+                                    Text("\(global.getUnreadMessagesCounter())")
+                                        .foregroundColor(.white)
+                                        .font(Font.system(size: 10))
+                                } else {
+                                    Text("99+")
+                                        .foregroundColor(.white)
+                                        .font(Font.system(size: 10))
+                                }
+                            }
+                            .frame(width: 20, height: 20)
+                            // Offset x: (tab index * 2 - 1) * (geometry.size.width / (number of tabs * 2).
+                            .offset(x: (3 * 2 - 1) * (geometry.size.width / (4 * 2)), y: -30)
                         }
                     }
-                    .frame(width: 20, height: 20)
-                    // Offset x: (tab index * 2 - 1) * (geometry.size.width / (number of tabs * 2).
-                    .offset(x: (3 * 2 - 1) * (geometry.size.width / (4 * 2)), y: -30)
                 }
+            }
+            .disabledOnLoad(isLoading: global.confirmationText != "", showLoading: false)
+            
+            ConfirmationView()
+        }
+        .alert(item: $global.activeAlert) { alert in
+            switch alert {
+            case .cannotBlockAdmin:
+                return Alert(title: Text("The User is an Admin"), message: Text("You cannot block an admin. For any questions or feedback, please contact us instead."), dismissButton: .default(Text("OK")))
             }
         }
     }

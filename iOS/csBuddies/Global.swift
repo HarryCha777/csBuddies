@@ -14,29 +14,33 @@ import TrueTime
 var globalObject = Global()
 
 class Global: ObservableObject {
-    // AppDelegate
-    @Published var fcmTokenCounter = 0
-    
     // AppView
     @Published var isOffline = false
+    
+    @Published var activeAlert: Alerts?
+    enum Alerts: Identifiable {
+        var id: Int { self.hashValue }
+        case
+            cannotBlockAdmin
+    }
 
     // LoadingView
     @Published var db = Firestore.firestore()
     @Published var webServerLink = ""
     @Published var referenceTime: ReferenceTime?
     @Published var activeRootView: RootViews = .loading
+    @Published var firebaseUser = Auth.auth().currentUser
     @Published var myId = ""
     @Published var isGlobalListenerSetUp = false
-    @Published var firstLaunchTime = Date() { didSet { saveUserData() } }
+    @Published var firstLaunchedAt = Date() { didSet { saveUserData() } }
     @Published var hasAskedReview = false { didSet { saveUserData() } }
     @Published var hasUserDataLoaded = false
     @Published var onlineTimeout = 60 * 3
     
     // WelcomeView
     @Published var hasSignedIn = false
-    @Published var mustSyncWithServer = false
-    @Published var isMessageUpdatesListenerSetUp = false
-    @Published var messageUpdatesListener: ListenerRegistration?
+    @Published var isAccountsListenerSetUp = false
+    @Published var accountsListener: ListenerRegistration?
 
     // MaintenanceView
     @Published var maintenanceText = ""
@@ -45,7 +49,7 @@ class Global: ObservableObject {
     @Published var updateText = ""
     
     // TypeEmailView
-    @Published var email = "" { didSet { saveUserData() } }
+    @Published var email = ""
     
     // SetInterestsView
     // Sort interestsOptions case insensitive for words like "iOS".
@@ -55,7 +59,7 @@ class Global: ObservableObject {
     @Published var interests = [String]() { didSet { saveUserData() } }
     @Published var otherInterests = "" { didSet { saveUserData() } }
 
-    // SetProfileView
+    // SetUserProfileView
     @Published var genderOptions = ["Male", "Female", "Other", "Private"]
     @Published var genderIndex = 0 { didSet { saveUserData() } }
     @Published var birthday = Date(timeIntervalSince1970: 946684800) { didSet { saveUserData() } } // Default birthday is 1/1/2000 12:00:00 AM UTC.
@@ -69,21 +73,21 @@ class Global: ObservableObject {
     @Published var smallImage = "" {
         didSet {
             saveUserData()
-            smallImageCaches.setObject(ImageCache(image: smallImage, lastCacheTime: getUtcTime()), forKey: myId as NSString)
+            smallImageCache.setObject(ImageCache(image: smallImage, lastCachedAt: getUtcTime()), forKey: myId as NSString)
         }
     }
     @Published var bigImage = "" {
         didSet {
             saveUserData()
-            bigImageCaches.setObject(ImageCache(image: bigImage, lastCacheTime: getUtcTime()), forKey: myId as NSString)
+            bigImageCache.setObject(ImageCache(image: bigImage, lastCachedAt: getUtcTime()), forKey: myId as NSString)
         }
     }
-    @Published var smallImageCaches = NSCache<NSString, ImageCache>()
-    @Published var bigImageCaches = NSCache<NSString, ImageCache>()
-    @Published var hasImageCachesUpdated = false
+    @Published var smallImageCache = NSCache<NSString, ImageCache>()
+    @Published var bigImageCache = NSCache<NSString, ImageCache>()
+    @Published var hasImageCacheUpdated = false
     @Published var intro = "" { didSet { saveUserData() } }
-    @Published var password = ""
     @Published var isPremium = false
+    @Published var isAdmin = false
     @Published var tabIndex = 0
     
     // TabsView
@@ -96,9 +100,10 @@ class Global: ObservableObject {
     @Published var announcementText = ""
     @Published var announcementLink = ""
     
-    // BuddiesProfileView
-    @Published var savedUsers = [UserRowData]() { didSet { saveUserData() } }
-    @Published var blocks = [UserRowData]() { didSet { saveUserData() } }
+    // UserView
+    @Published var userPreviews = [String: UserPreviewData]()
+    @Published var users = [String: UserData]()
+    @Published var blockedBuddyIds = [String]() { didSet { saveUserData() } }
 
     // BuddiesFilterView
     @Published var buddiesFilterGenderIndex = 0 { didSet { saveUserData() } }
@@ -116,39 +121,58 @@ class Global: ObservableObject {
     @Published var newBuddiesFilterSortIndex = 0
 
     // BytesView
-    @Published var savedBytes = [BytesPostData]() { didSet { saveUserData() } }
+    @Published var bytes = [String: ByteData]()
+    
+    // InboxView
+    @Published var inboxData = InboxData() {
+        didSet {
+            saveUserData()
+            UIApplication.shared.applicationIconBadgeNumber = self.getUnreadNotificationsCounter() + self.getUnreadMessagesCounter()
+        }
+    }
+    
+    // ByteWriteView
+    @Published var byteDraft = "" { didSet { saveUserData() } }
+    
+    // CommentView
+    @Published var comments = [String: CommentData]()
+    
+    // CommentWriteView
+    @Published var commentDraft = "" { didSet { saveUserData() } }
     
     // BytesFilterView
-    @Published var bytesFilterSortIndex = 1 { didSet { saveUserData() } }
-    @Published var bytesFilterTimeIndex = 0 { didSet { saveUserData() } }
-
-    @Published var newBytesFilterSortIndex = 1
-    @Published var newBytesFilterTimeIndex = 0
+    @Published var bytesFilterSortIndex = 0 { didSet { saveUserData() } }
     
-    // BytesWriteView
-    @Published var byteDraft = "" { didSet { saveUserData() } }
-
+    @Published var newBytesFilterSortIndex = 0 { didSet { saveUserData() } }
+    
     // ChatView
     @Published var hasAskedNotification = false { didSet { saveUserData() } }
-    @Published var lastReceivedChatTime = Date() { didSet { saveUserData() } }
-    
+
     @Published var chatBuddyId = ""
     @Published var chatBuddyUsername = ""
 
     @Published var chatData = [String: ChatRoomData]() {
         didSet {
             saveUserData()
-            UIApplication.shared.applicationIconBadgeNumber = self.getUnreadCounter()
+            UIApplication.shared.applicationIconBadgeNumber = self.getUnreadNotificationsCounter() + self.getUnreadMessagesCounter()
+            for buddyId in chatData.keys {
+                if chatData[buddyId]!.messages.count == 0 {
+                    chatData[buddyId] = nil
+                }
+            }
         }
     }
 
-    // ChatRoomInputView
+    // MessageInputView
     @Published var messageDrafts = [String: String]() { didSet { saveUserData() } }
 
-    // ProfileView
+    // UserProfileView
     @Published var bytesMade = 0 { didSet { saveUserData() } }
-    @Published var likesReceived = 0
-    @Published var likesGiven = 0 { didSet { saveUserData() } }
+    @Published var commentsMade = 0 { didSet { saveUserData() } }
+    @Published var byteLikesReceived = 0
+    @Published var commentLikesReceived = 0
+    @Published var byteLikesGiven = 0 { didSet { saveUserData() } }
+    @Published var commentLikesGiven = 0 { didSet { saveUserData() } }
 
     // ProfileEditView
     @Published var newSmallImage = ""
@@ -162,17 +186,16 @@ class Global: ObservableObject {
     @Published var newOtherInterests = ""
     @Published var newIntro = ""
     
-    // ProfileSettingsAccountView
-    @Published var hasByteNotification = true { didSet { updateNotifications() } }
-    @Published var hasChatNotification = true { didSet { updateNotifications() } }
-
+    // AccountView
+    @Published var notifyLikes = true { didSet { updateNotifications() } }
+    @Published var notifyComments = true { didSet { updateNotifications() } }
+    @Published var notifyMessages = true { didSet { updateNotifications() } }
+    
     // Global Functions
     func resetUserData() {
-        hasUserDataLoaded = false
         myId = ""
         email = ""
         username = ""
-        password = ""
         smallImage = ""
         bigImage = ""
         genderIndex = 0
@@ -183,17 +206,27 @@ class Global: ObservableObject {
         intro = ""
         gitHub = ""
         linkedIn = ""
-        byteDraft = ""
-        isPremium = false
         
-        savedUsers = [UserRowData]()
-        savedBytes = [BytesPostData]()
-        blocks = [UserRowData]()
+        notifyLikes = false
+        notifyComments = false
+        notifyMessages = false
+        bytesMade = 0
+        commentsMade = 0
+        byteLikesGiven = 0
+        commentLikesGiven = 0
+        blockedBuddyIds = [String]()
+        inboxData = InboxData()
         chatData = [String: ChatRoomData]()
+        
+        byteDraft = ""
+        commentDraft = ""
         messageDrafts = [String: String]()
         
-        messageUpdatesListener!.remove()
-        isMessageUpdatesListenerSetUp = false
+        isPremium = false
+        isAdmin = false
+        
+        accountsListener!.remove()
+        isAccountsListenerSetUp = false
     }
     
     func saveUserData() {
@@ -202,63 +235,66 @@ class Global: ObservableObject {
             return
         }
 
-        // Find user.
         let moc = PersistenceController.shared.container.viewContext
         let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
-        fetchRequest.sortDescriptors = []
-        let users = try! moc.fetch(fetchRequest)
+        let coreDataUsers = try! moc.fetch(fetchRequest)
+        let coreDataUser = coreDataUsers.count == 0 ? User(context: moc) : coreDataUsers[0]
+        
+        coreDataUser.username = username
+        coreDataUser.smallImage = smallImage
+        coreDataUser.bigImage = bigImage
+        coreDataUser.genderIndex = Int16(genderIndex)
+        coreDataUser.birthday = birthday
+        coreDataUser.countryIndex = Int16(countryIndex)
+        coreDataUser.interests = interests as NSObject
+        coreDataUser.otherInterests = otherInterests
+        coreDataUser.intro = intro
+        coreDataUser.gitHub = gitHub
+        coreDataUser.linkedIn = linkedIn
+        
+        coreDataUser.notifyLikes = notifyLikes
+        coreDataUser.notifyComments = notifyComments
+        coreDataUser.notifyMessages = notifyMessages
+        coreDataUser.bytesMade = Int16(bytesMade)
+        coreDataUser.commentsMade = Int16(commentsMade)
+        coreDataUser.byteLikesGiven = Int16(byteLikesGiven)
+        coreDataUser.commentLikesGiven = Int16(commentLikesGiven)
+        coreDataUser.blockedBuddyIds = blockedBuddyIds as NSObject
+        coreDataUser.inboxBinaryData = try? JSONEncoder().encode(inboxData)
+        coreDataUser.chatBinaryData = try? JSONEncoder().encode(chatData)
 
-        let index = users.firstIndex(where: { $0.myId == myId })
-        var user = User()
-        if index == nil {
-            user = User(context: moc)
-            user.myId = myId
-        } else {
-            user = users[index!]
-        }
-
-        // Save client data.
-        user.buddiesFilterGenderIndex = Int16(buddiesFilterGenderIndex)
-        user.buddiesFilterMinAge = Int16(buddiesFilterMinAge)
-        user.buddiesFilterMaxAge = Int16(buddiesFilterMaxAge)
-        user.buddiesFilterCountryIndex = Int16(buddiesFilterCountryIndex)
-        user.buddiesFilterInterests = buddiesFilterInterests as NSObject
-        user.buddiesFilterSortIndex = Int16(buddiesFilterSortIndex)
-        user.bytesFilterSortIndex = Int16(bytesFilterSortIndex)
-        user.bytesFilterTimeIndex = Int16(bytesFilterTimeIndex)
-        user.byteDraft = byteDraft
-        user.messageDrafts = messageDrafts as NSObject
-        user.firstLaunchTime = firstLaunchTime
-        user.hasAskedReview = hasAskedReview
-        user.hasAskedNotification = hasAskedNotification
-        user.hasByteNotification = hasByteNotification
-        user.hasChatNotification = hasChatNotification
-        user.savedUsersBinaryData = try? JSONEncoder().encode(savedUsers)
-        user.savedBytesBinaryData = try? JSONEncoder().encode(savedBytes)
-        user.chatBinaryData = try? JSONEncoder().encode(chatData)
-
-        // Save server data.
-        user.email = email
-        user.username = username
-        user.smallImage = smallImage
-        user.bigImage = bigImage
-        user.genderIndex = Int16(genderIndex)
-        user.birthday = birthday
-        user.countryIndex = Int16(countryIndex)
-        user.interests = interests as NSObject
-        user.otherInterests = otherInterests
-        user.intro = intro
-        user.gitHub = gitHub
-        user.linkedIn = linkedIn
-        user.bytesMade = Int16(bytesMade)
-        user.likesGiven = Int16(likesGiven)
-        user.lastReceivedChatTime = lastReceivedChatTime
-        user.blocksBinaryData = try? JSONEncoder().encode(blocks)
+        coreDataUser.byteDraft = byteDraft
+        coreDataUser.commentDraft = commentDraft
+        coreDataUser.messageDrafts = messageDrafts as NSObject
+        
+        coreDataUser.buddiesFilterGenderIndex = Int16(buddiesFilterGenderIndex)
+        coreDataUser.buddiesFilterMinAge = Int16(buddiesFilterMinAge)
+        coreDataUser.buddiesFilterMaxAge = Int16(buddiesFilterMaxAge)
+        coreDataUser.buddiesFilterCountryIndex = Int16(buddiesFilterCountryIndex)
+        coreDataUser.buddiesFilterInterests = buddiesFilterInterests as NSObject
+        coreDataUser.buddiesFilterSortIndex = Int16(buddiesFilterSortIndex)
+        coreDataUser.bytesFilterSortIndex = Int16(bytesFilterSortIndex)
+        coreDataUser.firstLaunchedAt = firstLaunchedAt
+        coreDataUser.hasAskedReview = hasAskedReview
+        coreDataUser.hasAskedNotification = hasAskedNotification
+        
         try? moc.save()
     }
     
     func getUtcTime() -> Date {
         return referenceTime?.now() ?? Date()
+    }
+    
+    func getTokenIfSignedIn(completion: @escaping (String) -> Void) {
+        if firebaseUser == nil {
+            completion("")
+            return
+        }
+        
+        firebaseUser!.getIDToken(completion: { (token, error) in
+            completion(token!)
+            return
+        })
     }
     
     func runPhp(script: String, postString: String, completion: @escaping (NSDictionary) -> Void) {
@@ -267,20 +303,20 @@ class Global: ObservableObject {
             return
         }
 
-        //print("script: \(script)")
-        //print("postString: \(postString)")
+        //print("DEBUG - script: \(script)")
+        //print("DEBUG - postString: \(postString)")
         
-        let scriptUrl = URL(string: "\(webServerLink)/20/\(script).php");
+        let scriptUrl = URL(string: "\(webServerLink)/21/\(script).php");
         var request = URLRequest(url: scriptUrl!)
         request.httpMethod = "POST"
         request.httpBody = postString.data(using: String.Encoding.utf8)
         
         let task = URLSession.shared.dataTask(with: request) { (data: Data?, response: URLResponse?, error: Error?) in
-            let responseString = NSString(data: data!, encoding: String.Encoding.utf8.rawValue)
-            /*if script == "getImage" {
-                print("response string = some image probably")
+            /*let responseString = NSString(data: data!, encoding: String.Encoding.utf8.rawValue)
+            if script == "getImage" {
+                print("DEBUG - \(script) response string = some image probably")
             } else {
-                print("response string = \(String(describing: responseString))")
+                print("DEBUG - \(script) response string = \(String(describing: responseString))")
             }*/
             
             let json = try? JSONSerialization.jsonObject(with: data!, options: .mutableContainers) as? NSDictionary
@@ -306,34 +342,49 @@ class Global: ObservableObject {
     }
     
     func updateNotifications() {
-        if !hasUserDataLoaded {
+        if myId == "" || !hasUserDataLoaded {
             return
         }
         
-        let postString =
-            "myId=\(myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "password=\(password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "hasByteNotification=\(hasByteNotification)&" +
-            "hasChatNotification=\(hasChatNotification)"
-        runPhp(script: "updateNotifications", postString: postString) { json in
-            self.saveUserData()
-        }
+        firebaseUser!.getIDToken(completion: { (token, error) in
+            let postString =
+                "myId=\(self.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "notifyLikes=\(self.notifyLikes)&" +
+                "notifyComments=\(self.notifyComments)&" +
+                "notifyMessages=\(self.notifyMessages)"
+            self.runPhp(script: "updateNotifications", postString: postString) { json in
+                self.saveUserData()
+            }
+        })
     }
 
     func updateBadges() {
-        let postString =
-            "myId=\(self.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "password=\(self.password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "badges=\(self.getUnreadCounter())"
-        self.runPhp(script: "updateBadges", postString: postString) { json in }
+        firebaseUser!.getIDToken(completion: { (token, error) in
+            let postString =
+                "myId=\(self.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "badges=\(self.getUnreadNotificationsCounter() + self.getUnreadMessagesCounter())"
+            self.runPhp(script: "updateBadges", postString: postString) { json in }
+        })
     }
     
-    func getUnreadCounter() -> Int {
+    func getUnreadNotificationsCounter() -> Int {
+        var unreadCounter = 0
+        for notificationData in inboxData.notifications {
+            if notificationData.notifiedAt > inboxData.lastReadAt {
+                unreadCounter += 1
+            }
+        }
+        return unreadCounter
+    }
+    
+    func getUnreadMessagesCounter() -> Int {
         var unreadCounter = 0
         for (_, chatRoomData) in chatData {
-            for chatRoomMessageData in chatRoomData.messages {
-                if !chatRoomMessageData.isMine &&
-                    chatRoomMessageData.sendTime > chatRoomData.lastMyReadTime {
+            for messageData in chatRoomData.messages {
+                if !messageData.isMine &&
+                    messageData.sentAt > chatRoomData.lastMyReadAt {
                     unreadCounter += 1
                 }
             }
@@ -374,9 +425,8 @@ class Global: ObservableObject {
         return false
     }
 
-    func isOnline(lastVisitTimeAny: Any?) -> Bool {
-        let lastVisitTime = (lastVisitTimeAny as! String).toDate()
-        return Int(getUtcTime().timeIntervalSince(lastVisitTime)) <= onlineTimeout
+    func isOnline(lastVisitedAt: Date) -> Bool {
+        return Int(getUtcTime().timeIntervalSince(lastVisitedAt)) <= onlineTimeout
     }
     
     func toResizedString(uiImage: UIImage, maxSize: Float) -> String {
@@ -412,87 +462,51 @@ class Global: ObservableObject {
         return imageData!.base64EncodedString(options: Data.Base64EncodingOptions.lineLength64Characters)
     }
     
-    func saveUser(buddyId: String, buddyUsername: String) {
-        let userRowData = UserRowData(userId: buddyId, username: buddyUsername, isOnline: false, appendTime: getUtcTime())
-        savedUsers.append(userRowData)
-        
-        confirmationText = "Saved"
-    }
-    
-    func forgetUser(buddyId: String) {
-        savedUsers = savedUsers.filter() { $0.userId != buddyId }
-        
-        confirmationText = "Forgotten"
-    }
-    
-    func saveByte(bytesPostData: BytesPostData) {
-        savedBytes.append(bytesPostData)
-        
-        confirmationText = "Saved"
-    }
-    
-    func forgetByte(byteId: String) {
-        savedBytes = savedBytes.filter() { $0.byteId != byteId }
-        
-        confirmationText = "Forgotten"
-    }
-    
-    func block(buddyId: String, buddyUsername: String) {
-        let postString =
-            "myId=\(myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "password=\(password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "buddyId=\(buddyId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-        runPhp(script: "blockBuddy", postString: postString) { json in
-            let userRowData = UserRowData(userId: buddyId, username: buddyUsername, isOnline: false, appendTime: self.getUtcTime())
-            self.blocks.append(userRowData)
-
-            self.confirmationText = "Blocked"
-        }
+    func block(buddyId: String) {
+        firebaseUser!.getIDToken(completion: { (token, error) in
+            let postString =
+                "myId=\(self.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "buddyId=\(buddyId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+            self.runPhp(script: "blockBuddy", postString: postString) { json in
+                if json["isAdmin"] != nil &&
+                    json["isAdmin"] as! Bool {
+                    self.activeAlert = .cannotBlockAdmin
+                    return
+                }
+                
+                self.blockedBuddyIds.append(buddyId)
+                self.confirmationText = "Blocked"
+            }
+        })
     }
     
     func unblock(buddyId: String) {
-        let postString =
-            "myId=\(myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "password=\(password.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "buddyId=\(buddyId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-        runPhp(script: "unblockBuddy", postString: postString) { json in
-            self.blocks = self.blocks.filter() { $0.userId != buddyId }
-            
-            self.confirmationText = "Unblocked"
-        }
-    }
-    
-    func backButton(presentation: Binding<PresentationMode>, title: String) -> some View {
-        Button(action: {
-            presentation.wrappedValue.dismiss()
-        }) {
-            Text(title)
-        }
-    }
-    
-    func blueButton(title: String, reversed: Bool = false) -> some View {
-        Text(title)
-            .bold()
-            .frame(width: 250)
-            .padding()
-            .foregroundColor(!reversed ? Color.white : Color.blue)
-            .background(!reversed ? Color.blue : Color.clear)
-            .cornerRadius(20)
+        firebaseUser!.getIDToken(completion: { (token, error) in
+            let postString =
+                "myId=\(self.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "buddyId=\(buddyId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+            self.runPhp(script: "unblockBuddy", postString: postString) { json in
+                self.blockedBuddyIds = self.blockedBuddyIds.filter() { $0 != buddyId }
+                self.confirmationText = "Unblocked"
+            }
+        })
     }
 }
 
 // Global Classes
 class ImageCache: NSObject, NSDiscardableContent, ObservableObject {
     @Published var image: String
-    @Published var lastCacheTime: Date
+    @Published var lastCachedAt: Date
 
     init(image: String,
-         lastCacheTime: Date) {
+         lastCachedAt: Date) {
         self.image = image
-        self.lastCacheTime = lastCacheTime
+        self.lastCachedAt = lastCachedAt
         
         // View does not update unless at least one other global variables updates for an unknown reason.
-        globalObject.hasImageCachesUpdated = true
+        globalObject.hasImageCacheUpdated = true
     }
     
     func beginContentAccess() -> Bool {
@@ -515,12 +529,11 @@ enum RootViews: Identifiable {
     var id: Int { self.hashValue }
     case
         loading,
-        join,
         welcome,
+        join,
         tabs,
         maintenance,
-        update,
-        banned
+        update
 }
 
 // Global Extensions
@@ -539,12 +552,19 @@ extension Date {
 
     // Convert date to string with custom format.
     func toString(toFormat: String = "yyyy-MM-dd HH:mm:ss.SSS") -> String {
+        // Read about preventing common DateFormatter pitfalls using .calendar, .locale, and .timeZone:
+        // https://blog.sparksuite.com/avoiding-common-lesser-known-pitfalls-with-dates-in-swift-297d0e33c74a
+        
         let df = DateFormatter()
         df.dateFormat = toFormat
+        df.calendar = Calendar(identifier: .gregorian)
+        df.locale = Locale(identifier: "en_US_POSIX")
+        
         let hasTime = toFormat.rangeOfCharacter(from: CharacterSet(charactersIn: "HhmsSa")) != nil
-        if hasTime {
+        if hasTime { // Prevent birthday from changing by a day depending on time zone.
             df.timeZone = NSTimeZone(name: "UTC") as TimeZone?
         }
+        
         return df.string(from: self)
     }
     
@@ -553,7 +573,7 @@ extension Date {
         let timeDifference = Int(globalObject.getUtcTime().timeIntervalSince(self))
 
         let endingText = hasExtension ? " ago" : ""
-        let beginningText = hasExtension ? "in " : ""
+        let beginningText = hasExtension ? "on " : ""
         
         if timeDifference < 60 {
             return "\(timeDifference)s" + endingText
@@ -603,13 +623,32 @@ extension String {
     
     // Convert string in date format to date.
     func toDate(fromFormat: String = "yyyy-MM-dd HH:mm:ss.SSS") -> Date {
+        // Read about preventing common DateFormatter pitfalls using .calendar, .locale, and .timeZone:
+        // https://blog.sparksuite.com/avoiding-common-lesser-known-pitfalls-with-dates-in-swift-297d0e33c74a
+        
         let df = DateFormatter()
         df.dateFormat = fromFormat
+        df.calendar = Calendar(identifier: .gregorian)
+        df.locale = Locale(identifier: "en_US_POSIX")
+        
         let hasTime = fromFormat.rangeOfCharacter(from: CharacterSet(charactersIn: "HhmsSa")) != nil
-        if hasTime {
+        if hasTime { // Prevent birthday from changing by a day depending on time zone.
             df.timeZone = NSTimeZone(name: "UTC") as TimeZone?
         }
-        return df.date(from: self)!
+        
+        // PostgreSQL truncates timestamp's trailing zeroes for milliseconds, so add them back.
+        var milliseconds = ""
+        if fromFormat == "yyyy-MM-dd HH:mm:ss.SSS" {
+            if self.count == 19 {
+                milliseconds = ".000"
+            } else if self.count == 21 {
+                milliseconds = "00"
+            } else if self.count == 22 {
+                milliseconds = "0"
+            }
+        }
+        
+        return df.date(from: self + milliseconds)!
     }
 
     // Convert interests from string array.
@@ -679,6 +718,19 @@ extension View {
         self
             .rotationEffect(.radians(.pi))
             .scaleEffect(x: -1, y: 1, anchor: .center)
+    }
+    
+    // Disable and gray out the view with a loading screen while loading.
+    public func disabledOnLoad(isLoading: Bool, showLoading: Bool = true) -> some View {
+        ZStack {
+            self
+                .disabled(isLoading)
+                .opacity(isLoading ? 0.3 : 1)
+            
+            if isLoading && showLoading {
+                LottieView(name: "load", size: 300, mustLoop: true)
+            }
+        }
     }
 }
 

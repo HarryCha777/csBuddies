@@ -1,6 +1,5 @@
 <?php
-  include "globalFunctions.php";
-  include "/var/www/inc/dbinfo.inc";
+  require "globalFunctions.php";
   $pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
 
   $userId = $_POST["userId"];
@@ -14,15 +13,9 @@
 		die("Invalid");
 	}
 
-	if ($size == "big") {
-		$query = "select big_image from account where user_id = ? limit 1;";
-		$stmt = $pdo->prepare($query);
-		$stmt->execute(array($userId));
-	} else {
-		$query = "select small_image from account where user_id = ? limit 1;";
-		$stmt = $pdo->prepare($query);
-		$stmt->execute(array($userId));
-	}
+	$query = "select {$size}_image from account where user_id = ? limit 1;";
+	$stmt = $pdo->prepare($query);
+	$stmt->execute(array($userId));
 
   $row = $stmt->fetch();
   $return = array(

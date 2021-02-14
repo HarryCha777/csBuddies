@@ -17,7 +17,7 @@ struct UpdateView: View {
             title: "Update Required",
             subtitle: global.updateText == "" ? "csBuddies requires an update before continuing." : global.updateText.replacingOccurrences(of: "\\n", with: "\n"),
             bottomView: AnyView(Link(destination: URL(string: "https://apps.apple.com/app/id1524982759")!) {
-                global.blueButton(title: "Update")
+                ColoredButton(title: "Update")
             }))
     }
 }

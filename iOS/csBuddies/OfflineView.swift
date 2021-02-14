@@ -19,7 +19,7 @@ struct OfflineView: View {
             bottomView: AnyView(Button(action: {
                     global.isOffline = !Reachability.isConnectedToNetwork()
                 }) {
-                    global.blueButton(title: "Retry")
+                    ColoredButton(title: "Retry")
                 }))
     }
 }

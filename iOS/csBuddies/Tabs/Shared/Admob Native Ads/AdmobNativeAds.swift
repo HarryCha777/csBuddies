@@ -4,13 +4,13 @@ import SwiftUI
 import Combine
 import Firebase
 
-final class AdmobNativeAdsBuddiesUiView: NSObject, UIViewControllerRepresentable {
+final class AdmobNativeAdsUsersUiView: NSObject, UIViewControllerRepresentable {
     var adLoader: GADAdLoader?
-    var templateView: BuddiesGADTSmallTemplateView?
+    var templateView: UsersGADTSmallTemplateView?
     let adUnitId = "INSERT ADMOB AD UNIT ID HERE"
 
-    func makeUIViewController(context: UIViewControllerRepresentableContext<AdmobNativeAdsBuddiesUiView>) -> UIViewController {
-        let templateView = BuddiesGADTSmallTemplateView()
+    func makeUIViewController(context: UIViewControllerRepresentableContext<AdmobNativeAdsUsersUiView>) -> UIViewController {
+        let templateView = UsersGADTSmallTemplateView()
         self.templateView = templateView
 
         let viewController = UIViewController()
@@ -28,7 +28,7 @@ final class AdmobNativeAdsBuddiesUiView: NSObject, UIViewControllerRepresentable
         return viewController
     }
 
-    func updateUIViewController(_ uiViewController: UIViewController, context: UIViewControllerRepresentableContext<AdmobNativeAdsBuddiesUiView>) {}
+    func updateUIViewController(_ uiViewController: UIViewController, context: UIViewControllerRepresentableContext<AdmobNativeAdsUsersUiView>) {}
 }
 
 final class AdmobNativeAdsBytesUiView: NSObject, UIViewControllerRepresentable {
@@ -58,7 +58,7 @@ final class AdmobNativeAdsBytesUiView: NSObject, UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UIViewController, context: UIViewControllerRepresentableContext<AdmobNativeAdsBytesUiView>) {}
 }
 
-extension AdmobNativeAdsBuddiesUiView: GADUnifiedNativeAdLoaderDelegate {
+extension AdmobNativeAdsUsersUiView: GADUnifiedNativeAdLoaderDelegate {
     func adLoader(_ adLoader: GADAdLoader, didReceive nativeAd: GADUnifiedNativeAd) {
         templateView?.nativeAd = nativeAd
     }
@@ -74,9 +74,9 @@ extension AdmobNativeAdsBytesUiView: GADUnifiedNativeAdLoaderDelegate {
     func adLoader(_ adLoader: GADAdLoader, didFailToReceiveAdWithError error: GADRequestError) {}
 }
 
-struct AdmobNativeAdsBuddiesView: View {
+struct AdmobNativeAdsUsersView: View {
     var body: some View {
-        AdmobNativeAdsBuddiesUiView()
+        AdmobNativeAdsUsersUiView()
             .frame(height: 140)
     }
 }

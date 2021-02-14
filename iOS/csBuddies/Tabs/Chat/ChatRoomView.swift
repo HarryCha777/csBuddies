@@ -37,9 +37,9 @@ struct ChatRoomView: View {
     var body: some View {
         ZStack {
             VStack {
-                ChatRoomListView(buddyId: buddyId)
+                MessageListView(buddyId: buddyId, buddyUsername: buddyUsername)
                 Spacer()
-                ChatRoomInputView(buddyId: buddyId, buddyUsername: buddyUsername, message: global.messageDrafts[buddyId] ?? "")
+                MessageInputView(buddyId: buddyId, buddyUsername: buddyUsername, message: global.messageDrafts[buddyId] ?? "")
                     .environmentObject(globalObject)
             }
             .navigationBarTitle(buddyUsername, displayMode: .inline)
@@ -50,33 +50,14 @@ struct ChatRoomView: View {
                         Button(action: {
                             showActionSheet = true
                         }) {
-                            Image(systemName: "ellipsis.circle")
+                            Image(systemName: "ellipsis")
                                 .font(.largeTitle)
                         }
                     }
                 }
             }
             
-            NavigationLinkEmpty(destination: BuddiesProfileView(buddyId: buddyId), isActive: $mustVisitBuddiesProfile)
-            
-            // Place alert here since ChatRoomInputView's alerts are disabled if alerts are modified to the view wrapping it.
-            Spacer()
-                .alert(item: $activeAlert) { alert in
-                    switch alert {
-                    case .block:
-                        return Alert(title: Text("Block Buddy"), message: Text("You will no longer receive messages or notifications from them. Their activity will also be hidden from your Buddies and Bytes tabs. They will never know that you blocked them."), primaryButton: .default(Text("Cancel")), secondaryButton: .destructive(Text("Block"), action: {
-                            global.block(buddyId: buddyId, buddyUsername: global.chatBuddyUsername)
-                        }))
-                    case .clear:
-                        return Alert(title: Text("Are you sure?"), message: Text("You cannot undo this action."), primaryButton: .default(Text("Cancel")
-                        ), secondaryButton: .destructive(Text("Clear"), action: {
-                            global.chatData[buddyId] = nil
-                            
-                            presentation.wrappedValue.dismiss()
-                            global.confirmationText = "Cleared"
-                        }))
-                    }
-                }
+            NavigationLinkEmpty(destination: UserView(userId: buddyId), isActive: $mustVisitBuddiesProfile)
         }
         .actionSheet(isPresented: $showActionSheet) {
             getActionSheet()
@@ -85,12 +66,43 @@ struct ChatRoomView: View {
             switch sheet {
             case .buddiesProfileReport:
                 NavigationView {
-                    BuddiesProfileReportView(buddyId: buddyId)
+                    ReportView(buddyId: buddyId)
                         .environmentObject(globalObject)
                 }
                 .navigationViewStyle(StackNavigationViewStyle())
             }
         }
+        .overlay(
+            // Place alert here since MessageInputView's alerts are disabled if alerts are modified to the view wrapping it.
+            Spacer()
+                .alert(item: $activeAlert) { alert in
+                    switch alert {
+                    case .block:
+                        return Alert(title: Text("Block Buddy"), message: Text("Their profiles, bytes, and comments will be hidden, and you will no longer receive messages or notifications from them. They will never know that you blocked them."), primaryButton: .default(Text("Cancel")), secondaryButton: .destructive(Text("Block"), action: {
+                            // Create userPreviewData with only the available information and leave it to be updated later.
+                            let userPreviewData = UserPreviewData(
+                                userId: buddyId,
+                                username: buddyUsername,
+                                birthday: global.getUtcTime(),
+                                genderIndex: 3,
+                                countryIndex: 0,
+                                intro: "",
+                                lastVisitedAt: Date(timeIntervalSince1970: 0))
+                            userPreviewData.updateClientData()
+                            global.block(buddyId: buddyId)
+                        }))
+                    case .clear:
+                        return Alert(title: Text("Are you sure?"), message: Text("You cannot undo this action."), primaryButton: .default(Text("Cancel")
+                        ), secondaryButton: .destructive(Text("Clear"), action: {
+                            global.chatData[buddyId] = nil
+                            global.updateBadges()
+                            
+                            presentation.wrappedValue.dismiss()
+                            global.confirmationText = "Cleared"
+                        }))
+                    }
+                }
+        )
         .onAppear {
             // The onDisappear of previous view is called later than onAppear of new view,
             // which will result in blank chatBuddyId if user navigates between 2 ChatRoomViews using tabs,
@@ -104,41 +116,35 @@ struct ChatRoomView: View {
         .onDisappear {
             global.chatBuddyId = ""
             global.chatBuddyUsername = ""
+            markAllRead()
         }
     }
     
     func markAllRead() {
         var mustUpdateBadges = false
         if global.chatData[buddyId] != nil {
-            for index in global.chatData[buddyId]!.messages.indices {
-                if !global.chatData[buddyId]!.messages[index].isMine &&
-                    global.chatData[buddyId]!.messages[index].sendTime > global.chatData[buddyId]!.lastBuddyReadTime {
+            for messageData in global.chatData[buddyId]!.messages {
+                if !messageData.isMine &&
+                    messageData.sentAt > global.chatData[buddyId]!.lastMyReadAt {
                     mustUpdateBadges = true
                 }
             }
         }
         
         if mustUpdateBadges {
-            let now = global.getUtcTime()
-            global.chatData[buddyId]!.lastMyReadTime = now
+            global.chatData[buddyId]!.lastMyReadAt = global.getUtcTime()
             global.updateBadges()
-            global.db.collection("messageUpdates")
-                .whereField("myId", isEqualTo: global.myId)
-                .whereField("buddyId", isEqualTo: buddyId)
-                .getDocuments { (snapshot, error) in
-                    if snapshot!.documents.count == 0 {
-                        global.db.collection("messageUpdates")
-                            .addDocument(data: [
-                                            "myId": global.myId,
-                                            "myUsername": global.username,
-                                            "buddyId": buddyId,
-                                            "lastReadTime": now,
-                                            "lastSendTime": Date(timeIntervalSince1970: 0)])
-                    } else {
-                        snapshot!.documents[0].reference
-                            .setData(["myUsername": global.username, "lastReadTime": now], merge: true)
-                    }
-            }
+            global.firebaseUser!.getIDToken(completion: { (token, error) in
+                let postString =
+                    "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                    "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                    "buddyId=\(buddyId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+                global.runPhp(script: "readMessages", postString: postString) { json in
+                    global.db.collection("accounts")
+                        .document(buddyId)
+                        .setData(["hasChanged": true], merge: true) { error in }
+                }
+            })
         }
     }
 
@@ -147,7 +153,7 @@ struct ChatRoomView: View {
             mustVisitBuddiesProfile = true
         }]
         
-        if !global.blocks.contains(where: { $0.userId == buddyId }) {
+        if !global.blockedBuddyIds.contains(buddyId) {
             buttons += [Alert.Button.destructive(Text("Block")) {
                 activeAlert = .block
             }]
@@ -173,13 +179,14 @@ struct ChatRoomView: View {
 struct ChatRoomData: Identifiable, Codable {
     var id = UUID()
     var username: String
-    var isOnline = false
-    var lastMyReadTime = Date(timeIntervalSince1970: 0)
-    var lastBuddyReadTime = Date(timeIntervalSince1970: 0)
-    var lastBuddySendTime = Date(timeIntervalSince1970: 0)
-    var messages = [ChatRoomMessageData]()
+    var lastVisitedAt = Date(timeIntervalSince1970: 0)
+    var lastMyReadAt = Date(timeIntervalSince1970: 0)
+    var lastBuddyReadAt = Date(timeIntervalSince1970: 0)
+    var messages: [MessageData]
 
-    init(username: String) {
+    init(username: String, messageData: MessageData) {
         self.username = username
+        // Make sure ChatRoomData always has at least one message, or it will be nil on didSet.
+        self.messages = [messageData]
     }
 }

@@ -15,8 +15,7 @@ struct BytesFilterView: View {
     
     @Binding var mustGetBytes: Bool
     
-    @State private var filterSortOptions = ["New", "Trending", "Likes"]
-    @State private var filterTimeOptions = ["Week", "Month", "All Time"] // Omit "Day" because trending essentially takes of it.
+    @State private var filterSortOptions = ["Hot", "New"]
 
     var body: some View {
         List {
@@ -28,23 +27,12 @@ struct BytesFilterView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
             }
-            
-            if global.newBytesFilterSortIndex == 2 {
-                Section(header: Text("Time")) {
-                    Picker("", selection: $global.newBytesFilterTimeIndex) {
-                        ForEach(filterTimeOptions.indices) { index in
-                            Text(filterTimeOptions[index])
-                        }
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                }
-            }
         }
         .listStyle(InsetGroupedListStyle())
         .navigationBarTitle("Filter Bytes", displayMode: .inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                global.backButton(presentation: presentation, title: "Cancel")
+                BackButton(title: "Cancel", presentation: presentation)
             }
             ToolbarItem(placement: .primaryAction) {
                 Button(action: {
@@ -58,11 +46,9 @@ struct BytesFilterView: View {
     
     func applyFilters() {
         global.bytesFilterSortIndex = global.newBytesFilterSortIndex
-        global.bytesFilterTimeIndex = global.newBytesFilterTimeIndex
 
         Analytics.logEvent("bytes_filter", parameters: [
             "sort": filterSortOptions[global.bytesFilterSortIndex],
-            "time": filterTimeOptions[global.bytesFilterTimeIndex],
         ])
         
         mustGetBytes = true

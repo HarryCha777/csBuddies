@@ -48,124 +48,102 @@ struct TypeIntroView: View {
     }
     
     var body: some View {
-        ZStack {
-            List {
-                JoinStepperView(step: 3)
-                
-                Section(header: Text("Username")) {
-                    TextField("Your username", text: $global.username)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                }
-                
-                Section(header: Text("Image")) {
-                    Button(action: {
-                        activeSheet = .imagePicker
-                    }) {
-                        HStack {
-                            Spacer()
-                            if global.smallImage == "" {
-                                Image(systemName: "person.crop.circle.fill")
-                                    .resizable()
-                                    .frame(width: 75, height: 75)
-                                    .clipShape(Circle())
-                            } else {
-                                Image(uiImage: global.smallImage.toUiImage())
-                                    .resizable()
-                                    .frame(width: 75, height: 75)
-                                    .clipShape(Circle())
-                            }
-                            Spacer()
-                        }
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-                
-                Section(header: Text("Self-Introduction")) {
-                    VStack {
-                        BetterTextEditor(placeholder: introExample, text: $global.intro)
+        List {
+            JoinStepperView(step: 3)
+            
+            Section(header: Text("Username")) {
+                TextField("Your username", text: $global.username)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            }
+            
+            Section(header: Text("Image")) {
+                Button(action: {
+                    activeSheet = .imagePicker
+                }) {
+                    HStack {
                         Spacer()
-                        HStack {
-                            Spacer()
-                            Text("\(global.intro.count)/256")
-                                .padding()
-                                .foregroundColor(global.intro.count > 256 ? Color.red : colorScheme == .light ? Color.black : Color.white)
+                        if global.smallImage == "" {
+                            Image(systemName: "person.crop.circle.fill")
+                                .resizable()
+                                .frame(width: 75, height: 75)
+                                .clipShape(Circle())
+                        } else {
+                            Image(uiImage: global.smallImage.toUiImage())
+                                .resizable()
+                                .frame(width: 75, height: 75)
+                                .clipShape(Circle())
                         }
-                    }
-                    if !global.hasAskedNotification {
-                        Button(action: {
-                            activeAlert = .prepermission
-                        }) {
-                            Text("Turn on Notification")
-                        }
+                        Spacer()
                     }
                 }
-                
-                Section(header: Text("Agreement")) {
+                .buttonStyle(PlainButtonStyle())
+            }
+            
+            Section(header: Text("Self-Introduction")) {
+                VStack {
+                    BetterTextEditor(placeholder: introExample, text: $global.intro)
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Text("\(global.intro.count)/256")
+                            .padding()
+                            .foregroundColor(global.intro.count > 256 ? .red : colorScheme == .light ? .black : .white)
+                    }
+                }
+                if !global.hasAskedNotification {
                     Button(action: {
-                        agreed = !agreed
+                        activeAlert = .prepermission
                     }) {
-                        HStack {
-                            Text("I agree to Apple's License Agreement and Terms and Conditions.")
-                            Spacer()
-                            if agreed {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.blue)
-                                        .frame(width: 20, height: 20)
-                                    Circle()
-                                        .fill(Color.white)
-                                        .frame(width: 8, height: 8)
-                                }
-                            } else {
+                        Text("Turn on Notification")
+                    }
+                }
+            }
+            
+            Section(header: Text("Agreement")) {
+                Button(action: {
+                    agreed = !agreed
+                }) {
+                    HStack {
+                        Text("I agree to Apple's License Agreement and Terms and Conditions.")
+                        Spacer()
+                        if agreed {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.blue)
+                                    .frame(width: 20, height: 20)
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 20, height: 20)
-                                    .overlay(Circle().stroke(Color.gray, lineWidth: 1))
+                                    .frame(width: 8, height: 8)
                             }
+                        } else {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 20, height: 20)
+                                .overlay(Circle().stroke(Color.gray, lineWidth: 1))
                         }
-                        .background(Color.black.opacity(0.001)) // Expand button's tappable area to empty spaces.
                     }
-                    .buttonStyle(PlainButtonStyle())
-                    
-                    NavigationLink(destination:
-                                    WebView(request: URLRequest(url: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!))
-                                    .navigationBarTitle("Apple's Licence Agreement", displayMode: .inline)
-                    ) {
-                        Text("View Apple's Licence Agreement.")
-                    }
-                    
-                    NavigationLink(destination:
-                                    WebView(request: URLRequest(url: URL(string: "https://csbuddies.com/terms-and-conditions")!))
-                                    .navigationBarTitle("Terms and Conditions", displayMode: .inline)
-                    ) {
-                        Text("View Terms and Conditions")
-                    }
+                    .background(Color.black.opacity(0.001)) // Expand button's tappable area to empty spaces.
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                NavigationLink(destination:
+                                WebView(request: URLRequest(url: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!))
+                                .navigationBarTitle("Apple's Licence Agreement", displayMode: .inline)
+                ) {
+                    Text("View Apple's Licence Agreement.")
                 }
                 
-                Section(header: Text("Preview")) {
-                    Text("Preview depends on the screen width.")
-                    BuddiesPreviewView(userPreviewData: UserPreviewData(
-                                        userId: global.myId,
-                                        username: global.username,
-                                        birthday: global.birthday,
-                                        genderIndex: global.genderIndex,
-                                        intro: global.intro,
-                                        hasGitHub: global.gitHub.count != 0,
-                                        hasLinkedIn: global.linkedIn.count != 0,
-                                        isOnline: true,
-                                        lastVisitTime: global.getUtcTime()),
-                                       myImage: global.smallImage)
+                NavigationLink(destination:
+                                WebView(request: URLRequest(url: URL(string: "https://csbuddies.com/terms-and-conditions")!))
+                                .navigationBarTitle("Terms and Conditions", displayMode: .inline)
+                ) {
+                    Text("View Terms and Conditions")
                 }
             }
-            .listStyle(InsetGroupedListStyle())
-            .removeHeaderPadding()
-            .disabled(isAddingUser)
-            .opacity(isAddingUser ? 0.3 : 1)
-            
-            if isAddingUser {
-                LottieView(name: "load", size: 300, mustLoop: true)
-            }
         }
+        .listStyle(InsetGroupedListStyle())
+        .removeHeaderPadding()
+        .disabledOnLoad(isLoading: isAddingUser)
         .navigationBarTitle("Introduction", displayMode: .inline)
         .navigationBarBackButtonHidden(isAddingUser)
         .toolbar {
@@ -245,53 +223,43 @@ struct TypeIntroView: View {
     }
     
     func addUser() {
-        let postString =
-            "email=\(global.email.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "username=\(global.username.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "smallImage=\(global.smallImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "bigImage=\(global.bigImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "gender=\(global.genderIndex)&" +
-            "birthday=\(global.birthday.toString(toFormat: "yyyy-MM-dd"))&" +
-            "country=\(global.countryIndex)&" +
-            "interests=\(global.interests.toInterestsString().addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "otherInterests=\(global.otherInterests.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "intro=\(global.intro.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "gitHub=\(global.gitHub.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "linkedIn=\(global.linkedIn.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-            "fcm=\(Messaging.messaging().fcmToken!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-        global.runPhp(script: "addUser", postString: postString) { json in
-            if json["isExtantUsername"] != nil {
-                activeAlert = .extantUsername
-                return
-            }
-            
-            global.myId = json["myId"] as! String
-            global.password = json["password"] as! String
-
-            setDisplayName()
-        }
-    }
-    
-    func setDisplayName() {
-        let user = Auth.auth().currentUser
-        let changeRequest = user!.createProfileChangeRequest()
-        changeRequest.displayName = global.myId
-        changeRequest.commitChanges { error in
-            user!.getIDTokenForcingRefresh(true, completion: { (token, error) in
+        global.firebaseUser!.getIDToken(completion: { (token, error) in
+            let postString =
+                "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "username=\(global.username.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "smallImage=\(global.smallImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "bigImage=\(global.bigImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "gender=\(global.genderIndex)&" +
+                "birthday=\(global.birthday.toString(toFormat: "yyyy-MM-dd"))&" +
+                "country=\(global.countryIndex)&" +
+                "interests=\(global.interests.toInterestsString().addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "otherInterests=\(global.otherInterests.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "intro=\(global.intro.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "gitHub=\(global.gitHub.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "linkedIn=\(global.linkedIn.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "fcm=\(Messaging.messaging().fcmToken!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+            global.runPhp(script: "addUser", postString: postString) { json in
+                if json["isExtantUsername"] != nil &&
+                    json["isExtantUsername"] as! Bool {
+                    activeAlert = .extantUsername
+                    return
+                }
+                
+                global.myId = json["myId"] as! String
                 makeDocument()
-            })
-        }
+            }
+        })
     }
     
     func makeDocument() {
-        global.db.collection("users")
-            .document(global.myId)
-            .setData([
-                        "myId": global.myId,
-                        "password": global.password]) { error in
-                global.hasSignedIn = true
-                global.activeRootView = .welcome
-            }
+        // Force refresh because backend changed the custom claims.
+        global.firebaseUser!.getIDTokenResult(forcingRefresh: true, completion: { (result, error) in
+            global.db.collection("accounts")
+                .document(global.myId)
+                .setData(["hasChanged": false]) { error in
+                    global.activeRootView = .loading
+                }
+        })
     }
 }
 

@@ -1,30 +1,43 @@
 <?php
-  include "globalFunctions.php";
-  include "/var/www/inc/dbinfo.inc";
+  require "globalFunctions.php";
   $pdo = new PDO("pgsql:host=".HOST.";port=".PORT.";dbname=".DATABASE.";user=".USERNAME.";password=".PASSWORD);
 
   $myId = $_POST["myId"];
-  $password = $_POST["password"];
+  $token = $_POST["token"];
   $buddyId = $_POST["buddyId"];
 
 	$isValid =
-		isAuthenticated($myId, $password) &&
+		isAuthenticated($myId, $token) &&
 		isExtantUserId($buddyId);
 	if (!$isValid) {
   	$pdo = null;
 		die("Invalid");
 	}
 
-  $query = "select count(block_id) from block where user_id = ? and buddy_id = ? limit 1;";
+	$query = "select count(user_id) = 1 from account where user_id = ? and became_admin_at is not null limit 1;";
+	$stmt = $pdo->prepare($query);
+	$stmt->execute(array($buddyId));
+
+  $row = $stmt->fetch();
+	$isAdmin = $row[0];
+
+	if ($isAdmin) {
+    $return = array("isAdmin" => True);
+  	echo json_encode($return);
+		$pdo = null;
+		exit;
+	}
+
+  $query = "select count(block_id) = 1 from block where user_id = ? and buddy_id = ? limit 1;";
   $stmt = $pdo->prepare($query);
   $stmt->execute(array($myId, $buddyId));
 
   $row = $stmt->fetch();
-  $isBlocked = $row[0] == 1;
+  $isBlocked = $row[0];
 
 	// Buddy might have already been blocked from another device.
   if (!$isBlocked) {
-  	$query = "insert into block (user_id, buddy_id, block_time) values (?, ?, current_timestamp);";
+  	$query = "insert into block (user_id, buddy_id) values (?, ?);";
   	$stmt = $pdo->prepare($query);
   	$stmt->execute(array($myId, $buddyId));
   }

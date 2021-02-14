@@ -11,56 +11,54 @@ import SwiftUI
 struct ChatRoomPreviewView: View {
     @EnvironmentObject var global: Global
 
-    let buddyId: String
-    let buddyUsername: String
-    let isOnline: Bool
+    let chatRoomPreviewData: ChatRoomPreviewData
     
     var body: some View {
         // Check messages.last != nil instead of messages.count > 0 since latter may crash when chat rooms are deleted.
-        if global.chatData[buddyId] != nil && global.chatData[buddyId]!.messages.last != nil {
+        if global.chatData[chatRoomPreviewData.buddyId] != nil && global.chatData[chatRoomPreviewData.buddyId]!.messages.last != nil {
             HStack {
-                NavigationLinkBorderless(destination: BuddiesProfileView(buddyId: buddyId)) {
-                    SmallImageView(userId: buddyId, isOnline: isOnline, size: 50, myImage: global.smallImage)
+                NavigationLinkBorderless(destination: UserView(userId: chatRoomPreviewData.buddyId)) {
+                    SmallImageView(userId: chatRoomPreviewData.buddyId, isOnline: global.isOnline(lastVisitedAt: chatRoomPreviewData.lastVisitedAt), size: 50)
                 }
                 
                 Spacer()
                     .frame(width: 10)
                 
-                NavigationLinkBorderless(destination: ChatRoomView(buddyId: buddyId, buddyUsername: buddyUsername)) {
+                NavigationLinkBorderless(destination: ChatRoomView(buddyId: chatRoomPreviewData.buddyId, buddyUsername: chatRoomPreviewData.buddyUsername)) {
                     VStack(alignment: .leading) {
                         HStack {
-                            Text(buddyUsername)
+                            Text(chatRoomPreviewData.buddyUsername)
                                 .lineLimit(1)
                             Spacer()
-                            Text(sendTimeDisplay(sendTime: global.chatData[buddyId]!.messages.last!.sendTime))
-                                .foregroundColor(Color.gray)
+                            Text(sentAtDisplay(sentAt: global.chatData[chatRoomPreviewData.buddyId]!.messages.last!.sentAt))
+                                .foregroundColor(.gray)
                         }
                         HStack {
-                            if global.messageDrafts[buddyId] != nil && global.messageDrafts[buddyId] != "" {
-                                Text("[Draft] \(global.messageDrafts[buddyId]!.replacingOccurrences(of: "\n", with: " "))")
+                            if global.messageDrafts[chatRoomPreviewData.buddyId] != nil && global.messageDrafts[chatRoomPreviewData.buddyId] != "" {
+                                Text("[Draft] \(global.messageDrafts[chatRoomPreviewData.buddyId]!.replacingOccurrences(of: "\n", with: " "))")
                                     .frame(height: 45, alignment: .top)
-                                    .foregroundColor(Color.orange)
+                                    .foregroundColor(.orange)
                                     .lineLimit(2)
                             } else {
-                                Text(global.chatData[buddyId]!.messages.last!.content.replacingOccurrences(of: "\n", with: " "))
+                                Text(global.chatData[chatRoomPreviewData.buddyId]!.messages.last!.content.replacingOccurrences(of: "\n", with: " "))
                                     .frame(height: 45, alignment: .top)
-                                    .foregroundColor(Color.gray)
+                                    .foregroundColor(.gray)
                                     .lineLimit(2)
                             }
                             Spacer()
-                            if getUnreadCounter() > 0 {
-                                if getUnreadCounter() <= 99 {
-                                    Text("\(getUnreadCounter())")
+                            if getUnreadMessagesCounter() > 0 {
+                                if getUnreadMessagesCounter() <= 99 {
+                                    Text("\(getUnreadMessagesCounter())")
                                         .bold()
                                         .padding(10)
-                                        .foregroundColor(Color.white)
-                                        .background(Circle().fill(Color.blue))
+                                        .foregroundColor(.white)
+                                        .background(Circle().fill(Color.red))
                                 } else {
                                     Text("99+")
                                         .bold()
                                         .padding(10)
-                                        .foregroundColor(Color.white)
-                                        .background(Circle().fill(Color.blue))
+                                        .foregroundColor(.white)
+                                        .background(Circle().fill(Color.red))
                                 }
                             }
                         }
@@ -71,25 +69,39 @@ struct ChatRoomPreviewView: View {
         }
     }
     
-    
-    func sendTimeDisplay(sendTime: Date) -> String {
-        if Calendar.current.isDate(global.getUtcTime(), inSameDayAs: sendTime) {
-            return sendTime.toLocal().toString(toFormat: "h:mm a")
+    func sentAtDisplay(sentAt: Date) -> String {
+        if Calendar.current.isDate(global.getUtcTime(), inSameDayAs: sentAt) {
+            return sentAt.toLocal().toString(toFormat: "h:mm a")
         }
-        if Calendar.current.isDate(global.getUtcTime().yesterday, inSameDayAs: sendTime) {
+        if Calendar.current.isDate(global.getUtcTime().yesterday, inSameDayAs: sentAt) {
             return "Yesterday"
         }
-        return sendTime.toLocal().toString(toFormat: "M/d/yy")
+        return sentAt.toLocal().toString(toFormat: "M/d/yy")
     }
     
-    func getUnreadCounter() -> Int {
+    func getUnreadMessagesCounter() -> Int {
         var unreadCounter = 0
-        for chatRoomMessageData in global.chatData[buddyId]!.messages {
-            if !chatRoomMessageData.isMine &&
-                chatRoomMessageData.sendTime > global.chatData[buddyId]!.lastMyReadTime {
+        for messageData in global.chatData[chatRoomPreviewData.buddyId]!.messages {
+            if !messageData.isMine &&
+                messageData.sentAt > global.chatData[chatRoomPreviewData.buddyId]!.lastMyReadAt {
                 unreadCounter += 1
             }
         }
         return unreadCounter
+    }
+}
+
+struct ChatRoomPreviewData: Identifiable, Codable {
+    var id = UUID()
+    var buddyId: String
+    var buddyUsername: String
+    var lastVisitedAt: Date
+
+    init(buddyId: String,
+         buddyUsername: String,
+         lastVisitedAt: Date) {
+        self.buddyId = buddyId
+        self.buddyUsername = buddyUsername
+        self.lastVisitedAt = lastVisitedAt
     }
 }

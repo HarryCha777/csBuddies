@@ -6,31 +6,16 @@ service cloud.firestore {
       allow write: if false;
     }
     
-    match /users/{documentId} {
-    	allow read: if request.auth.token.name == existingData().myId;
-      allow create: if
-      	request.auth.token.name == incomingData().myId &&
-        isValidString("password", 12, 12);
-      allow update: if false;
-      allow delete: if false;
-    }
-
-    match /messageUpdates/{documentId} {
+    match /accounts/{documentId} {
     	allow read: if
-      	request.auth.token.name == existingData().myId ||
-        request.auth.token.name == existingData().buddyId;
-      allow create: if request.auth.token.name == incomingData().myId;
+      	request.auth.token.userId == documentId;
+      allow create: if
+      	request.auth.token.userId == documentId &&
+        incomingData().hasChanged == false;
       allow update: if
-      	request.auth.token.name == incomingData().myId &&
-        isNotUpdating("id") &&
-        isNotUpdating("myId") &&
-        isNotUpdating("buddyId");
+      	((request.auth.token.userId == documentId && incomingData().hasChanged == false) ||
+        (request.auth.token.userId != documentId && incomingData().hasChanged == true));
       allow delete: if false;
-    }
-
-    match /messages/{documentId} {
-    	allow read: if false;
-      allow write: if false;
     }
     
     function isNotUpdating(field) {
@@ -46,6 +31,12 @@ service cloud.firestore {
     function incomingData() {
     	return request.resource.data;
     }
+    
+    function isValidTimestamp(field) {
+    	return
+      	incomingData()[field] is timestamp &&
+        incomingData()[field] < request.time;
+    }
   	
   	function isValidString(field, minLength, maxLength) {
   		return
@@ -55,3 +46,4 @@ service cloud.firestore {
   	}
   }
 }
+
