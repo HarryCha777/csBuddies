@@ -10,6 +10,9 @@ import SwiftUI
 
 struct BuddiesFilterAgeView: View {
     @EnvironmentObject var global: Global
+    
+    @Binding var newBuddiesFilterMinAge: Int
+    @Binding var newBuddiesFilterMaxAge: Int
 
     var body: some View {
         VStack {
@@ -18,14 +21,14 @@ struct BuddiesFilterAgeView: View {
                     VStack {
                         Spacer()
                         Text("Min Age")
-                        Picker(selection: $global.newBuddiesFilterMinAge, label: Text("")) {
+                        Picker(selection: $newBuddiesFilterMinAge, label: Text("")) {
                             ForEach(13 ..< 130 + 1, id: \.self) { age in
                                 Text("\(age)")
                             }
                         }
-                        .onChange(of: global.newBuddiesFilterMinAge) { changedNewBuddiesFilterMinAge in
-                            if changedNewBuddiesFilterMinAge > global.newBuddiesFilterMaxAge {
-                                global.newBuddiesFilterMaxAge = changedNewBuddiesFilterMinAge
+                        .onChange(of: newBuddiesFilterMinAge) { changedNewBuddiesFilterMinAge in
+                            if changedNewBuddiesFilterMinAge > newBuddiesFilterMaxAge {
+                                newBuddiesFilterMaxAge = changedNewBuddiesFilterMinAge
                             }
                         }
                         .frame(maxWidth: geometry.size.width / 2)
@@ -36,14 +39,14 @@ struct BuddiesFilterAgeView: View {
                     VStack {
                         Spacer()
                         Text("Max Age")
-                        Picker(selection: $global.newBuddiesFilterMaxAge, label: Text("")) {
+                        Picker(selection: $newBuddiesFilterMaxAge, label: Text("")) {
                             ForEach(13 ..< 130 + 1, id: \.self) { age in
                                 Text("\(age)")
                             }
                         }
-                        .onChange(of: global.newBuddiesFilterMaxAge) { changedNewBuddiesFilterMaxAge in
-                            if global.newBuddiesFilterMinAge > changedNewBuddiesFilterMaxAge {
-                                global.newBuddiesFilterMinAge = changedNewBuddiesFilterMaxAge
+                        .onChange(of: newBuddiesFilterMaxAge) { changedNewBuddiesFilterMaxAge in
+                            if newBuddiesFilterMinAge > changedNewBuddiesFilterMaxAge {
+                                newBuddiesFilterMinAge = changedNewBuddiesFilterMaxAge
                             }
                         }
                         .frame(maxWidth: geometry.size.width / 2)

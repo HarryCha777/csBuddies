@@ -120,30 +120,30 @@ struct UserProfileView: View {
             
             Section(header: Text("Self-Introduction")) {
                 Text(global.users[userId]!.intro)
-                if global.users[userId]!.gitHub.count != 0 {
+                if global.users[userId]!.github.count != 0 {
                     NavigationLink(destination:
-                                    WebView(request: URLRequest(url: (URL(string: "https://www.github.com/\(global.users[userId]!.gitHub)") ?? URL(string: "https://www.github.com"))!))
+                                    WebView(request: URLRequest(url: (URL(string: "https://www.github.com/\(global.users[userId]!.github)") ?? URL(string: "https://www.github.com"))!))
                                     .navigationBarTitle("GitHub", displayMode: .inline)
                     ) {
-                        Image("gitHubLogo")
+                        Image("githubLogo")
                             .resizable()
                             .frame(width: 22, height: 22)
                             .if(colorScheme == .dark) { content in
                                 content.colorInvert() // Invert color on dark mode.
                             }
-                        Text("github.com/\(global.users[userId]!.gitHub)")
+                        Text("github.com/\(global.users[userId]!.github)")
                             .foregroundColor(.blue)
                     }
                 }
-                if global.users[userId]!.linkedIn.count != 0 {
+                if global.users[userId]!.linkedin.count != 0 {
                     NavigationLink(destination:
-                                    WebView(request: URLRequest(url: (URL(string: "https://linkedin.com/in/\(global.users[userId]!.linkedIn)") ?? URL(string: "https://linkedin.com"))!))
+                                    WebView(request: URLRequest(url: (URL(string: "https://linkedin.com/in/\(global.users[userId]!.linkedin)") ?? URL(string: "https://linkedin.com"))!))
                                     .navigationBarTitle("LinkedIn", displayMode: .inline)
                     ) {
-                        Image("linkedInLogo")
+                        Image("linkedinLogo")
                             .resizable()
                             .frame(width: 22, height: 22)
-                        Text("linkedin.com/in/\(global.users[userId]!.linkedIn)")
+                        Text("linkedin.com/in/\(global.users[userId]!.linkedin)")
                             .foregroundColor(.blue)
                     }
                 }

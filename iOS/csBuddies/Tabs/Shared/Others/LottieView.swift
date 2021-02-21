@@ -57,8 +57,12 @@ struct LottieView: View {
     }
 
     var body: some View {
-        LottieUiView(name: name, speed: speed!, mustLoop: mustLoop!)
-            .frame(width: size, height: size)
-            .padding(padding!)
+        HStack {
+            Spacer()
+            LottieUiView(name: name, speed: speed!, mustLoop: mustLoop!)
+                .frame(width: size, height: size)
+                .padding(padding!)
+            Spacer()
+        }
     }
 }

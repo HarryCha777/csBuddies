@@ -31,10 +31,6 @@ struct MessageInputView: View {
             HStack(alignment: .bottom) {
                 VStack {
                     BetterTextEditor(placeholder: "Enter message here...", text: $message)
-                        .onChange(of: self.message) { newMessage in
-                            // Use onChange since @Binding does not work with dictionaries and didSet does not work with @State.
-                            global.messageDrafts[buddyId] = newMessage
-                        }
                         .frame(maxHeight: 70)
                         .padding(.horizontal, 4)
                         .overlay(
@@ -70,6 +66,11 @@ struct MessageInputView: View {
             case .tooManyChatRoomsToday:
                 return Alert(title: Text("Reached Daily Chat Buddies Limit"), message: Text("You already sent messages to \(dailyLimit) different buddies today. Please come back tomorrow."), dismissButton: .default(Text("OK")))
             }
+        }
+        .onDisappear {
+            // Rapidly updating a global variable is laggy in TabView with lots of content,
+            // so use a local variable instead and update the global variable only at the end.
+            global.messageDrafts[buddyId] = message
         }
     }
     

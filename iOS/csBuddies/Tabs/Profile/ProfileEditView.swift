@@ -24,6 +24,16 @@ struct ProfileEditView: View {
         "You can check out some of my games on my GitHub profile.\n" +
         "Thanks for reading!"
     
+    @State private var newSmallImage = globalObject.smallImage
+    @State private var newBigImage = globalObject.bigImage
+    @State private var newGenderIndex = globalObject.genderIndex
+    @State private var newBirthday = globalObject.birthday
+    @State private var newCountryIndex = globalObject.countryIndex
+    @State private var newGitHub = globalObject.github
+    @State private var newLinkedIn = globalObject.linkedin
+    @State private var newInterests = globalObject.interests
+    @State private var newOtherInterests = globalObject.otherInterests
+    @State private var newIntro = globalObject.intro
     @State private var isUpdating = false
     
     @State var activeAlert: Alerts?
@@ -61,7 +71,7 @@ struct ProfileEditView: View {
                 }) {
                     HStack {
                         Spacer()
-                        SmallImageView(userId: global.myId, isOnline: false, size: 75, isUpdating: true)
+                        SmallImageView(userId: global.myId, isOnline: false, size: 75, isUpdating: true, newSmallImage: newSmallImage)
                         Spacer()
                     }
                 }
@@ -69,7 +79,7 @@ struct ProfileEditView: View {
             }
             
             Section(header: Text("Gender")) {
-                Picker("", selection: $global.newGenderIndex) {
+                Picker("", selection: $newGenderIndex) {
                     ForEach(global.genderOptions.indices) { index in
                         if index != global.genderOptions.count - 1 {
                             Text(global.genderOptions[index])
@@ -77,20 +87,20 @@ struct ProfileEditView: View {
                     }
                 }
                 .pickerStyle(SegmentedPickerStyle())
-                .disabled(global.newGenderIndex == global.genderOptions.count - 1)
+                .disabled(newGenderIndex == global.genderOptions.count - 1)
                 
                 Button(action: {
-                    if global.newGenderIndex == global.genderOptions.count - 1 {
-                        global.newGenderIndex = global.genderOptions.count - 2
+                    if newGenderIndex == global.genderOptions.count - 1 {
+                        newGenderIndex = global.genderOptions.count - 2
                     } else {
-                        global.newGenderIndex = global.genderOptions.count - 1
+                        newGenderIndex = global.genderOptions.count - 1
                         activeAlert = .privateGender
                     }
                 }) {
                     HStack {
                         Text("I prefer not to say.")
                         Spacer()
-                        if global.newGenderIndex == global.genderOptions.count - 1 {
+                        if newGenderIndex == global.genderOptions.count - 1 {
                             ZStack {
                                 Circle()
                                     .fill(Color.blue)
@@ -114,24 +124,24 @@ struct ProfileEditView: View {
             Section(header: Text("Birthday")) {
                 Text("This is used to calculate your age.\nIt won't be shown to anyone.")
                 
-                DatePicker("Date Label", selection: $global.newBirthday, in: ...global.getUtcTime(), displayedComponents: .date)
+                DatePicker("Date Label", selection: $newBirthday, in: ...global.getUtcTime(), displayedComponents: .date)
                     .labelsHidden()
-                    .disabled(global.newBirthday.toString()[0] == "0")
+                    .disabled(newBirthday.toString()[0] == "0")
                 
                 Button(action: {
-                    if global.newBirthday.toString()[0] == "0" {
-                        global.newBirthday = global.getUtcTime()
+                    if newBirthday.toString()[0] == "0" {
+                        newBirthday = global.getUtcTime()
                     } else {
                         var dateComponents = DateComponents()
                         dateComponents.year = 0
-                        global.newBirthday = Calendar.current.date(from: dateComponents)!
+                        newBirthday = Calendar.current.date(from: dateComponents)!
                         activeAlert = .privateBirthday
                     }
                 }) {
                     HStack {
                         Text("I prefer not to say.")
                         Spacer()
-                        if global.newBirthday.toString()[0] == "0" {
+                        if newBirthday.toString()[0] == "0" {
                             ZStack {
                                 Circle()
                                     .fill(Color.blue)
@@ -153,7 +163,7 @@ struct ProfileEditView: View {
             }
             
             Section(header: Text("Country")) {
-                Picker("Where are you from?", selection: $global.newCountryIndex) {
+                Picker("Where are you from?", selection: $newCountryIndex) {
                     ForEach(global.countryOptions.indices) { index in
                         Text(global.countryOptions[index])
                     }
@@ -162,13 +172,13 @@ struct ProfileEditView: View {
             
             Section(header: Text("Self-Introduction")) {
                 VStack {
-                    BetterTextEditor(placeholder: introExample, text: $global.newIntro)
+                    BetterTextEditor(placeholder: introExample, text: $newIntro)
                     Spacer()
                     HStack {
                         Spacer()
-                        Text("\(global.newIntro.count)/256")
+                        Text("\(newIntro.count)/256")
                             .padding()
-                            .foregroundColor(global.newIntro.count > 256 ? .red : colorScheme == .light ? .black : .white)
+                            .foregroundColor(newIntro.count > 256 ? .red : colorScheme == .light ? .black : .white)
                     }
                 }
             }
@@ -178,7 +188,7 @@ struct ProfileEditView: View {
                     Text("GitHub")
                     HStack(spacing: 0) {
                         Text("github.com/")
-                        TextField("Username", text: $global.newGitHub)
+                        TextField("Username", text: $newGitHub)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .autocapitalization(.none)
                     }
@@ -188,7 +198,7 @@ struct ProfileEditView: View {
                     Text("LinkedIn")
                     HStack(spacing: 0) {
                         Text("linkedin.com/in/")
-                        TextField("Profile URL", text: $global.newLinkedIn)
+                        TextField("Profile URL", text: $newLinkedIn)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .autocapitalization(.none)
                     }
@@ -199,24 +209,24 @@ struct ProfileEditView: View {
                 NavigationLink(
                     destination:
                         List {
-                            InterestsView(interests: $global.newInterests)
+                            InterestsView(interests: $newInterests)
                                 .environmentObject(globalObject)
                         }
                         .listStyle(PlainListStyle())
                         .navigationBarTitle("Edit Interests", displayMode: .inline)
                 ) {
-                    if global.newInterests.count == 0 {
+                    if newInterests.count == 0 {
                         Text("Interests")
                     } else {
-                        TagsView(data: global.newInterests) { interest in
-                            InterestsButtonDisabledView(interest: interest, interests: global.newInterests)
+                        TagsView(data: newInterests) { interest in
+                            InterestsButtonDisabledView(interest: interest, interests: newInterests)
                         }
                     }
                 }
                 
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Others")
-                    TextField("Ex: Design, Desktop, Graphics, etc", text: $global.newOtherInterests)
+                    TextField("Ex: Design, Desktop, Graphics, etc", text: $newOtherInterests)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                 }
             }
@@ -232,30 +242,30 @@ struct ProfileEditView: View {
                 Button(action: {
                     isUpdating = true
                     
-                    if global.newSmallImage == "" {
+                    if newSmallImage == "" {
                         activeAlert = .noImage
-                    } else if global.newBirthday.toAge() < 13 {
+                    } else if newBirthday.toAge() < 13 {
                         activeAlert = .mustBeAtLeast13
-                    } else if global.newBirthday.toAge() > 130 &&
-                                global.newBirthday.toString()[0] != "0" {
+                    } else if newBirthday.toAge() > 130 &&
+                                newBirthday.toString()[0] != "0" {
                         activeAlert = .mustBeAtMost130
-                    } else if global.newOtherInterests.count > 100 {
+                    } else if newOtherInterests.count > 100 {
                         activeAlert = .tooLongOtherInterests
-                    } else if global.newGitHub.contains("github.com") {
+                    } else if newGitHub.contains("github.com") {
                         activeAlert = .notGitHubUsername
-                    } else if global.newGitHub.count > 39 {
+                    } else if newGitHub.count > 39 {
                         activeAlert = .tooLongGitHub
-                    } else if !"https://github.com/\(global.newGitHub)".isValidUrl {
+                    } else if !"https://github.com/\(newGitHub)".isValidUrl {
                         activeAlert = .invalidGitHub
-                    } else if global.newLinkedIn.contains("linkedin.com") {
+                    } else if newLinkedIn.contains("linkedin.com") {
                         activeAlert = .notLinkedInProfileUrl
-                    } else if global.newLinkedIn.count > 100 {
+                    } else if newLinkedIn.count > 100 {
                         activeAlert = .tooLongLinkedIn
-                    } else if !"https://www.linkedin.com/in/\(global.newLinkedIn)".isValidUrl {
+                    } else if !"https://www.linkedin.com/in/\(newLinkedIn)".isValidUrl {
                         activeAlert = .invalidLinkedIn
-                    } else if global.newIntro == "" {
+                    } else if newIntro == "" {
                         activeAlert = .blankIntro
-                    } else if global.newIntro.count > 256 {
+                    } else if newIntro.count > 256 {
                         activeAlert = .tooLongIntro
                     } else if didNotEdit() {
                         presentation.wrappedValue.dismiss()
@@ -274,8 +284,8 @@ struct ProfileEditView: View {
             switch sheet {
             case .imagePicker:
                 ImagePickerView(sourceType: .photoLibrary) { uiImage in
-                    global.newSmallImage = global.toResizedString(uiImage: uiImage, maxSize: 200.0)
-                    global.newBigImage = global.toResizedString(uiImage: uiImage, maxSize: 1000.0)
+                    newSmallImage = global.toResizedString(uiImage: uiImage, maxSize: 200.0)
+                    newBigImage = global.toResizedString(uiImage: uiImage, maxSize: 1000.0)
                 }
                 .environmentObject(globalObject)
             }
@@ -313,22 +323,22 @@ struct ProfileEditView: View {
             case .blankIntro:
                 return Alert(title: Text("Your intro is blank."), message: Text("Your intro cannot be blank."), dismissButton: .default(Text("OK")))
             case .tooLongIntro:
-                return Alert(title: Text("Your intro is too long."), message: Text("You currently typed \(global.newIntro.count) characters. Please type no more than 256 characters."), dismissButton: .default(Text("OK")))
+                return Alert(title: Text("Your intro is too long."), message: Text("You currently typed \(newIntro.count) characters. Please type no more than 256 characters."), dismissButton: .default(Text("OK")))
             }
         }
     }
     
     func didNotEdit() -> Bool {
-        if global.smallImage == global.newSmallImage &&
-            global.bigImage == global.newBigImage &&
-            global.genderIndex == global.newGenderIndex &&
-            global.birthday == global.newBirthday &&
-            global.countryIndex == global.newCountryIndex &&
-            global.interests == global.newInterests &&
-            global.otherInterests == global.newOtherInterests &&
-            global.intro == global.newIntro &&
-            global.gitHub == global.newGitHub &&
-            global.linkedIn == global.newLinkedIn {
+        if global.smallImage == newSmallImage &&
+            global.bigImage == newBigImage &&
+            global.genderIndex == newGenderIndex &&
+            global.birthday == newBirthday &&
+            global.countryIndex == newCountryIndex &&
+            global.interests == newInterests &&
+            global.otherInterests == newOtherInterests &&
+            global.intro == newIntro &&
+            global.github == newGitHub &&
+            global.linkedin == newLinkedIn {
             return true
         }
         return false
@@ -339,16 +349,16 @@ struct ProfileEditView: View {
             let postString =
                 "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "smallImage=\(global.newSmallImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "bigImage=\(global.newBigImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "gender=\(global.newGenderIndex)&" +
-                "birthday=\(global.newBirthday.toString(toFormat: "yyyy-MM-dd"))&" +
-                "country=\(global.newCountryIndex)&" +
-                "interests=\(global.newInterests.toInterestsString().addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "otherInterests=\(global.newOtherInterests.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "intro=\(global.newIntro.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "gitHub=\(global.newGitHub.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "linkedIn=\(global.newLinkedIn.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+                "smallImage=\(newSmallImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "bigImage=\(newBigImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "gender=\(newGenderIndex)&" +
+                "birthday=\(newBirthday.toString(toFormat: "yyyy-MM-dd"))&" +
+                "country=\(newCountryIndex)&" +
+                "interests=\(newInterests.toInterestsString().addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "otherInterests=\(newOtherInterests.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "intro=\(newIntro.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "github=\(newGitHub.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "linkedin=\(newLinkedIn.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
             global.runPhp(script: "updateUser", postString: postString) { json in
                 updateGlobalProfile()
                 
@@ -360,15 +370,15 @@ struct ProfileEditView: View {
     }
     
     func updateGlobalProfile() {
-        global.smallImage = global.newSmallImage
-        global.bigImage = global.newBigImage
-        global.genderIndex = global.newGenderIndex
-        global.birthday = global.newBirthday
-        global.countryIndex = global.newCountryIndex
-        global.interests = global.newInterests
-        global.otherInterests = global.newOtherInterests
-        global.intro = global.newIntro
-        global.gitHub = global.newGitHub
-        global.linkedIn = global.newLinkedIn
+        global.smallImage = newSmallImage
+        global.bigImage = newBigImage
+        global.genderIndex = newGenderIndex
+        global.birthday = newBirthday
+        global.countryIndex = newCountryIndex
+        global.interests = newInterests
+        global.otherInterests = newOtherInterests
+        global.intro = newIntro
+        global.github = newGitHub
+        global.linkedin = newLinkedIn
     }
 }

@@ -83,7 +83,6 @@ struct UserView: View {
                 HStack { // Having at least 2 views inside HStack is necessary to make Image larger.
                     if !isLoading && global.myId == userId {
                         Button(action: {
-                            setEditVars()
                             activeSheet = .profileEdit
                         }) {
                             Image(systemName: "person.crop.circle")
@@ -175,8 +174,8 @@ struct UserView: View {
                 countryIndex: global.countryIndex,
                 interests: global.interests,
                 intro: global.intro,
-                gitHub: global.gitHub,
-                linkedIn: global.linkedIn,
+                github: global.github,
+                linkedin: global.linkedin,
                 lastVisitedAt: global.getUtcTime(),
                 lastUpdatedAt: Date(timeIntervalSince1970: 0),
                 isAdmin: global.isAdmin,
@@ -199,7 +198,7 @@ struct UserView: View {
         global.runPhp(script: "getBuddy", postString: postString) { json in
             if json["isBanned"] != nil &&
                 json["isBanned"] as! Bool {
-                var userData = UserData(userId: userId, username: json["username"] as! String, genderIndex: 0, birthday: global.getUtcTime(), countryIndex: 0, interests: [String](), intro: "", gitHub: "", linkedIn: "", lastVisitedAt: global.getUtcTime(), lastUpdatedAt: global.getUtcTime(), isAdmin: false, bytesMade: 0, commentsMade: 0, byteLikesReceived: 0, commentLikesReceived: 0, byteLikesGiven: 0, commentLikesGiven: 0)
+                var userData = UserData(userId: userId, username: json["username"] as! String, genderIndex: 0, birthday: global.getUtcTime(), countryIndex: 0, interests: [String](), intro: "", github: "", linkedin: "", lastVisitedAt: global.getUtcTime(), lastUpdatedAt: global.getUtcTime(), isAdmin: false, bytesMade: 0, commentsMade: 0, byteLikesReceived: 0, commentLikesReceived: 0, byteLikesGiven: 0, commentLikesGiven: 0)
                 userData.isBanned = true
                 userData.updateClientData()
                 
@@ -210,7 +209,7 @@ struct UserView: View {
             
             if json["isDeleted"] != nil &&
                 json["isDeleted"] as! Bool {
-                var userData = UserData(userId: userId, username: json["username"] as! String, genderIndex: 0, birthday: global.getUtcTime(), countryIndex: 0, interests: [String](), intro: "", gitHub: "", linkedIn: "", lastVisitedAt: global.getUtcTime(), lastUpdatedAt: global.getUtcTime(), isAdmin: false, bytesMade: 0, commentsMade: 0, byteLikesReceived: 0, commentLikesReceived: 0, byteLikesGiven: 0, commentLikesGiven: 0)
+                var userData = UserData(userId: userId, username: json["username"] as! String, genderIndex: 0, birthday: global.getUtcTime(), countryIndex: 0, interests: [String](), intro: "", github: "", linkedin: "", lastVisitedAt: global.getUtcTime(), lastUpdatedAt: global.getUtcTime(), isAdmin: false, bytesMade: 0, commentsMade: 0, byteLikesReceived: 0, commentLikesReceived: 0, byteLikesGiven: 0, commentLikesGiven: 0)
                 userData.isDeleted = true
                 userData.updateClientData()
                 
@@ -227,8 +226,8 @@ struct UserView: View {
                 countryIndex: json["country"] as! Int,
                 interests: (json["interests"] as! String).toInterestsArray(),
                 intro: json["intro"] as! String,
-                gitHub: json["gitHub"] as! String,
-                linkedIn: json["linkedIn"] as! String,
+                github: json["github"] as! String,
+                linkedin: json["linkedin"] as! String,
                 lastVisitedAt: (json["lastVisitedAt"] as! String).toDate(),
                 lastUpdatedAt: (json["lastUpdatedAt"] as! String).toDate(),
                 isAdmin: json["isAdmin"] as! Bool,
@@ -244,30 +243,6 @@ struct UserView: View {
             isLoading = false
             mustGetBytesAndComments = true
         }
-    }
-    
-    // Reset edit variables here instead of onAppear of ProfileEditView since it may be navigated from other views.
-    func setEditVars() {
-        global.newSmallImage = global.smallImage
-        global.newBigImage = global.bigImage
-        global.newGenderIndex = global.genderIndex
-        global.newBirthday = global.birthday
-        global.newCountryIndex = global.countryIndex
-        global.newInterests = global.interests
-        global.newOtherInterests = global.otherInterests
-        global.newIntro = global.intro
-        global.newGitHub = global.gitHub
-        global.newLinkedIn = global.linkedIn
-        
-        let userPreviewData = UserPreviewData(
-            userId: global.myId,
-            username: global.username,
-            birthday: global.newBirthday,
-            genderIndex: global.newGenderIndex,
-            countryIndex: global.newCountryIndex,
-            intro: global.newIntro,
-            lastVisitedAt: global.getUtcTime())
-        userPreviewData.updateClientData()
     }
     
     func getActionSheet() -> ActionSheet {
@@ -309,8 +284,8 @@ struct UserData: Identifiable, Codable {
     var countryIndex: Int
     var interests: [String]
     var intro: String
-    var gitHub: String
-    var linkedIn: String
+    var github: String
+    var linkedin: String
     var lastVisitedAt: Date
     var lastUpdatedAt: Date
     var isAdmin: Bool
@@ -330,8 +305,8 @@ struct UserData: Identifiable, Codable {
          countryIndex: Int,
          interests: [String],
          intro: String,
-         gitHub: String,
-         linkedIn: String,
+         github: String,
+         linkedin: String,
          lastVisitedAt: Date,
          lastUpdatedAt: Date,
          isAdmin: Bool,
@@ -348,8 +323,8 @@ struct UserData: Identifiable, Codable {
         self.countryIndex = countryIndex
         self.interests = interests
         self.intro = intro
-        self.gitHub = gitHub
-        self.linkedIn = linkedIn
+        self.github = github
+        self.linkedin = linkedin
         self.lastVisitedAt = lastVisitedAt
         self.lastUpdatedAt = lastUpdatedAt
         self.isAdmin = isAdmin

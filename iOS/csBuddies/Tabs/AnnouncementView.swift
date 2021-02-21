@@ -14,14 +14,23 @@ struct AnnouncementView: View {
     var body: some View {
         if global.announcementText != "" {
             HStack {
-                NavigationLink(destination:
-                                        WebView(request: URLRequest(url: URL(string: global.announcementLink)!))
-                                        .navigationBarTitle(global.announcementLink, displayMode: .inline)) {
+                if global.announcementLink == "" {
                     HStack {
                         Text(global.announcementText.replacingOccurrences(of: "\\n", with: "\n"))
                             .font(.system(size: 14))
                             .foregroundColor(.white)
                         Spacer()
+                    }
+                } else {
+                    NavigationLink(destination:
+                                            WebView(request: URLRequest(url: URL(string: global.announcementLink)!))
+                                            .navigationBarTitle(global.announcementLink, displayMode: .inline)) {
+                        HStack {
+                            Text(global.announcementText.replacingOccurrences(of: "\\n", with: "\n"))
+                                .font(.system(size: 14))
+                                .foregroundColor(.white)
+                            Spacer()
+                        }
                     }
                 }
                 
@@ -38,3 +47,4 @@ struct AnnouncementView: View {
         }
     }
 }
+

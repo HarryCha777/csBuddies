@@ -20,10 +20,8 @@ struct SimpleView: View {
         self.subtitle = subtitle
         self.bottomView = bottomView
     }
-
+    
     var body: some View {
-        HStack {
-            Spacer()
         VStack {
             if lottieView != nil {
                 lottieView
@@ -50,7 +48,5 @@ struct SimpleView: View {
             }
         }
         .padding()
-            Spacer()
-        }
     }
 }

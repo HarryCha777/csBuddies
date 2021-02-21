@@ -16,6 +16,7 @@ struct CommentWriteView: View {
     
     let byteId: String
     let parentCommentId: String
+    @State var comment: String
     @Binding var newCommentId: String
     
     @State private var isPosting = false
@@ -32,9 +33,11 @@ struct CommentWriteView: View {
     
     init(byteId: String,
          parentCommentId: String = "",
+         comment: String,
          newCommentId: Binding<String>) {
         self.byteId = byteId
         self.parentCommentId = parentCommentId
+        self._comment = State(initialValue: comment)
         self._newCommentId = newCommentId
     }
     
@@ -102,14 +105,14 @@ struct CommentWriteView: View {
                 Spacer()
                     .frame(height: 10)
                 
-                BetterTextEditor(placeholder: "Type your \(parentCommentId == "" ? "comment" : "reply") here...", text: $global.commentDraft)
+                BetterTextEditor(placeholder: "Type your \(parentCommentId == "" ? "comment" : "reply") here...", text: $comment)
                 
                 Spacer()
                 HStack {
                     Spacer()
-                    Text("\(global.commentDraft.count)/256")
+                    Text("\(comment.count)/256")
                         .padding()
-                        .foregroundColor(global.commentDraft.count > 256 ? .red : colorScheme == .light ? .black : .white)
+                        .foregroundColor(comment.count > 256 ? .red : colorScheme == .light ? .black : .white)
                 }
             }
             
@@ -132,7 +135,7 @@ struct CommentWriteView: View {
                 Button(action: {
                     isPosting = true
                     
-                    if global.commentDraft.count > 256 {
+                    if comment.count > 256 {
                         activeAlert = .tooLongComment
                     } else {
                         addComment()
@@ -140,7 +143,7 @@ struct CommentWriteView: View {
                 }) {
                     Text("Post")
                 }
-                .disabled(global.commentDraft.count == 0 || global.commentDraft.count > 256 || isPosting)
+                .disabled(comment.count == 0 || comment.count > 256 || isPosting)
             }
         }
         .alert(item: $activeAlert) { alert in
@@ -150,7 +153,7 @@ struct CommentWriteView: View {
             
             switch alert {
             case .tooLongComment:
-                return Alert(title: Text("Too Long Comment"), message: Text("You currently typed \(global.commentDraft.count) characters. Please type no more than 256 characters."), dismissButton: .default(Text("OK")))
+                return Alert(title: Text("Too Long Comment"), message: Text("You currently typed \(comment.count) characters. Please type no more than 256 characters."), dismissButton: .default(Text("OK")))
             case .tooManyCommentsToday:
                 return Alert(title: Text("Reached Daily Comment Limit"), message: Text("You already posted \(dailyLimit) comments today. Please come back tomorrow."), dismissButton: .default(Text("OK")))
             case .prepermission:
@@ -162,6 +165,11 @@ struct CommentWriteView: View {
                              }))
             }
         }
+        .onDisappear {
+            // Rapidly updating a global variable is laggy in TabView with lots of content,
+            // so use a local variable instead and update the global variable only at the end.
+            global.commentDraft = comment
+        }
     }
     
     func addComment() {
@@ -171,7 +179,7 @@ struct CommentWriteView: View {
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "byteId=\(byteId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "parentCommentId=\(parentCommentId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "content=\(global.commentDraft.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+                "content=\(comment.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
             global.runPhp(script: "addComment", postString: postString) { json in
                 if json["isTooMany"] != nil &&
                     json["isTooMany"] as! Bool {
@@ -199,13 +207,13 @@ struct CommentWriteView: View {
                     lastVisitedAt: global.getUtcTime(),
                     parentUserId: parentCommentId == "" ? "00000000-0000-0000-0000-000000000000" : global.comments[parentCommentId]!.userId,
                     parentUsername: parentCommentId == "" ? "" : global.comments[parentCommentId]!.username,
-                    content: global.commentDraft,
+                    content: comment,
                     likes: 0,
                     isLiked: false,
                     postedAt: global.getUtcTime())
                 commentData.updateClientData()
                 
-                global.commentDraft = ""
+                comment = ""
                 global.commentsMade += 1
                 
                 presentation.wrappedValue.dismiss()

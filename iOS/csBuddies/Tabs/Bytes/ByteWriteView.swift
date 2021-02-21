@@ -14,6 +14,7 @@ struct ByteWriteView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.presentationMode) var presentation
     
+    @State var byte: String
     @Binding var newByteId: String
     
     @State private var isPosting = false
@@ -31,13 +32,13 @@ struct ByteWriteView: View {
     var body: some View {
         List {
             VStack {
-                BetterTextEditor(placeholder: "Type your byte here...", text: $global.byteDraft)
+                BetterTextEditor(placeholder: "Type your byte here...", text: $byte)
                 Spacer()
                 HStack {
                     Spacer()
-                    Text("\(global.byteDraft.count)/256")
+                    Text("\(byte.count)/256")
                         .padding()
-                        .foregroundColor(global.byteDraft.count > 256 ? .red : colorScheme == .light ? .black : .white)
+                        .foregroundColor(byte.count > 256 ? .red : colorScheme == .light ? .black : .white)
                 }
             }
 
@@ -60,7 +61,7 @@ struct ByteWriteView: View {
                 Button(action: {
                     isPosting = true
                     
-                    if global.byteDraft.count > 256 {
+                    if byte.count > 256 {
                         activeAlert = .tooLongByte
                     } else {
                         addByte()
@@ -68,7 +69,7 @@ struct ByteWriteView: View {
                 }) {
                     Text("Post")
                 }
-                .disabled(global.byteDraft.count == 0 || global.byteDraft.count > 256 || isPosting)
+                .disabled(byte.count == 0 || byte.count > 256 || isPosting)
             }
         }
         .alert(item: $activeAlert) { alert in
@@ -78,7 +79,7 @@ struct ByteWriteView: View {
             
             switch alert {
             case .tooLongByte:
-                return Alert(title: Text("Too Long Byte"), message: Text("You currently typed \(global.byteDraft.count) characters. Please type no more than 256 characters."), dismissButton: .default(Text("OK")))
+                return Alert(title: Text("Too Long Byte"), message: Text("You currently typed \(byte.count) characters. Please type no more than 256 characters."), dismissButton: .default(Text("OK")))
             case .tooManyBytesToday:
                 return Alert(title: Text("Reached Daily Byte Limit"), message: Text("You already posted \(dailyLimit) bytes today. Please come back tomorrow."), dismissButton: .default(Text("OK")))
             case .prepermission:
@@ -90,6 +91,11 @@ struct ByteWriteView: View {
                       }))
             }
         }
+        .onDisappear {
+            // Rapidly updating a global variable is laggy in TabView with lots of content,
+            // so use a local variable instead and update the global variable only at the end.
+            global.byteDraft = byte
+        }
     }
     
     func addByte() {
@@ -97,7 +103,7 @@ struct ByteWriteView: View {
             let postString =
                 "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "content=\(global.byteDraft.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+                "content=\(byte.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
             global.runPhp(script: "addByte", postString: postString) { json in
                 if json["isTooMany"] != nil &&
                     json["isTooMany"] as! Bool {
@@ -112,14 +118,14 @@ struct ByteWriteView: View {
                     userId: global.myId,
                     username: global.username,
                     lastVisitedAt: global.getUtcTime(),
-                    content: global.byteDraft,
+                    content: byte,
                     likes: 0,
                     comments: 0,
                     isLiked: false,
                     postedAt: global.getUtcTime())
                 byteData.updateClientData()
                 
-                global.byteDraft = ""
+                byte = ""
                 global.bytesMade += 1
                 
                 presentation.wrappedValue.dismiss()

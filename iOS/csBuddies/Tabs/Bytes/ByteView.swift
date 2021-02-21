@@ -140,7 +140,7 @@ struct ByteView: View {
                 .navigationViewStyle(StackNavigationViewStyle())
             case .bytesByteWrite:
                 NavigationView {
-                    CommentWriteView(byteId: byteId, newCommentId: $newCommentId)
+                    CommentWriteView(byteId: byteId, comment: global.commentDraft, newCommentId: $newCommentId)
                         .environmentObject(globalObject)
                 }
                 .navigationViewStyle(StackNavigationViewStyle())

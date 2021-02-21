@@ -65,8 +65,8 @@ class Global: ObservableObject {
     @Published var birthday = Date(timeIntervalSince1970: 946684800) { didSet { saveUserData() } } // Default birthday is 1/1/2000 12:00:00 AM UTC.
     @Published var countryOptions = ["Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo, Democratic Republic of the", "Congo, Republic of the", "Costa Rica", "Cote d'Ivoire", "Croatia", "Cuba", "Cyprus", "Czechia", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"]
     @Published var countryIndex = 187 { didSet { saveUserData() } } // Default country is US.
-    @Published var gitHub = "" { didSet { saveUserData() } }
-    @Published var linkedIn = "" { didSet { saveUserData() } }
+    @Published var github = "" { didSet { saveUserData() } }
+    @Published var linkedin = "" { didSet { saveUserData() } }
     
     // TypeIntroView
     @Published var username = "" { didSet { saveUserData() } }
@@ -113,13 +113,6 @@ class Global: ObservableObject {
     @Published var buddiesFilterInterests = [String]() { didSet { saveUserData() } }
     @Published var buddiesFilterSortIndex = 0 { didSet { saveUserData() } }
 
-    @Published var newBuddiesFilterGenderIndex = 0
-    @Published var newBuddiesFilterMinAge = 13
-    @Published var newBuddiesFilterMaxAge = 130
-    @Published var newBuddiesFilterCountryIndex = 0
-    @Published var newBuddiesFilterInterests = [String]()
-    @Published var newBuddiesFilterSortIndex = 0
-
     // BytesView
     @Published var bytes = [String: ByteData]()
     
@@ -142,8 +135,6 @@ class Global: ObservableObject {
     
     // BytesFilterView
     @Published var bytesFilterSortIndex = 0 { didSet { saveUserData() } }
-    
-    @Published var newBytesFilterSortIndex = 0 { didSet { saveUserData() } }
     
     // ChatView
     @Published var hasAskedNotification = false { didSet { saveUserData() } }
@@ -173,18 +164,6 @@ class Global: ObservableObject {
     @Published var commentLikesReceived = 0
     @Published var byteLikesGiven = 0 { didSet { saveUserData() } }
     @Published var commentLikesGiven = 0 { didSet { saveUserData() } }
-
-    // ProfileEditView
-    @Published var newSmallImage = ""
-    @Published var newBigImage = ""
-    @Published var newGenderIndex = 0
-    @Published var newBirthday = Date()
-    @Published var newCountryIndex = 0
-    @Published var newGitHub = ""
-    @Published var newLinkedIn = ""
-    @Published var newInterests = [String]()
-    @Published var newOtherInterests = ""
-    @Published var newIntro = ""
     
     // AccountView
     @Published var notifyLikes = true { didSet { updateNotifications() } }
@@ -204,8 +183,8 @@ class Global: ObservableObject {
         interests = [String]()
         otherInterests = ""
         intro = ""
-        gitHub = ""
-        linkedIn = ""
+        github = ""
+        linkedin = ""
         
         notifyLikes = false
         notifyComments = false
@@ -249,8 +228,8 @@ class Global: ObservableObject {
         coreDataUser.interests = interests as NSObject
         coreDataUser.otherInterests = otherInterests
         coreDataUser.intro = intro
-        coreDataUser.gitHub = gitHub
-        coreDataUser.linkedIn = linkedIn
+        coreDataUser.github = github
+        coreDataUser.linkedin = linkedin
         
         coreDataUser.notifyLikes = notifyLikes
         coreDataUser.notifyComments = notifyComments
@@ -306,7 +285,7 @@ class Global: ObservableObject {
         //print("DEBUG - script: \(script)")
         //print("DEBUG - postString: \(postString)")
         
-        let scriptUrl = URL(string: "\(webServerLink)/21/\(script).php");
+        let scriptUrl = URL(string: "\(webServerLink)/22/\(script).php");
         var request = URLRequest(url: scriptUrl!)
         request.httpMethod = "POST"
         request.httpBody = postString.data(using: String.Encoding.utf8)

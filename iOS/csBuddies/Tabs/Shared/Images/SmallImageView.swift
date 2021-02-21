@@ -15,24 +15,26 @@ struct SmallImageView: View {
     let isOnline: Bool
     let size: CGFloat
     let isUpdating: Bool
+    let newSmallImage: String
     
-    init(userId: String, isOnline: Bool, size: CGFloat, isUpdating: Bool = false) {
+    init(userId: String, isOnline: Bool, size: CGFloat, isUpdating: Bool = false, newSmallImage: String = "") {
         self.userId = userId
         self.isOnline = isOnline
         self.size = size
         self.isUpdating = isUpdating
+        self.newSmallImage = newSmallImage
     }
 
     var body: some View {
         ZStack {
             if userId == global.myId && isUpdating {
-                if global.newBigImage == "" {
+                if newSmallImage == "" {
                     Image(systemName: "person.crop.circle.fill")
                         .resizable()
                         .frame(width: size, height: size)
                         .clipShape(RoundedRectangle(cornerRadius: 15))
                 } else {
-                    Image(uiImage: global.newBigImage.toUiImage())
+                    Image(uiImage: newSmallImage.toUiImage())
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(width: size, height: size)

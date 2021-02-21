@@ -131,7 +131,6 @@ struct BytesView: View {
                     }
 
                     Button(action: {
-                        setNewFilterVars()
                         activeSheet = .bytesFilter
                     }) {
                         Image(systemName: "slider.horizontal.3")
@@ -144,7 +143,7 @@ struct BytesView: View {
             switch sheet {
             case .bytesWrite:
                 NavigationView {
-                    ByteWriteView(newByteId: $newByteId)
+                    ByteWriteView(byte: global.byteDraft, newByteId: $newByteId)
                         .environmentObject(globalObject)
                 }
                 .navigationViewStyle(StackNavigationViewStyle())
@@ -168,10 +167,6 @@ struct BytesView: View {
                 }))
             }
         }
-    }
-    
-    func setNewFilterVars() {
-        global.newBytesFilterSortIndex = global.bytesFilterSortIndex
     }
 
     func getBytes() {

@@ -84,7 +84,6 @@ struct BuddiesView: View {
                 HStack { // Having at least 2 views inside HStack is necessary to make Image larger.
                     Spacer()
                     Button(action: {
-                        setNewFilterVars()
                         activeSheet = .buddiesFilter
                     }) {
                         Image(systemName: "slider.horizontal.3")
@@ -122,16 +121,6 @@ struct BuddiesView: View {
                 }), secondaryButton: .destructive(Text(afterOpeningSayNo)))
             }
         }
-    }
-    
-    // Reset new filter variables here instead of onAppear of BuddiesFilterView since it may be navigated from other views.
-    func setNewFilterVars() {
-        global.newBuddiesFilterGenderIndex = global.buddiesFilterGenderIndex
-        global.newBuddiesFilterMinAge = global.buddiesFilterMinAge
-        global.newBuddiesFilterMaxAge = global.buddiesFilterMaxAge
-        global.newBuddiesFilterCountryIndex = global.buddiesFilterCountryIndex
-        global.newBuddiesFilterInterests = global.buddiesFilterInterests
-        global.newBuddiesFilterSortIndex = global.buddiesFilterSortIndex
     }
     
     func getBuddies() {

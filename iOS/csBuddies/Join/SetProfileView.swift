@@ -132,7 +132,7 @@ struct SetUserProfileView: View {
                         Text("GitHub")
                         HStack(spacing: 0) {
                             Text("github.com/")
-                            TextField("Username", text: $global.gitHub)
+                            TextField("Username", text: $global.github)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .autocapitalization(.none)
                         }
@@ -142,7 +142,7 @@ struct SetUserProfileView: View {
                         Text("LinkedIn")
                         HStack(spacing: 0) {
                             Text("linkedin.com/in/")
-                            TextField("Profile URL", text: $global.linkedIn)
+                            TextField("Profile URL", text: $global.linkedin)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .autocapitalization(.none)
                         }
@@ -163,17 +163,17 @@ struct SetUserProfileView: View {
                     } else if global.birthday.toAge() > 130 &&
                                 global.birthday.toString()[0] != "0" {
                         activeAlert = .mustBeAtMost130
-                    } else if global.gitHub.contains("github.com") {
+                    } else if global.github.contains("github.com") {
                         activeAlert = .notGitHubUsername
-                    } else if global.gitHub.count > 39 {
+                    } else if global.github.count > 39 {
                         activeAlert = .tooLongGitHub
-                    } else if !"https://github.com/\(global.gitHub)".isValidUrl {
+                    } else if !"https://github.com/\(global.github)".isValidUrl {
                         activeAlert = .invalidGitHub
-                    } else if global.linkedIn.contains("linkedin.com") {
+                    } else if global.linkedin.contains("linkedin.com") {
                         activeAlert = .notLinkedInProfileUrl
-                    } else if global.linkedIn.count > 100 {
+                    } else if global.linkedin.count > 100 {
                         activeAlert = .tooLongLinkedIn
-                    } else if !"https://www.linkedin.com/in/\(global.linkedIn)".isValidUrl {
+                    } else if !"https://www.linkedin.com/in/\(global.linkedin)".isValidUrl {
                         activeAlert = .invalidLinkedIn
                     } else {
                         mustVisitTypeIntro = true

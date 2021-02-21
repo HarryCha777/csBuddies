@@ -235,8 +235,8 @@ struct TypeIntroView: View {
                 "interests=\(global.interests.toInterestsString().addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "otherInterests=\(global.otherInterests.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "intro=\(global.intro.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "gitHub=\(global.gitHub.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "linkedIn=\(global.linkedIn.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "github=\(global.github.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
+                "linkedin=\(global.linkedin.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "fcm=\(Messaging.messaging().fcmToken!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
             global.runPhp(script: "addUser", postString: postString) { json in
                 if json["isExtantUsername"] != nil &&

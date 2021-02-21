@@ -16,20 +16,28 @@ struct AppView: View {
         VStack {
             if global.isOffline {
                 OfflineView()
+                    .environmentObject(globalObject)
             } else {
                 switch global.activeRootView {
                 case .loading:
                     LoadingView()
+                        .environmentObject(globalObject)
                 case .welcome:
                     WelcomeView()
+                        .environmentObject(globalObject)
                 case .join:
                     TypeEmailView()
+                        .environmentObject(globalObject)
                 case .tabs:
                     TabsView()
+                        .environmentObject(globalObject)
                 case .maintenance:
                     MaintenanceView()
+                        .environmentObject(globalObject)
                 case .update:
                     UpdateView()
+                        .environmentObject(globalObject)
+
                 }
             }
         }

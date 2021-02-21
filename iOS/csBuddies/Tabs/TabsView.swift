@@ -20,6 +20,7 @@ struct TabsView: View {
                     TabView(selection: $global.tabIndex) {
                         NavigationView {
                             BuddiesView()
+                                .environmentObject(globalObject)
                                 .overlay(
                                     VStack {
                                         Spacer()
@@ -37,6 +38,7 @@ struct TabsView: View {
                         
                         NavigationView {
                             BytesView()
+                                .environmentObject(globalObject)
                         }
                         .navigationViewStyle(StackNavigationViewStyle())
                         .tabItem {
@@ -48,6 +50,7 @@ struct TabsView: View {
                         
                         NavigationView {
                             ChatView()
+                                .environmentObject(globalObject)
                         }
                         .navigationViewStyle(StackNavigationViewStyle())
                         .tabItem {
@@ -59,6 +62,7 @@ struct TabsView: View {
                         
                         NavigationView {
                             ProfileView()
+                                .environmentObject(globalObject)
                         }
                         .navigationViewStyle(StackNavigationViewStyle())
                         .tabItem {

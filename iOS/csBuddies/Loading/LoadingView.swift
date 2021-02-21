@@ -144,8 +144,8 @@ struct LoadingView: View {
         global.interests = coreDataUser.interests as? [String] ?? [String]()
         global.otherInterests = coreDataUser.otherInterests ?? ""
         global.intro = coreDataUser.intro ?? ""
-        global.gitHub = coreDataUser.gitHub ?? ""
-        global.linkedIn = coreDataUser.linkedIn ?? ""
+        global.github = coreDataUser.github ?? ""
+        global.linkedin = coreDataUser.linkedin ?? ""
         
         global.notifyLikes = coreDataUser.notifyLikes
         global.notifyComments = coreDataUser.notifyComments
@@ -454,8 +454,8 @@ struct LoadingView: View {
                 global.interests = (json["interests"] as! String).toInterestsArray()
                 global.otherInterests = json["otherInterests"] as! String
                 global.intro = json["intro"] as! String
-                global.gitHub = json["gitHub"] as! String
-                global.linkedIn = json["linkedIn"] as! String
+                global.github = json["github"] as! String
+                global.linkedin = json["linkedin"] as! String
                 
                 global.notifyLikes = json["notifyLikes"] as! Bool
                 global.notifyComments = json["notifyComments"] as! Bool
@@ -464,8 +464,6 @@ struct LoadingView: View {
                 global.commentsMade = json["commentsMade"] as! Int
                 global.byteLikesGiven = json["byteLikesGiven"] as! Int
                 global.commentLikesGiven = json["commentLikesGiven"] as! Int
-                
-                global.newBigImage = json["bigImage"] as! String // Set global.newBigImage for SmallImageView in WelcomeView.
 
                 global.blockedBuddyIds = [String]()
                 // If the json is empty, it will be NSArray. Otherwise, it will be NSDictionary. So there's no need to make sure its count is > 0.

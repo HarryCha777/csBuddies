@@ -16,11 +16,13 @@ struct BytesFilterView: View {
     @Binding var mustGetBytes: Bool
     
     @State private var filterSortOptions = ["Hot", "New"]
+    
+    @State private var newBytesFilterSortIndex = globalObject.bytesFilterSortIndex
 
     var body: some View {
         List {
             Section(header: Text("Sort")) {
-                Picker("", selection: $global.newBytesFilterSortIndex) {
+                Picker("", selection: $newBytesFilterSortIndex) {
                     ForEach(filterSortOptions.indices) { index in
                         Text(filterSortOptions[index])
                     }
@@ -45,7 +47,7 @@ struct BytesFilterView: View {
     }
     
     func applyFilters() {
-        global.bytesFilterSortIndex = global.newBytesFilterSortIndex
+        global.bytesFilterSortIndex = newBytesFilterSortIndex
 
         Analytics.logEvent("bytes_filter", parameters: [
             "sort": filterSortOptions[global.bytesFilterSortIndex],

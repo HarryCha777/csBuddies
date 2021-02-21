@@ -40,7 +40,7 @@ struct WelcomeView: View {
             .offset(y: UIScreen.main.bounds.height / 2 - UIScreen.main.bounds.height * 0.09)
             
             ZStack {
-                SmallImageView(userId: global.myId, isOnline: false, size: 160, isUpdating: true)
+                SmallImageView(userId: global.myId, isOnline: false, size: 160)
                     .scaledToFit()
                     .scaleEffect(self.showProfileImage ? 1 : 0)
                     .animation(Animation.spring())

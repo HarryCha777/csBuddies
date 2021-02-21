@@ -1099,7 +1099,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 21;
+				CURRENT_PROJECT_VERSION = 22;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"csBuddies/Preview Content\"";
@@ -1119,7 +1119,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/csBuddies/Toolkit",
 				);
-				MARKETING_VERSION = 4.0.0;
+				MARKETING_VERSION = 4.0.1;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrycha.csBuddies;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1142,7 +1142,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 21;
+				CURRENT_PROJECT_VERSION = 22;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"csBuddies/Preview Content\"";
 				DEVELOPMENT_TEAM = 9P4X6V9RQ5;
@@ -1161,7 +1161,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/csBuddies/Toolkit",
 				);
-				MARKETING_VERSION = 4.0.0;
+				MARKETING_VERSION = 4.0.1;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrycha.csBuddies;
 				PRODUCT_NAME = "$(TARGET_NAME)";
