@@ -50,7 +50,7 @@ left join byte_like as my_byte_like
 where  byte.deleted_at is null
 and byte.user_id = ?
 and byte.posted_at < ?
-order  by byte.posted_at DESC
+order  by byte.posted_at desc
 limit  20;";
 $stmt = $pdo->prepare($query);
 $stmt->execute(array($myId, $userId, $bottomPostedAt));

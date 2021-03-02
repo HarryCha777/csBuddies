@@ -1,0 +1,120 @@
+html * {
+    font-family: "Roboto", sans-serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+h1 {
+    font-size: 50px;
+    font-weight: bold;
+}
+
+h2 {
+    font-size: 30px;
+    font-weight: normal;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.navbar {
+    border-bottom: 2px solid gray;
+}
+
+.vertical-padding {
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+
+.navbar-padding {
+    padding-top: 150px;
+}
+
+@media (min-width: 768px) {
+    .conditional-vertical-padding {
+        padding-top: 50px;
+    }
+}
+
+@media (max-width: 767px) {
+    .conditional-vertical-padding {
+        padding-bottom: 50px;
+    }
+}
+
+.nav-item {
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+.navbar-nav .nav-item:hover .nav-link {
+    color: lightgray;
+}
+
+#navbar-title {
+    font-size: 40px;
+    vertical-align: middle;
+    padding-left: 20px;
+}
+
+#step-1-bg {
+    background: #61ce70;
+}
+
+#step-1-title {
+    color: white;
+}
+
+#step-1-subtitle {
+    color: white;
+}
+
+#step-2-bg {
+    background: #6ec1e4;
+}
+
+#step-2-title {
+    color: white;
+    text-align: right;
+}
+
+#step-2-subtitle {
+    color: white;
+    text-align: right;
+}
+
+#step-3-title {
+    color: #4054b2;
+}
+
+#step-3-subtitle {
+    color: #4054b2;
+}
+
+#bottom-bg {
+    background: #ffa500;
+}
+
+#bottom-title {
+    color: white;
+    text-shadow: 1px 1px 5px gray;
+}
+
+#bottom-subtitle {
+    color: white;
+}
+
+#footer-bg {
+    background: #3a3a3a;
+}
+
+#footer-title {
+    font-size: 15px;
+    font-weight: lighter;
+    color: white;
+}

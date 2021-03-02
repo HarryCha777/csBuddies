@@ -51,19 +51,9 @@ struct BuddiesView: View {
     
     var body: some View {
         List {
-            // Indices will not update the views when more profiles are loaded.
-            // Using enumerated or zip will require ad banner to stick to a profile using Vstack.
-            // Also, using enumerated or zip will cause a glitch when more profiles are loaded after clicking on a banner ad.
-            // Admob Native Ads View slows down the app, so stop showing them at some point.
             ForEach(buddyIds, id: \.self) { buddyId in
                 if !global.blockedBuddyIds.contains(buddyId) {
                     UserPreviewView(userId: buddyId)
-                }
-                
-                if buddyIds.firstIndex(where: { $0 == buddyId })! % 10 == 9 &&
-                    buddyIds.firstIndex(where: { $0 == buddyId })! < 500 &&
-                    !global.isPremium {
-                    AdmobNativeAdsUsersView()
                 }
             }
             // Do not use .id(UUID()) to prevent calling PHP on each tab change.

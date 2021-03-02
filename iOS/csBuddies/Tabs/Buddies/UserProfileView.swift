@@ -244,12 +244,6 @@ struct UserProfileView: View {
                     if global.users[userId]!.bytesMade > 0 {
                         ForEach(byteIds, id: \.self) { byteId in
                             BytePreviewView(byteId: byteId)
-                            
-                            if byteIds.firstIndex(where: { $0 == byteId })! % 10 == 9 &&
-                                byteIds.firstIndex(where: { $0 == byteId })! < 500 &&
-                                !global.isPremium {
-                                AdmobNativeAdsBytesView()
-                            }
                         }
                         // Do not use .id(UUID()) or bytes do not change when they are liked.
                         
@@ -268,12 +262,6 @@ struct UserProfileView: View {
                     if global.users[userId]!.byteLikesGiven > 0 {
                         ForEach(likedByteIds, id: \.self) { byteId in
                             BytePreviewView(byteId: byteId)
-                            
-                            if likedByteIds.firstIndex(where: { $0 == byteId })! % 10 == 9 &&
-                                likedByteIds.firstIndex(where: { $0 == byteId })! < 500 &&
-                                !global.isPremium {
-                                AdmobNativeAdsBytesView()
-                            }
                         }
                         // Do not use .id(UUID()) or bytes do not change when they are liked.
                         

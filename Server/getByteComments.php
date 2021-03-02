@@ -56,7 +56,7 @@ where  ( account.banned_at is null
        and comment.deleted_at is null
        and comment.byte_id = ?
        and comment.posted_at > ?
-order  by comment.posted_at ASC
+order  by comment.posted_at asc
 limit  20;";
 $stmt = $pdo->prepare($query);
 $stmt->execute(array($myId, $myId, $byteId, $bottomPostedAt));

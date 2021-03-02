@@ -48,10 +48,6 @@ struct BytesFilterView: View {
     
     func applyFilters() {
         global.bytesFilterSortIndex = newBytesFilterSortIndex
-
-        Analytics.logEvent("bytes_filter", parameters: [
-            "sort": filterSortOptions[global.bytesFilterSortIndex],
-        ])
         
         mustGetBytes = true
         presentation.wrappedValue.dismiss()

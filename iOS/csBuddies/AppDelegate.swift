@@ -6,6 +6,7 @@
 //  Copyright © 2020 Harry Cha. All rights reserved.
 //
 
+import SwiftUI
 import Firebase
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {

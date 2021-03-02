@@ -50,7 +50,7 @@ from   comment
 where  comment.deleted_at is null
        and comment.user_id = ?
        and comment.posted_at < ?
-order  by comment.posted_at DESC
+order  by comment.posted_at desc
 limit  20;";
 $stmt = $pdo->prepare($query);
 $stmt->execute(array($myId, $userId, $bottomPostedAt));

@@ -14,6 +14,18 @@ if (!$isValid) {
     die("Invalid");
 }
 
+$query = "select user_id from comment where comment_id = ? limit 1;";
+$stmt = $pdo->prepare($query);
+$stmt->execute(array($commentId));
+
+$row = $stmt->fetch();
+$userId = $row[0];
+
+if ($myId !== $userId) {
+    $pdo = null;
+    die("Invalid");
+}
+
 $query = "select count(comment_id) = 0 from comment where deleted_at is null and comment_id = ? limit 1;";
 $stmt = $pdo->prepare($query);
 $stmt->execute(array($commentId));
@@ -25,13 +37,6 @@ if (!$hasAlreadyDeleted) {
     $query = "update comment set deleted_at = current_timestamp where comment_id = ?;";
     $stmt = $pdo->prepare($query);
     $stmt->execute(array($commentId));
-
-    $query = "select byte_id from comment where comment_id = ? limit 1;";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute(array($commentId));
-
-    $row = $stmt->fetch();
-    $byteId = $row[0];
 }
 
 $return = array("hasAlreadyDeleted" => $hasAlreadyDeleted);

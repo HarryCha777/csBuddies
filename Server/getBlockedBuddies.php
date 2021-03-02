@@ -29,7 +29,7 @@ from   block
 where  account.deleted_at is null
        and block.user_id = ?
        and block.blocked_at < ?
-order  by block.blocked_at DESC
+order  by block.blocked_at desc
 limit  20;";
 $stmt = $pdo->prepare($query);
 $stmt->execute(array($myId, $bottomBlockedAt));

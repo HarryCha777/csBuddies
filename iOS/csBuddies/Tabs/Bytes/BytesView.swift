@@ -40,19 +40,9 @@ struct BytesView: View {
     var body: some View {
         ZStack {
             List {
-                // Indices will not update the views when more profiles are loaded.
-                // Using enumerated or zip will require ad banner to stick to a profile using Vstack.
-                // Also, using enumerated or zip will cause a glitch when more profiles are loaded after clicking on a banner ad.
-                // AdmobNativeAdsView slows down the app, so stop showing them at some point.
                 ForEach(byteIds, id: \.self) { byteId in
                     if !global.blockedBuddyIds.contains(global.bytes[byteId]!.userId) {
                         BytePreviewView(byteId: byteId)
-                    }
-                    
-                    if byteIds.firstIndex(where: { $0 == byteId })! % 10 == 9 &&
-                        byteIds.firstIndex(where: { $0 == byteId })! < 500 &&
-                        !global.isPremium {
-                        AdmobNativeAdsBytesView()
                     }
                 }
                 // Do not use .id(UUID()) to prevent calling PHP on each tab change and bytes from staying still when they are liked.

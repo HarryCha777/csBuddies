@@ -26,12 +26,6 @@ struct ByteLikesView: View {
                 if !global.blockedBuddyIds.contains(userId) {
                     UserPreviewView(userId: userId)
                 }
-                
-                if likerIds.firstIndex(where: { $0 == userId })! % 10 == 9 &&
-                    likerIds.firstIndex(where: { $0 == userId })! < 500 &&
-                    !global.isPremium {
-                    AdmobNativeAdsUsersView()
-                }
             }
             // Do not use .id(UUID()) to prevent calling PHP on each tab change.
 

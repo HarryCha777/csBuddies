@@ -11,7 +11,7 @@ if (!$isValid) {
     die("Invalid");
 }
 
-$query = "select username, banned_at is not null, deleted_at from account where user_id = ? limit 1;";
+$query = "select username, banned_at is not null, deleted_at is not null from account where user_id = ? limit 1;";
 $stmt = $pdo->prepare($query);
 $stmt->execute(array($buddyId));
 

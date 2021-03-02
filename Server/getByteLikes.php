@@ -38,7 +38,7 @@ where  ( account.banned_at is null
        and byte_like.is_liked = true
        and byte_like.byte_id = ?
        and byte_like.last_updated_at < ?
-order  by byte_like.last_updated_at DESC
+order  by byte_like.last_updated_at desc
 limit  20;";
 $stmt = $pdo->prepare($query);
 $stmt->execute(array($myId, $byteId, $bottomLastUpdatedAt));

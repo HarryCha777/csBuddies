@@ -111,15 +111,6 @@ struct BuddiesFilterView: View {
         global.buddiesFilterCountryIndex = newBuddiesFilterCountryIndex
         global.buddiesFilterInterests = newBuddiesFilterInterests
         global.buddiesFilterSortIndex = newBuddiesFilterSortIndex
-
-        Analytics.logEvent("buddies_filter", parameters: [
-            "gender": filterGenderOptions[global.buddiesFilterGenderIndex],
-            "min_age": String(global.buddiesFilterMinAge),
-            "max_age": String(global.buddiesFilterMaxAge),
-            "country": filterCountryOptions[global.buddiesFilterCountryIndex],
-            "interests": global.buddiesFilterInterests.toInterestsString(),
-            "sort": filterSortOptions[global.buddiesFilterSortIndex],
-        ])
         
         mustGetBuddies = true
         presentation.wrappedValue.dismiss()

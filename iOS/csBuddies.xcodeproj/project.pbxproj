@@ -23,18 +23,11 @@
 		8F26E3BB25CD9B7200EE4CB1 /* BackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F26E3BA25CD9B7200EE4CB1 /* BackButton.swift */; };
 		8F26E3C025CD9BD700EE4CB1 /* ColoredButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F26E3BF25CD9BD700EE4CB1 /* ColoredButton.swift */; };
 		8F26E3CB25CD9C2700EE4CB1 /* FloatingActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F26E3CA25CD9C2700EE4CB1 /* FloatingActionButton.swift */; };
-		8F2BFF8624F18E8F00F87BB8 /* AdmobNativeAds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F2BFF8524F18E8F00F87BB8 /* AdmobNativeAds.swift */; };
 		8F32877B2565810A00F2DE15 /* ByteLikesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F3287752565810A00F2DE15 /* ByteLikesView.swift */; };
 		8F32877D2565810A00F2DE15 /* BytesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F3287772565810A00F2DE15 /* BytesView.swift */; };
 		8F32877E2565810A00F2DE15 /* ByteWriteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F3287782565810A00F2DE15 /* ByteWriteView.swift */; };
 		8F32AE3B257D9F7C00609DD1 /* ConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F32AE3A257D9F7C00609DD1 /* ConfirmationView.swift */; };
 		8F38763D25BF933300DBEB22 /* BytesFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F38763C25BF933300DBEB22 /* BytesFilterView.swift */; };
-		8F39287E25598C1D00E0BCA8 /* UsersGADTSmallTemplateView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F39287425598C1D00E0BCA8 /* UsersGADTSmallTemplateView.m */; };
-		8F39287F25598C1D00E0BCA8 /* UsersGADTSmallTemplateView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8F39287525598C1D00E0BCA8 /* UsersGADTSmallTemplateView.xib */; };
-		8F39288025598C1D00E0BCA8 /* UsersGADTTemplateView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F39287725598C1D00E0BCA8 /* UsersGADTTemplateView.m */; };
-		8F39288125598C1D00E0BCA8 /* BytesGADTSmallTemplateView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F39287A25598C1D00E0BCA8 /* BytesGADTSmallTemplateView.m */; };
-		8F39288225598C1D00E0BCA8 /* BytesGADTSmallTemplateView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8F39287B25598C1D00E0BCA8 /* BytesGADTSmallTemplateView.xib */; };
-		8F39288325598C1D00E0BCA8 /* BytesGADTTemplateView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F39287D25598C1D00E0BCA8 /* BytesGADTTemplateView.m */; };
 		8F41765525B67F4D00FDE0A3 /* CommentHeartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F41765425B67F4D00FDE0A3 /* CommentHeartView.swift */; };
 		8F41765A25B681C400FDE0A3 /* CommentLikesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F41765925B681C400FDE0A3 /* CommentLikesView.swift */; };
 		8F42243C25AE6ECC00E0AE13 /* CommentWriteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F42243B25AE6ECC00E0AE13 /* CommentWriteView.swift */; };
@@ -56,7 +49,6 @@
 		8F9BC4402565568700206650 /* DeleteAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F9BC43F2565568700206650 /* DeleteAccountView.swift */; };
 		8F9F48D7257C230B00A85457 /* sendEmail.json in Resources */ = {isa = PBXBuildFile; fileRef = 8F9F48D6257C230B00A85457 /* sendEmail.json */; };
 		8F9F48DF257C326700A85457 /* openEmail.json in Resources */ = {isa = PBXBuildFile; fileRef = 8F9F48DE257C326700A85457 /* openEmail.json */; };
-		8FA9A11C25558C620035FE84 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 8FA9A11B25558C620035FE84 /* FirebaseAnalytics */; };
 		8FA9A12025558C620035FE84 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 8FA9A11F25558C620035FE84 /* FirebaseMessaging */; };
 		8FA9A12225558C620035FE84 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 8FA9A12125558C620035FE84 /* FirebaseAuth */; };
 		8FA9A12425558C620035FE84 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 8FA9A12325558C620035FE84 /* FirebaseFirestore */; };
@@ -101,7 +93,6 @@
 		8FC8689E25BD580C00957332 /* NotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FC8689D25BD580C00957332 /* NotificationView.swift */; };
 		8FC9921525B2C9DF00EFBF1B /* ByteHeartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FC9921425B2C9DF00EFBF1B /* ByteHeartView.swift */; };
 		8FCFB8F3255D464200999FA8 /* StepperView in Frameworks */ = {isa = PBXBuildFile; productRef = 8FCFB8F2255D464200999FA8 /* StepperView */; };
-		8FCFB900255D499700999FA8 /* GoogleMobileAds.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8FCFB8FF255D499700999FA8 /* GoogleMobileAds.xcframework */; };
 		8FCFB905255D598700999FA8 /* JoinStepper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FCFB904255D598700999FA8 /* JoinStepper.swift */; };
 		8FCFB90D255D7CA500999FA8 /* InterestsButtonEnabledView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FCFB90C255D7CA400999FA8 /* InterestsButtonEnabledView.swift */; };
 		8FD43CA22579C1FC007F6678 /* LottieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD43CA12579C1FC007F6678 /* LottieView.swift */; };
@@ -163,23 +154,12 @@
 		8F26E3BA25CD9B7200EE4CB1 /* BackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackButton.swift; sourceTree = "<group>"; };
 		8F26E3BF25CD9BD700EE4CB1 /* ColoredButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColoredButton.swift; sourceTree = "<group>"; };
 		8F26E3CA25CD9C2700EE4CB1 /* FloatingActionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingActionButton.swift; sourceTree = "<group>"; };
-		8F2BFF8524F18E8F00F87BB8 /* AdmobNativeAds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdmobNativeAds.swift; sourceTree = "<group>"; };
 		8F2BFFAA24F2BD7400F87BB8 /* csBuddies-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "csBuddies-Bridging-Header.h"; sourceTree = "<group>"; };
 		8F3287752565810A00F2DE15 /* ByteLikesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ByteLikesView.swift; sourceTree = "<group>"; };
 		8F3287772565810A00F2DE15 /* BytesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BytesView.swift; sourceTree = "<group>"; };
 		8F3287782565810A00F2DE15 /* ByteWriteView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ByteWriteView.swift; sourceTree = "<group>"; };
 		8F32AE3A257D9F7C00609DD1 /* ConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmationView.swift; sourceTree = "<group>"; };
 		8F38763C25BF933300DBEB22 /* BytesFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BytesFilterView.swift; sourceTree = "<group>"; };
-		8F39287325598C1D00E0BCA8 /* UsersGADTSmallTemplateView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UsersGADTSmallTemplateView.h; sourceTree = "<group>"; };
-		8F39287425598C1D00E0BCA8 /* UsersGADTSmallTemplateView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UsersGADTSmallTemplateView.m; sourceTree = "<group>"; };
-		8F39287525598C1D00E0BCA8 /* UsersGADTSmallTemplateView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UsersGADTSmallTemplateView.xib; sourceTree = "<group>"; };
-		8F39287625598C1D00E0BCA8 /* UsersGADTTemplateView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UsersGADTTemplateView.h; sourceTree = "<group>"; };
-		8F39287725598C1D00E0BCA8 /* UsersGADTTemplateView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UsersGADTTemplateView.m; sourceTree = "<group>"; };
-		8F39287925598C1D00E0BCA8 /* BytesGADTSmallTemplateView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BytesGADTSmallTemplateView.h; sourceTree = "<group>"; };
-		8F39287A25598C1D00E0BCA8 /* BytesGADTSmallTemplateView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BytesGADTSmallTemplateView.m; sourceTree = "<group>"; };
-		8F39287B25598C1D00E0BCA8 /* BytesGADTSmallTemplateView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = BytesGADTSmallTemplateView.xib; sourceTree = "<group>"; };
-		8F39287C25598C1D00E0BCA8 /* BytesGADTTemplateView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BytesGADTTemplateView.h; sourceTree = "<group>"; };
-		8F39287D25598C1D00E0BCA8 /* BytesGADTTemplateView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BytesGADTTemplateView.m; sourceTree = "<group>"; };
 		8F41765425B67F4D00FDE0A3 /* CommentHeartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentHeartView.swift; sourceTree = "<group>"; };
 		8F41765925B681C400FDE0A3 /* CommentLikesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentLikesView.swift; sourceTree = "<group>"; };
 		8F42243B25AE6ECC00E0AE13 /* CommentWriteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentWriteView.swift; sourceTree = "<group>"; };
@@ -245,7 +225,6 @@
 		8FC702FC257C70AC00D5641B /* Refresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Refresh.swift; sourceTree = "<group>"; };
 		8FC8689D25BD580C00957332 /* NotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationView.swift; sourceTree = "<group>"; };
 		8FC9921425B2C9DF00EFBF1B /* ByteHeartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ByteHeartView.swift; sourceTree = "<group>"; };
-		8FCFB8FF255D499700999FA8 /* GoogleMobileAds.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = GoogleMobileAds.xcframework; sourceTree = "<group>"; };
 		8FCFB904255D598700999FA8 /* JoinStepper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinStepper.swift; sourceTree = "<group>"; };
 		8FCFB90C255D7CA400999FA8 /* InterestsButtonEnabledView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterestsButtonEnabledView.swift; sourceTree = "<group>"; };
 		8FD43CA12579C1FC007F6678 /* LottieView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LottieView.swift; sourceTree = "<group>"; };
@@ -278,9 +257,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8FA9A12025558C620035FE84 /* FirebaseMessaging in Frameworks */,
-				8FCFB900255D499700999FA8 /* GoogleMobileAds.xcframework in Frameworks */,
 				8FA9A12A25558EF90035FE84 /* TrueTime in Frameworks */,
-				8FA9A11C25558C620035FE84 /* FirebaseAnalytics in Frameworks */,
 				8FD43CA82579C264007F6678 /* Lottie in Frameworks */,
 				8FA9A13625558FFA0035FE84 /* Introspect in Frameworks */,
 				8FCFB8F3255D464200999FA8 /* StepperView in Frameworks */,
@@ -336,40 +313,6 @@
 			path = Bytes;
 			sourceTree = "<group>";
 		};
-		8F39287125598C1D00E0BCA8 /* Admob Native Ads */ = {
-			isa = PBXGroup;
-			children = (
-				8F2BFF8524F18E8F00F87BB8 /* AdmobNativeAds.swift */,
-				8F39287225598C1D00E0BCA8 /* Users */,
-				8F39287825598C1D00E0BCA8 /* Bytes */,
-			);
-			path = "Admob Native Ads";
-			sourceTree = "<group>";
-		};
-		8F39287225598C1D00E0BCA8 /* Users */ = {
-			isa = PBXGroup;
-			children = (
-				8F39287325598C1D00E0BCA8 /* UsersGADTSmallTemplateView.h */,
-				8F39287425598C1D00E0BCA8 /* UsersGADTSmallTemplateView.m */,
-				8F39287525598C1D00E0BCA8 /* UsersGADTSmallTemplateView.xib */,
-				8F39287625598C1D00E0BCA8 /* UsersGADTTemplateView.h */,
-				8F39287725598C1D00E0BCA8 /* UsersGADTTemplateView.m */,
-			);
-			path = Users;
-			sourceTree = "<group>";
-		};
-		8F39287825598C1D00E0BCA8 /* Bytes */ = {
-			isa = PBXGroup;
-			children = (
-				8F39287925598C1D00E0BCA8 /* BytesGADTSmallTemplateView.h */,
-				8F39287A25598C1D00E0BCA8 /* BytesGADTSmallTemplateView.m */,
-				8F39287B25598C1D00E0BCA8 /* BytesGADTSmallTemplateView.xib */,
-				8F39287C25598C1D00E0BCA8 /* BytesGADTTemplateView.h */,
-				8F39287D25598C1D00E0BCA8 /* BytesGADTTemplateView.m */,
-			);
-			path = Bytes;
-			sourceTree = "<group>";
-		};
 		8F4622FA2571843100C5D23E /* Interests */ = {
 			isa = PBXGroup;
 			children = (
@@ -405,7 +348,6 @@
 		8F4623192571877D00C5D23E /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				8F39287125598C1D00E0BCA8 /* Admob Native Ads */,
 				8F4AB3A325CD9EBD003071A9 /* Texts */,
 				8F4AB39A25CD9DD5003071A9 /* Buttons */,
 				8F4623162571861D00C5D23E /* Navigation Links */,
@@ -488,7 +430,6 @@
 				8FCF3C8B255F74A900DF222C /* Update */,
 				8FCF3C8D255F74C200DF222C /* Tabs */,
 				8FE8E149257B7BC600E00EDE /* Json Animation */,
-				8FCFB8FF255D499700999FA8 /* GoogleMobileAds.xcframework */,
 				8F2BFFAA24F2BD7400F87BB8 /* csBuddies-Bridging-Header.h */,
 				8FC6A95D24C7BB54001FB6E0 /* Assets.xcassets */,
 				8FC6A96224C7BB54001FB6E0 /* LaunchScreen.storyboard */,
@@ -670,7 +611,6 @@
 			);
 			name = csBuddies;
 			packageProductDependencies = (
-				8FA9A11B25558C620035FE84 /* FirebaseAnalytics */,
 				8FA9A11F25558C620035FE84 /* FirebaseMessaging */,
 				8FA9A12125558C620035FE84 /* FirebaseAuth */,
 				8FA9A12325558C620035FE84 /* FirebaseFirestore */,
@@ -727,7 +667,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1150;
-				LastUpgradeCheck = 1150;
+				LastUpgradeCheck = 1240;
 				ORGANIZATIONNAME = "Harry Cha";
 				TargetAttributes = {
 					8FC6A95024C7BB50001FB6E0 = {
@@ -777,7 +717,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8FE8E162257B7BE000E00EDE /* error.json in Resources */,
-				8F39288225598C1D00E0BCA8 /* BytesGADTSmallTemplateView.xib in Resources */,
 				8FE8E16B257B7BE000E00EDE /* like.json in Resources */,
 				8F7F1697257B92F700AECE6F /* team.json in Resources */,
 				8F7F166F257B8D1200AECE6F /* noData.json in Resources */,
@@ -786,7 +725,6 @@
 				8FE8E164257B7BE000E00EDE /* maintenance.json in Resources */,
 				8FDA96EE24F0C1620039EC4C /* GoogleService-Info.plist in Resources */,
 				8F14BF752587159700D3ADB8 /* chat.json in Resources */,
-				8F39287F25598C1D00E0BCA8 /* UsersGADTSmallTemplateView.xib in Resources */,
 				8FC6A96124C7BB54001FB6E0 /* Preview Assets.xcassets in Resources */,
 				8FE8E174257B7C2D00E00EDE /* attention.json in Resources */,
 				8F9F48D7257C230B00A85457 /* sendEmail.json in Resources */,
@@ -873,7 +811,6 @@
 				8F9BC4402565568700206650 /* DeleteAccountView.swift in Sources */,
 				8FC6A9D624C7CD80001FB6E0 /* TypeIntroView.swift in Sources */,
 				8FC6A9D224C7CD80001FB6E0 /* LoadingView.swift in Sources */,
-				8F39288125598C1D00E0BCA8 /* BytesGADTSmallTemplateView.m in Sources */,
 				8F769D242562119F00351A3A /* BetterTextEditor.swift in Sources */,
 				8FC6A9D324C7CD80001FB6E0 /* UpdateView.swift in Sources */,
 				8FC6A9F624C7CD81001FB6E0 /* NavigationLinkBorderless.swift in Sources */,
@@ -890,15 +827,12 @@
 				8FC6A9D824C7CD80001FB6E0 /* AppDelegate.swift in Sources */,
 				8FEEAB7325AD8785006323AA /* BytePostView.swift in Sources */,
 				8FF3F1F1256F2D08008474BB /* NavigationLinkEmpty.swift in Sources */,
-				8F39287E25598C1D00E0BCA8 /* UsersGADTSmallTemplateView.m in Sources */,
 				8F1C4A4A25CD74A600156A34 /* InfiniteScrollView.swift in Sources */,
 				8FC6A9CF24C7CD80001FB6E0 /* UserView.swift in Sources */,
 				8FD43CA22579C1FC007F6678 /* LottieView.swift in Sources */,
 				8FE0D3A9254CCDB70088A8AB /* SmallImageView.swift in Sources */,
-				8F39288025598C1D00E0BCA8 /* UsersGADTTemplateView.m in Sources */,
 				8F38763D25BF933300DBEB22 /* BytesFilterView.swift in Sources */,
 				8F1B5FB5254FB752009C402B /* BigImageView.swift in Sources */,
-				8F2BFF8624F18E8F00F87BB8 /* AdmobNativeAds.swift in Sources */,
 				8F85F80E256EA41C00FE8348 /* AccountView.swift in Sources */,
 				8FBD011E25D3D0DD005F42F7 /* RadioButton.swift in Sources */,
 				8F1B5FBD254FD2A1009C402B /* UserProfileView.swift in Sources */,
@@ -914,7 +848,6 @@
 				8FC6A9CE24C7CD80001FB6E0 /* UserPreviewView.swift in Sources */,
 				8F12B66225CA30710011749A /* BytePreviewView.swift in Sources */,
 				8FEEAB6E25AD84D0006323AA /* ByteView.swift in Sources */,
-				8F39288325598C1D00E0BCA8 /* BytesGADTTemplateView.m in Sources */,
 				8F26E3CB25CD9C2700EE4CB1 /* FloatingActionButton.swift in Sources */,
 				8FC0F3BD255938A200298B0F /* EmailConfirmationView.swift in Sources */,
 				8F621934253AF1F600D4AFAB /* NavigationLinkNoArrow.swift in Sources */,
@@ -1000,6 +933,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -1061,6 +995,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -1099,7 +1034,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 23;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"csBuddies/Preview Content\"";
@@ -1119,8 +1054,8 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/csBuddies/Toolkit",
 				);
-				MARKETING_VERSION = 4.0.1;
-				OTHER_LDFLAGS = "-ObjC";
+				MARKETING_VERSION = 4.0.2;
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrycha.csBuddies;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1142,7 +1077,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 23;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"csBuddies/Preview Content\"";
 				DEVELOPMENT_TEAM = 9P4X6V9RQ5;
@@ -1161,8 +1096,8 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/csBuddies/Toolkit",
 				);
-				MARKETING_VERSION = 4.0.1;
-				OTHER_LDFLAGS = "-ObjC";
+				MARKETING_VERSION = 4.0.2;
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.harrycha.csBuddies;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1347,11 +1282,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8FA9A11A25558C620035FE84 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCrashlytics;
-		};
-		8FA9A11B25558C620035FE84 /* FirebaseAnalytics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8FA9A11A25558C620035FE84 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAnalytics;
 		};
 		8FA9A11F25558C620035FE84 /* FirebaseMessaging */ = {
 			isa = XCSwiftPackageProductDependency;

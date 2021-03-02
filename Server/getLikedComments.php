@@ -59,7 +59,7 @@ from   comment
               on parent_account.user_id = parent_comment.user_id
 where  comment.deleted_at is null
        and user_comment_like.last_updated_at < ?
-order  by user_comment_like.last_updated_at DESC
+order  by user_comment_like.last_updated_at desc
 limit  20;";
 $stmt = $pdo->prepare($query);
 $stmt->execute(array($myId, $userId, $bottomLastUpdatedAt));

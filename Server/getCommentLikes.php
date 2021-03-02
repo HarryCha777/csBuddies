@@ -38,7 +38,7 @@ where  ( account.banned_at is null
        and comment_like.is_liked = true
        and comment_like.comment_id = ?
        and comment_like.last_updated_at < ?
-order  by comment_like.last_updated_at DESC
+order  by comment_like.last_updated_at desc
 limit  20;";
 $stmt = $pdo->prepare($query);
 $stmt->execute(array($myId, $commentId, $bottomLastUpdatedAt));

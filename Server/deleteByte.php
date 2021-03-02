@@ -14,6 +14,18 @@ if (!$isValid) {
     die("Invalid");
 }
 
+$query = "select user_id from byte where byte_id = ? limit 1;";
+$stmt = $pdo->prepare($query);
+$stmt->execute(array($byteId));
+
+$row = $stmt->fetch();
+$userId = $row[0];
+
+if ($myId !== $userId) {
+    $pdo = null;
+    die("Invalid");
+}
+
 $query = "select count(byte_id) = 0 from byte where deleted_at is null and byte_id = ? limit 1;";
 $stmt = $pdo->prepare($query);
 $stmt->execute(array($byteId));

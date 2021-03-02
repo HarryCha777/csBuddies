@@ -32,7 +32,5 @@
 	<string>1:368792321905:ios:7b51e4d09e6023cbfcc0d0</string>
 	<key>DATABASE_URL</key>
 	<string>https://csbuddies-1d615.firebaseio.com</string>
-	<key>ADMOB_APP_ID</key>
-	<string>INSERT ADMOB APP ID HERE</string>
 </dict>
 </plist>

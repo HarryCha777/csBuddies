@@ -18,7 +18,7 @@ if (!$isValid) {
     die("Invalid");
 }
 
-$query = "select deleted_at from byte where byte_id = ? limit 1;";
+$query = "select deleted_at is not null from byte where byte_id = ? limit 1;";
 $stmt = $pdo->prepare($query);
 $stmt->execute(array($byteId));
 
