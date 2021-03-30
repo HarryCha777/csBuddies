@@ -26,9 +26,9 @@ struct ProfileEditView: View {
     
     @State private var newSmallImage = globalObject.smallImage
     @State private var newBigImage = globalObject.bigImage
-    @State private var newGenderIndex = globalObject.genderIndex
+    @State private var newGender = globalObject.gender
     @State private var newBirthday = globalObject.birthday
-    @State private var newCountryIndex = globalObject.countryIndex
+    @State private var newCountry = globalObject.country
     @State private var newGitHub = globalObject.github
     @State private var newLinkedIn = globalObject.linkedin
     @State private var newInterests = globalObject.interests
@@ -79,7 +79,7 @@ struct ProfileEditView: View {
             }
             
             Section(header: Text("Gender")) {
-                Picker("", selection: $newGenderIndex) {
+                Picker("", selection: $newGender) {
                     ForEach(global.genderOptions.indices) { index in
                         if index != global.genderOptions.count - 1 {
                             Text(global.genderOptions[index])
@@ -87,20 +87,20 @@ struct ProfileEditView: View {
                     }
                 }
                 .pickerStyle(SegmentedPickerStyle())
-                .disabled(newGenderIndex == global.genderOptions.count - 1)
+                .disabled(newGender == global.genderOptions.count - 1)
                 
                 Button(action: {
-                    if newGenderIndex == global.genderOptions.count - 1 {
-                        newGenderIndex = global.genderOptions.count - 2
+                    if newGender == global.genderOptions.count - 1 {
+                        newGender = global.genderOptions.count - 2
                     } else {
-                        newGenderIndex = global.genderOptions.count - 1
+                        newGender = global.genderOptions.count - 1
                         activeAlert = .privateGender
                     }
                 }) {
                     HStack {
                         Text("I prefer not to say.")
                         Spacer()
-                        if newGenderIndex == global.genderOptions.count - 1 {
+                        if newGender == global.genderOptions.count - 1 {
                             ZStack {
                                 Circle()
                                     .fill(Color.blue)
@@ -163,7 +163,7 @@ struct ProfileEditView: View {
             }
             
             Section(header: Text("Country")) {
-                Picker("Where are you from?", selection: $newCountryIndex) {
+                Picker("Where are you from?", selection: $newCountry) {
                     ForEach(global.countryOptions.indices) { index in
                         Text(global.countryOptions[index])
                     }
@@ -331,9 +331,9 @@ struct ProfileEditView: View {
     func didNotEdit() -> Bool {
         if global.smallImage == newSmallImage &&
             global.bigImage == newBigImage &&
-            global.genderIndex == newGenderIndex &&
+            global.gender == newGender &&
             global.birthday == newBirthday &&
-            global.countryIndex == newCountryIndex &&
+            global.country == newCountry &&
             global.interests == newInterests &&
             global.otherInterests == newOtherInterests &&
             global.intro == newIntro &&
@@ -347,19 +347,18 @@ struct ProfileEditView: View {
     func updateUser() {
         global.firebaseUser!.getIDToken(completion: { (token, error) in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "smallImage=\(newSmallImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "bigImage=\(newBigImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "gender=\(newGenderIndex)&" +
+                "gender=\(newGender)&" +
                 "birthday=\(newBirthday.toString(toFormat: "yyyy-MM-dd"))&" +
-                "country=\(newCountryIndex)&" +
+                "country=\(newCountry)&" +
                 "interests=\(newInterests.toInterestsString().addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "otherInterests=\(newOtherInterests.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "intro=\(newIntro.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "github=\(newGitHub.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "linkedin=\(newLinkedIn.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-            global.runPhp(script: "updateUser", postString: postString) { json in
+            global.runHttp(script: "updateUser", postString: postString) { json in
                 updateGlobalProfile()
                 
                 mustUpdateProfile = true
@@ -372,9 +371,9 @@ struct ProfileEditView: View {
     func updateGlobalProfile() {
         global.smallImage = newSmallImage
         global.bigImage = newBigImage
-        global.genderIndex = newGenderIndex
+        global.gender = newGender
         global.birthday = newBirthday
-        global.countryIndex = newCountryIndex
+        global.country = newCountry
         global.interests = newInterests
         global.otherInterests = newOtherInterests
         global.intro = newIntro

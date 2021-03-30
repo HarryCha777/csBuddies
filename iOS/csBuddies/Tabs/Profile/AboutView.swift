@@ -17,14 +17,14 @@ struct AboutView: View {
         Form {
             Section(header: Text("Agreements")) {
                 NavigationLink(destination:
-                                WebView(request: URLRequest(url: URL(string: "https://csbuddies.com/privacy-policy")!))
+                                WebView(request: URLRequest(url: URL(string: "https://csbuddies.com/privacy-policy.html")!))
                                 .navigationBarTitle("Privacy Policy", displayMode: .inline)
                 ) {
                     Text("Privacy Policy")
                 }
                 
                 NavigationLink(destination:
-                                WebView(request: URLRequest(url: URL(string: "https://csbuddies.com/terms-and-conditions")!))
+                                WebView(request: URLRequest(url: URL(string: "https://csbuddies.com/terms-and-conditions.html")!))
                                 .navigationBarTitle("Terms and Conditions", displayMode: .inline)
                 ) {
                     Text("Terms and Conditions")

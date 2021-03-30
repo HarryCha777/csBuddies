@@ -17,12 +17,12 @@ struct BytesFilterView: View {
     
     @State private var filterSortOptions = ["Hot", "New"]
     
-    @State private var newBytesFilterSortIndex = globalObject.bytesFilterSortIndex
+    @State private var newBytesFilterSort = globalObject.bytesFilterSort
 
     var body: some View {
         List {
             Section(header: Text("Sort")) {
-                Picker("", selection: $newBytesFilterSortIndex) {
+                Picker("", selection: $newBytesFilterSort) {
                     ForEach(filterSortOptions.indices) { index in
                         Text(filterSortOptions[index])
                     }
@@ -47,7 +47,7 @@ struct BytesFilterView: View {
     }
     
     func applyFilters() {
-        global.bytesFilterSortIndex = newBytesFilterSortIndex
+        global.bytesFilterSort = newBytesFilterSort
         
         mustGetBytes = true
         presentation.wrappedValue.dismiss()

@@ -175,27 +175,16 @@ struct CommentWriteView: View {
     func addComment() {
         global.firebaseUser!.getIDToken(completion: { (token, error) in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "byteId=\(byteId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "parentCommentId=\(parentCommentId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "content=\(comment.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-            global.runPhp(script: "addComment", postString: postString) { json in
+            global.runHttp(script: "addComment", postString: postString) { json in
                 if json["isTooMany"] != nil &&
                     json["isTooMany"] as! Bool {
                     dailyLimit = json["dailyLimit"] as! Int
                     activeAlert = .tooManyCommentsToday
                     return
-                }
-                
-                if parentCommentId == "" {
-                    global.db.collection("accounts")
-                        .document(global.bytes[byteId]!.userId)
-                        .setData(["hasChanged": true], merge: true) { error in }
-                } else {
-                    global.db.collection("accounts")
-                        .document(global.comments[parentCommentId]!.userId)
-                        .setData(["hasChanged": true], merge: true) { error in }
                 }
                 
                 newCommentId = json["commentId"] as! String

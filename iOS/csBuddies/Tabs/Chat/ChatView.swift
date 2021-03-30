@@ -109,11 +109,10 @@ struct ChatView: View {
         // Below is a .redundant call since the chat rooms may have been deleted.
         global.firebaseUser!.getIDToken(completion: { (token, error) in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-            global.runPhp(script: "getChatIsOnline", postString: postString) { json in
+            global.runHttp(script: "getChatIsOnline", postString: postString) { json in
                 if json.count > 0 {
-                    for i in 1...json.count {
+                    for i in 0...json.count - 1 {
                         let row = json[String(i)] as! NSDictionary
                         let buddyId = row["buddyId"] as! String
                         if global.chatData[buddyId] != nil {

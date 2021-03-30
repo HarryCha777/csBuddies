@@ -17,7 +17,7 @@ struct UserProfileView: View {
     @Binding var mustGetBytesAndComments: Bool
     
     @State private var mustVisitBigImage = false
-    @State private var bytesAndCommentsTabIndex = 0
+    @State private var profileTab = 0
     
     @State private var byteIds = [String]()
     @State private var isLoadingBytes = false
@@ -76,21 +76,21 @@ struct UserProfileView: View {
                         }
                     }
                     HStack {
-                        if global.users[userId]!.genderIndex == 0 {
-                            Text(global.genderOptions[global.users[userId]!.genderIndex])
+                        if global.users[userId]!.gender == 0 {
+                            Text(global.genderOptions[global.users[userId]!.gender])
                                 .font(.footnote)
                                 .foregroundColor(.blue) +
                                 Text(",")
                                 .font(.footnote)
-                        } else if global.users[userId]!.genderIndex == 1 {
-                            Text(global.genderOptions[global.users[userId]!.genderIndex])
+                        } else if global.users[userId]!.gender == 1 {
+                            Text(global.genderOptions[global.users[userId]!.gender])
                                 .font(.footnote)
                                 .foregroundColor(Color(red: 255 / 255, green: 20 / 255, blue: 147 / 255)) + // This is pink
                                 Text(",")
                                 .font(.footnote)
-                        } else if global.users[userId]!.genderIndex == 2 ||
-                                    global.users[userId]!.genderIndex == 3 {
-                            Text(global.genderOptions[global.users[userId]!.genderIndex])
+                        } else if global.users[userId]!.gender == 2 ||
+                                    global.users[userId]!.gender == 3 {
+                            Text(global.genderOptions[global.users[userId]!.gender])
                                 .font(.footnote)
                                 .foregroundColor(.gray) +
                                 Text(",")
@@ -104,7 +104,7 @@ struct UserProfileView: View {
                         Text(global.users[userId]!.birthday.toString()[0] != "0" ? "\(global.users[userId]!.birthday.toAge())" : "N/A")
                             .font(.footnote)
                     }
-                    Text(global.countryOptions[safe: global.users[userId]!.countryIndex] ?? "Unknown")
+                    Text(global.countryOptions[safe: global.users[userId]!.country] ?? "Unknown")
                         .font(.footnote)
                     if global.isOnline(lastVisitedAt: global.users[userId]!.lastVisitedAt) {
                         Text("Online now")
@@ -161,9 +161,9 @@ struct UserProfileView: View {
             
             Section(header: EmptyView()) {
                 VStack {
-                    SlidingTabView(selection: $bytesAndCommentsTabIndex, tabs: ["Bytes", "Comments", "Liked\nBytes", "Liked\nComments"])
+                    SlidingTabView(selection: $profileTab, tabs: ["Bytes", "Comments", "Liked\nBytes", "Liked\nComments"])
                     
-                    switch bytesAndCommentsTabIndex {
+                    switch profileTab {
                     case 0:
                         HStack(spacing: 0) {
                             if global.users[userId]!.bytesMade == 0 {
@@ -239,7 +239,7 @@ struct UserProfileView: View {
                     }
                 }
                 
-                switch bytesAndCommentsTabIndex {
+                switch profileTab {
                 case 0:
                     if global.users[userId]!.bytesMade > 0 {
                         ForEach(byteIds, id: \.self) { byteId in
@@ -287,7 +287,7 @@ struct UserProfileView: View {
                     Spacer()
                         .onAppear {
                             mustGetBytesAndComments = false
-                            bytesAndCommentsTabIndex = 0
+                            profileTab = 0
                             bottomBytePostedAt = global.getUtcTime()
                             bottomCommentPostedAt = global.getUtcTime()
                             bottomLikedByteLastUpdatedAt = global.getUtcTime()
@@ -315,18 +315,17 @@ struct UserProfileView: View {
         
         global.getTokenIfSignedIn { token in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "userId=\(userId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "bottomPostedAt=\(bottomBytePostedAt.toString())"
-            global.runPhp(script: "getBytes", postString: postString) { json in
+            global.runHttp(script: "getBytes", postString: postString) { json in
                 if json.count <= 1 {
                     isLoadingBytes = false
                     canLoadMoreBytes = false
                     return
                 }
                 
-                for i in 1...json.count - 1 {
+                for i in 0...json.count - 2 {
                     let row = json[String(i)] as! NSDictionary
                     let byteData = ByteData(
                         byteId: row["byteId"] as! String,
@@ -342,7 +341,7 @@ struct UserProfileView: View {
                     byteIds.append(byteData.byteId)
                 }
                 
-                let lastRow = json[String(json.count)] as! NSDictionary
+                let lastRow = json[String(json.count - 1)] as! NSDictionary
                 bottomBytePostedAt = (lastRow["bottomPostedAt"] as! String).toDate()
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { // Prevent calling PHP twice on each load.
@@ -361,18 +360,17 @@ struct UserProfileView: View {
         
         global.getTokenIfSignedIn { token in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "userId=\(userId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "bottomPostedAt=\(bottomCommentPostedAt.toString())"
-            global.runPhp(script: "getComments", postString: postString) { json in
+            global.runHttp(script: "getComments", postString: postString) { json in
                 if json.count <= 1 {
                     isLoadingComments = false
                     canLoadMoreComments = false
                     return
                 }
                 
-                for i in 1...json.count - 1 {
+                for i in 0...json.count - 2 {
                     let row = json[String(i)] as! NSDictionary
                     let commentData = CommentData(
                         commentId: row["commentId"] as! String,
@@ -390,7 +388,7 @@ struct UserProfileView: View {
                     commentIds.append(commentData.commentId)
                 }
                 
-                let lastRow = json[String(json.count)] as! NSDictionary
+                let lastRow = json[String(json.count - 1)] as! NSDictionary
                 bottomCommentPostedAt = (lastRow["bottomPostedAt"] as! String).toDate()
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { // Prevent calling PHP twice on each load.
@@ -409,18 +407,17 @@ struct UserProfileView: View {
         
         global.getTokenIfSignedIn { token in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "userId=\(userId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "bottomLastUpdatedAt=\(bottomLikedByteLastUpdatedAt.toString())"
-            global.runPhp(script: "getLikedBytes", postString: postString) { json in
+            global.runHttp(script: "getLikedBytes", postString: postString) { json in
                 if json.count <= 1 {
                     isLoadingLikedBytes = false
                     canLoadMoreLikedBytes = false
                     return
                 }
                 
-                for i in 1...json.count - 1 {
+                for i in 0...json.count - 2 {
                     let row = json[String(i)] as! NSDictionary
                     let byteData = ByteData(
                         byteId: row["byteId"] as! String,
@@ -436,7 +433,7 @@ struct UserProfileView: View {
                     likedByteIds.append(byteData.byteId)
                 }
                 
-                let lastRow = json[String(json.count)] as! NSDictionary
+                let lastRow = json[String(json.count - 1)] as! NSDictionary
                 bottomLikedByteLastUpdatedAt = (lastRow["bottomLastUpdatedAt"] as! String).toDate()
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { // Prevent calling PHP twice on each load.
@@ -455,18 +452,17 @@ struct UserProfileView: View {
         
         global.getTokenIfSignedIn { token in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "userId=\(userId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "bottomLastUpdatedAt=\(bottomLikedCommentLastUpdatedAt.toString())"
-            global.runPhp(script: "getLikedComments", postString: postString) { json in
+            global.runHttp(script: "getLikedComments", postString: postString) { json in
                 if json.count <= 1 {
                     isLoadingLikedComments = false
                     canLoadMoreLikedComments = false
                     return
                 }
                 
-                for i in 1...json.count - 1 {
+                for i in 0...json.count - 2 {
                     let row = json[String(i)] as! NSDictionary
                     let commentData = CommentData(
                         commentId: row["commentId"] as! String,
@@ -484,7 +480,7 @@ struct UserProfileView: View {
                     likedCommentIds.append(commentData.commentId)
                 }
                 
-                let lastRow = json[String(json.count)] as! NSDictionary
+                let lastRow = json[String(json.count - 1)] as! NSDictionary
                 bottomLikedCommentLastUpdatedAt = (lastRow["bottomLastUpdatedAt"] as! String).toDate()
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { // Prevent calling PHP twice on each load.

@@ -166,9 +166,9 @@ struct ByteView: View {
                     let userPreviewData = UserPreviewData(
                         userId: global.bytes[byteId]!.userId,
                         username: global.bytes[byteId]!.username,
+                        gender: 3,
                         birthday: global.getUtcTime(),
-                        genderIndex: 3,
-                        countryIndex: 0,
+                        country: 0,
                         intro: "",
                         lastVisitedAt: Date(timeIntervalSince1970: 0))
                     userPreviewData.updateClientData()
@@ -179,10 +179,9 @@ struct ByteView: View {
                 ), secondaryButton: .destructive(Text("Delete"), action: {
                     global.firebaseUser!.getIDToken(completion: { (token, error) in
                         let postString =
-                            "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                             "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                             "byteId=\(byteId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-                        global.runPhp(script: "deleteByte", postString: postString) { json in
+                        global.runHttp(script: "deleteByte", postString: postString) { json in
                             global.bytes[byteId]!.isDeleted = true
                             
                             let hasAlreadyDeleted = json["hasAlreadyDeleted"] as! Bool
@@ -217,10 +216,9 @@ struct ByteView: View {
         
         global.getTokenIfSignedIn { token in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "byteId=\(byteId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-            global.runPhp(script: "getByte", postString: postString) { json in
+            global.runHttp(script: "getByte", postString: postString) { json in
                 if json["isDeleted"] != nil &&
                     json["isDeleted"] as! Bool {
                     var byteData = ByteData(byteId: byteId, userId: "", username: "", lastVisitedAt: global.getUtcTime(), content: "", likes: 0, comments: 0, isLiked: false, postedAt: global.getUtcTime())
@@ -256,11 +254,10 @@ struct ByteView: View {
         
         global.getTokenIfSignedIn { token in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "byteId=\(byteId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "bottomPostedAt=\(bottomPostedAt.toString())"
-            global.runPhp(script: "getByteComments", postString: postString) { json in
+            global.runHttp(script: "getByteComments", postString: postString) { json in
                 if json.count <= 1 {
                     mustGetByteAndComments = false
                     isLoadingComments = false
@@ -268,7 +265,7 @@ struct ByteView: View {
                     return
                 }
                 
-                for i in 1...json.count - 1 {
+                for i in 0...json.count - 2 {
                     let row = json[String(i)] as! NSDictionary
                     let commentData = CommentData(
                         commentId: row["commentId"] as! String,
@@ -286,7 +283,7 @@ struct ByteView: View {
                     commentIds.append(commentData.commentId)
                 }
                 
-                let lastRow = json[String(json.count)] as! NSDictionary
+                let lastRow = json[String(json.count - 1)] as! NSDictionary
                 bottomPostedAt = (lastRow["bottomPostedAt"] as! String).toDate()
                 
                 mustGetByteAndComments = false

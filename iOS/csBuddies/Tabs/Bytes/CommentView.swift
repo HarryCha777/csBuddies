@@ -154,9 +154,9 @@ struct CommentView: View {
                                 let userPreviewData = UserPreviewData(
                                     userId: global.comments[commentId]!.userId,
                                     username: global.comments[commentId]!.username,
+                                    gender: 3,
                                     birthday: global.getUtcTime(),
-                                    genderIndex: 3,
-                                    countryIndex: 0,
+                                    country: 0,
                                     intro: "",
                                     lastVisitedAt: Date(timeIntervalSince1970: 0))
                                 userPreviewData.updateClientData()
@@ -167,10 +167,9 @@ struct CommentView: View {
                             ), secondaryButton: .destructive(Text("Delete"), action: {
                                 global.firebaseUser!.getIDToken(completion: { (token, error) in
                                     let postString =
-                                        "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                                         "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                                         "commentId=\(commentId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-                                    global.runPhp(script: "deleteComment", postString: postString) { json in
+                                    global.runHttp(script: "deleteComment", postString: postString) { json in
                                         global.comments[commentId]!.isDeleted = true
                                         
                                         let hasAlreadyDeleted = json["hasAlreadyDeleted"] as! Bool

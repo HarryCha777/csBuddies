@@ -47,21 +47,21 @@ struct UserPreviewView: View {
                             .bold()
                             .lineLimit(1)
                         HStack {
-                            if global.userPreviews[userId]!.genderIndex == 0 {
-                                Text(global.genderOptions[global.userPreviews[userId]!.genderIndex])
+                            if global.userPreviews[userId]!.gender == 0 {
+                                Text(global.genderOptions[global.userPreviews[userId]!.gender])
                                     .font(.footnote)
                                     .foregroundColor(.blue) +
                                     Text(",")
                                     .font(.footnote)
-                            } else if global.userPreviews[userId]!.genderIndex == 1 {
-                                Text(global.genderOptions[global.userPreviews[userId]!.genderIndex])
+                            } else if global.userPreviews[userId]!.gender == 1 {
+                                Text(global.genderOptions[global.userPreviews[userId]!.gender])
                                     .font(.footnote)
                                     .foregroundColor(Color(red: 255 / 255, green: 20 / 255, blue: 147 / 255)) + // This is pink 
                                     Text(",")
                                     .font(.footnote)
-                            } else if global.userPreviews[userId]!.genderIndex == 2 ||
-                                        global.userPreviews[userId]!.genderIndex == 3 {
-                                Text(global.genderOptions[global.userPreviews[userId]!.genderIndex])
+                            } else if global.userPreviews[userId]!.gender == 2 ||
+                                        global.userPreviews[userId]!.gender == 3 {
+                                Text(global.genderOptions[global.userPreviews[userId]!.gender])
                                     .font(.footnote)
                                     .foregroundColor(.gray) +
                                     Text(",")
@@ -75,7 +75,7 @@ struct UserPreviewView: View {
                             Text(global.userPreviews[userId]!.birthday.toString()[0] != "0" ? "\(global.userPreviews[userId]!.birthday.toAge())" : "N/A")
                                 .font(.footnote)
                         }
-                        Text(global.countryOptions[safe: global.userPreviews[userId]!.countryIndex] ?? "Unknown")
+                        Text(global.countryOptions[safe: global.userPreviews[userId]!.country] ?? "Unknown")
                             .font(.footnote)
                         if global.isOnline(lastVisitedAt: global.userPreviews[userId]!.lastVisitedAt) {
                             Text("Online now")
@@ -174,24 +174,24 @@ struct UserPreviewData: Identifiable, Codable {
     var id = UUID()
     var userId: String
     var username: String
+    var gender: Int
     var birthday: Date
-    var genderIndex: Int
-    var countryIndex: Int
+    var country: Int
     var intro: String
     var lastVisitedAt: Date
 
     init(userId: String,
          username: String,
+         gender: Int,
          birthday: Date,
-         genderIndex: Int,
-         countryIndex: Int,
+         country: Int,
          intro: String,
          lastVisitedAt: Date) {
         self.userId = userId
         self.username = username
+        self.gender = gender
         self.birthday = birthday
-        self.genderIndex = genderIndex
-        self.countryIndex = countryIndex
+        self.country = country
         self.intro = intro
         self.lastVisitedAt = lastVisitedAt
     }

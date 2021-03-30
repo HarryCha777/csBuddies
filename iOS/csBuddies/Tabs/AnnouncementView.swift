@@ -16,7 +16,7 @@ struct AnnouncementView: View {
             HStack {
                 if global.announcementLink == "" {
                     HStack {
-                        Text(global.announcementText.replacingOccurrences(of: "\\n", with: "\n"))
+                        Text(global.announcementText)
                             .font(.system(size: 14))
                             .foregroundColor(.white)
                         Spacer()
@@ -26,7 +26,7 @@ struct AnnouncementView: View {
                                             WebView(request: URLRequest(url: URL(string: global.announcementLink)!))
                                             .navigationBarTitle(global.announcementLink, displayMode: .inline)) {
                         HStack {
-                            Text(global.announcementText.replacingOccurrences(of: "\\n", with: "\n"))
+                            Text(global.announcementText)
                                 .font(.system(size: 14))
                                 .foregroundColor(.white)
                             Spacer()

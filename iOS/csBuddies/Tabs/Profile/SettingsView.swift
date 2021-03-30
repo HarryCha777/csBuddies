@@ -43,8 +43,6 @@ struct SettingsView: View {
                     }
                 }
             }
-
-            // FAQ with info about 5 max chat rooms, future premium plans, SwiftUI app advertisement, etc?
             
             NavigationLink(destination: AboutView()) {
                 HStack {

@@ -46,10 +46,9 @@ struct blockedBuddyIdsView: View {
         
         global.firebaseUser!.getIDToken(completion: { (token, error) in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "bottomBlockedAt=\(bottomBlockedAt.toString())"
-            global.runPhp(script: "getBlockedBuddies", postString: postString) { json in
+            global.runHttp(script: "getBlockedBuddies", postString: postString) { json in
                 if json.count <= 1 {
                     mustgetBlockedBuddies = false
                     isLoading = false
@@ -57,21 +56,21 @@ struct blockedBuddyIdsView: View {
                     return
                 }
                 
-                for i in 1...json.count - 1 {
+                for i in 0...json.count - 2 {
                     let row = json[String(i)] as! NSDictionary
                     let userPreviewData = UserPreviewData(
                         userId: row["buddyId"] as! String,
                         username: row["username"] as! String,
-                        birthday: (row["birthday"] as! String).toDate(fromFormat: "yyyy-MM-dd"),
-                        genderIndex: row["gender"] as! Int,
-                        countryIndex: row["country"] as! Int,
+                        gender: row["gender"] as! Int,
+                        birthday: (row["birthday"] as! String).toDate(hasTime: false),
+                        country: row["country"] as! Int,
                         intro: row["intro"] as! String,
                         lastVisitedAt: (row["lastVisitedAt"] as! String).toDate())
                     userPreviewData.updateClientData()
                     buddyIds.append(userPreviewData.userId)
                 }
                 
-                let lastRow = json[String(json.count)] as! NSDictionary
+                let lastRow = json[String(json.count - 1)] as! NSDictionary
                 bottomBlockedAt = (lastRow["bottomBlockedAt"] as! String).toDate()
                 
                 mustgetBlockedBuddies = false

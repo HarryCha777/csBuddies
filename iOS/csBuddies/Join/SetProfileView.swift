@@ -36,7 +36,7 @@ struct SetUserProfileView: View {
                 JoinStepperView(step: 2)
                 
                 Section(header: Text("Gender")) {
-                    Picker("", selection: $global.genderIndex) {
+                    Picker("", selection: $global.gender) {
                         ForEach(global.genderOptions.indices) { index in
                             if index != global.genderOptions.count - 1 {
                                 Text(global.genderOptions[index])
@@ -44,20 +44,20 @@ struct SetUserProfileView: View {
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
-                    .disabled(global.genderIndex == global.genderOptions.count - 1)
+                    .disabled(global.gender == global.genderOptions.count - 1)
                     
                     Button(action: {
-                        if global.genderIndex == global.genderOptions.count - 1 {
-                            global.genderIndex = global.genderOptions.count - 2
+                        if global.gender == global.genderOptions.count - 1 {
+                            global.gender = global.genderOptions.count - 2
                         } else {
-                            global.genderIndex = global.genderOptions.count - 1
+                            global.gender = global.genderOptions.count - 1
                             activeAlert = .privateGender
                         }
                     }) {
                         HStack {
                             Text("I prefer not to say.")
                             Spacer()
-                            if global.genderIndex == global.genderOptions.count - 1 {
+                            if global.gender == global.genderOptions.count - 1 {
                                 ZStack {
                                     Circle()
                                         .fill(Color.blue)
@@ -120,7 +120,7 @@ struct SetUserProfileView: View {
                 }
                 
                 Section(header: Text("Country")) {
-                    Picker("Where are you from?", selection: $global.countryIndex) {
+                    Picker("Where are you from?", selection: $global.country) {
                         ForEach(global.countryOptions.indices) { index in
                             Text(global.countryOptions[index])
                         }

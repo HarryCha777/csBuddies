@@ -43,19 +43,15 @@ struct CommentHeartView: View {
                         
                         global.firebaseUser!.getIDToken(completion: { (token, error) in
                             let postString =
-                                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                                 "commentId=\(commentId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-                            global.runPhp(script: "likeComment", postString: postString) { json in
+                            global.runHttp(script: "likeComment", postString: postString) { json in
                                 isUpdatingLike = false
                                 
                                 // User may have already liked the byte on another screen.
                                 let isLiked = json["isLiked"] as! Bool
                                 if !isLiked {
                                     global.commentLikesGiven += 1
-                                    global.db.collection("accounts")
-                                        .document(global.comments[commentId]!.userId)
-                                        .setData(["hasChanged": true], merge: true) { error in }
                                 }
                             }
                         })
@@ -74,10 +70,9 @@ struct CommentHeartView: View {
                         
                         global.firebaseUser!.getIDToken(completion: { (token, error) in
                             let postString =
-                                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                                 "commentId=\(commentId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-                            global.runPhp(script: "unlikeComment", postString: postString) { json in
+                            global.runHttp(script: "unlikeComment", postString: postString) { json in
                                 isUpdatingLike = false
                                 
                                 // User may have already unliked the byte on another screen.

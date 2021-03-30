@@ -19,17 +19,17 @@ struct BuddiesFilterView: View {
     @State private var filterCountryOptions = ["Worldwide"] + globalObject.countryOptions
     @State private var filterSortOptions = ["Active", "New"]
     
-    @State private var newBuddiesFilterGenderIndex = globalObject.buddiesFilterGenderIndex
+    @State private var newBuddiesFilterGender = globalObject.buddiesFilterGender
     @State private var newBuddiesFilterMinAge = globalObject.buddiesFilterMinAge
     @State private var newBuddiesFilterMaxAge = globalObject.buddiesFilterMaxAge
-    @State private var newBuddiesFilterCountryIndex = globalObject.buddiesFilterCountryIndex
+    @State private var newBuddiesFilterCountry = globalObject.buddiesFilterCountry
     @State private var newBuddiesFilterInterests = globalObject.buddiesFilterInterests
-    @State private var newBuddiesFilterSortIndex = globalObject.buddiesFilterSortIndex
+    @State private var newBuddiesFilterSort = globalObject.buddiesFilterSort
     
     var body: some View {
         List {
             Section(header: Text("Demographics")) {
-                Picker("", selection: $newBuddiesFilterGenderIndex) {
+                Picker("", selection: $newBuddiesFilterGender) {
                     ForEach(filterGenderOptions.indices) { index in
                         if index != filterGenderOptions.count - 1 {
                             Text(filterGenderOptions[index])
@@ -50,7 +50,7 @@ struct BuddiesFilterView: View {
                     }
                 }
                 
-                Picker("Country", selection: $newBuddiesFilterCountryIndex) {
+                Picker("Country", selection: $newBuddiesFilterCountry) {
                     ForEach(filterCountryOptions.indices) { index in
                         Text(filterCountryOptions[index])
                     }
@@ -80,7 +80,7 @@ struct BuddiesFilterView: View {
             }
             
             Section(header: Text("Sort")) {
-                Picker("", selection: $newBuddiesFilterSortIndex) {
+                Picker("", selection: $newBuddiesFilterSort) {
                     ForEach(filterSortOptions.indices) { index in
                         Text(filterSortOptions[index])
                     }
@@ -105,12 +105,12 @@ struct BuddiesFilterView: View {
     }
     
     func applyFilters() {
-        global.buddiesFilterGenderIndex = newBuddiesFilterGenderIndex
+        global.buddiesFilterGender = newBuddiesFilterGender
         global.buddiesFilterMinAge = newBuddiesFilterMinAge
         global.buddiesFilterMaxAge = newBuddiesFilterMaxAge
-        global.buddiesFilterCountryIndex = newBuddiesFilterCountryIndex
+        global.buddiesFilterCountry = newBuddiesFilterCountry
         global.buddiesFilterInterests = newBuddiesFilterInterests
-        global.buddiesFilterSortIndex = newBuddiesFilterSortIndex
+        global.buddiesFilterSort = newBuddiesFilterSort
         
         mustGetBuddies = true
         presentation.wrappedValue.dismiss()

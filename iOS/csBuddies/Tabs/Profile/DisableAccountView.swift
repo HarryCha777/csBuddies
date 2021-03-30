@@ -29,9 +29,8 @@ struct DisableAccountView: View {
                     
                     global.firebaseUser!.getIDToken(completion: { (token, error) in
                         let postString =
-                            "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                             "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-                        global.runPhp(script: "disableUser", postString: postString) { json in
+                        global.runHttp(script: "disableUser", postString: postString) { json in
                             global.resetUserData()
                             try! Auth.auth().signOut()
                             presentation.wrappedValue.dismiss()

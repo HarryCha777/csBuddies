@@ -17,7 +17,7 @@ struct DeleteAccountView: View {
     
     @State private var isSelectedList = [Bool](repeating: false, count: 7) // 7 is reasonOptions.count.
     @State private var reasonOptions = ["Nobody talked to me.", "The users are mean.", "I saw inappropriate content.", "I got spammed.", "The app is buggy", "I need a break.", "Other"]
-    @State private var reasonIndex = -1
+    @State private var reason = -1
     @State private var comments = ""
     @State private var isUpdatingAccount = false
     
@@ -52,7 +52,7 @@ struct DeleteAccountView: View {
                     
                     Section(header: Text("Reasons")) {
                         ForEach(reasonOptions.indices) { index in
-                            RadioButton(index: index, reasonIndex: $reasonIndex, reasonOptions: reasonOptions, isSelectedList: $isSelectedList)
+                            RadioButton(index: index, reason: $reason, reasonOptions: reasonOptions, isSelectedList: $isSelectedList)
                         }
                     }
                     
@@ -72,7 +72,7 @@ struct DeleteAccountView: View {
                         Text("Delete Account")
                             .accentColor(.red)
                     }
-                    .disabled(reasonIndex == -1)
+                    .disabled(reason == -1)
                 }
                 .listStyle(InsetGroupedListStyle())
                 .disabledOnLoad(isLoading: isUpdatingAccount)
@@ -99,11 +99,10 @@ struct DeleteAccountView: View {
     func deleteAccount() {
         global.firebaseUser!.getIDToken(completion: { (token, error) in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "reason=\(reasonIndex)&" +
+                "reason=\(reason)&" +
                 "comments=\(comments.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-            global.runPhp(script: "deleteUser", postString: postString) { json in
+            global.runHttp(script: "deleteUser", postString: postString) { json in
                 // Simply sign out instead of unnecessarily deleting Firebase account.
                 // In fact, Firebase throws an error on account deletion attempt unless they recently signed in.
                 // You can also recover others' accounts on the accounts table unless they manually deleted their accounts by themselves.

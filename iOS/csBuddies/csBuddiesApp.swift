@@ -13,6 +13,7 @@ import Firebase
 @main
 struct csBuddiesApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @Environment(\.scenePhase) private var phase
     let persistenceController = PersistenceController.shared
     
     init() {
@@ -25,6 +26,20 @@ struct csBuddiesApp: App {
                 .environmentObject(globalObject)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .onAppear(perform: UIApplication.shared.addTapGestureRecognizer)
+                .onChange(of: phase) { newPhase in
+                    switch newPhase {
+                    case .active:
+                        if globalObject.myId != "" {
+                            globalObject.websocket = Websocket()
+                        }
+                    case .inactive, .background:
+                        if globalObject.myId != "" {
+                            globalObject.websocket!.disconnect()
+                        }
+                    @unknown default:
+                        break
+                    }
+                }
         }
     }
 }

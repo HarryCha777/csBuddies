@@ -168,12 +168,11 @@ struct BytesView: View {
         
         global.getTokenIfSignedIn { token in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "sort=\(global.bytesFilterSortIndex)&" +
+                "sort=\(global.bytesFilterSort)&" +
                 "bottomPostedAt=\(bottomPostedAt.toString())&" +
                 "bottomHotScore=\(bottomHotScore)"
-            global.runPhp(script: "getTabBytes", postString: postString) { json in
+            global.runHttp(script: "getTabBytes", postString: postString) { json in
                 if json.count <= 1 {
                     mustGetBytes = false
                     isLoading = false
@@ -181,7 +180,7 @@ struct BytesView: View {
                     return
                 }
                 
-                for i in 1...json.count - 1 {
+                for i in 0...json.count - 2 {
                     let row = json[String(i)] as! NSDictionary
                     let byteData = ByteData(
                         byteId: row["byteId"] as! String,
@@ -197,7 +196,7 @@ struct BytesView: View {
                     byteIds.append(byteData.byteId)
                 }
                 
-                let lastRow = json[String(json.count)] as! NSDictionary
+                let lastRow = json[String(json.count - 1)] as! NSDictionary
                 bottomPostedAt = (lastRow["bottomPostedAt"] as! String).toDate()
                 bottomHotScore = lastRow["bottomHotScore"] as! Double
                 

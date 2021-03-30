@@ -100,7 +100,7 @@ struct TypeEmailView: View {
     func checkDeletedEmail() {
         let postString =
             "email=\(global.email.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-        global.runPhp(script: "isDeletedEmail", postString: postString) { json in
+        global.runHttp(script: "isDeletedEmail", postString: postString) { json in
             if json["isDeletedEmail"] as! Bool {
                 activeAlert = .deletedEmail
                 return

@@ -12,7 +12,7 @@ struct RadioButton: View {
     @EnvironmentObject var global: Global
     
     let index: Int
-    @Binding var reasonIndex: Int
+    @Binding var reason: Int
     @State var reasonOptions: [String]
     @Binding var isSelectedList: [Bool]
     
@@ -20,7 +20,7 @@ struct RadioButton: View {
         Button(action: {
             isSelectedList = [Bool](repeating: false, count: reasonOptions.count)
             isSelectedList[index] = true
-            reasonIndex = index
+            reason = index
         }) {
             HStack {
                 Text(reasonOptions[index])

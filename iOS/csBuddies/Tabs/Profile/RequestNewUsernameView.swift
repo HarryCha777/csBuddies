@@ -15,7 +15,7 @@ struct RequestNewUsernameView: View {
     @State private var newUsername = ""
     @State private var isSelectedList = [Bool](repeating: false, count: 3) // 3 is reasonOptions.count.
     @State private var reasonOptions = ["Typo", "Name Changed", "Other"]
-    @State private var reasonIndex = -1
+    @State private var reason = -1
     @State private var comments = ""
     @State private var isRequesting = false
     
@@ -44,7 +44,7 @@ struct RequestNewUsernameView: View {
             
             Section(header: Text("Reasons")) {
                 ForEach(reasonOptions.indices) { index in
-                    RadioButton(index: index, reasonIndex: $reasonIndex, reasonOptions: reasonOptions, isSelectedList: $isSelectedList)
+                    RadioButton(index: index, reason: $reason, reasonOptions: reasonOptions, isSelectedList: $isSelectedList)
                 }
             }
             
@@ -68,13 +68,13 @@ struct RequestNewUsernameView: View {
                 } else if comments.count > 1000 {
                     activeAlert = .tooLongComments
                 } else {
-                    requestNewUsername(mustReplacePrevious: false)
+                    requestNewUsername(mustReplace: false)
                 }
             }) {
                 Text("Request Username Change")
                     .accentColor(.red)
             }
-            .disabled(newUsername == "" || reasonIndex == -1)
+            .disabled(newUsername == "" || reason == -1)
         }
         .listStyle(InsetGroupedListStyle())
         .disabledOnLoad(isLoading: isRequesting)
@@ -107,22 +107,21 @@ struct RequestNewUsernameView: View {
             case .extantRequest:
                 return Alert(title: Text("Already Requested"), message: Text("You already have a pending username change request. Would you like to replace the previous request with this one?"), primaryButton: .destructive(Text("Cancel")), secondaryButton: .default(Text("OK"), action: {
                     isRequesting = true
-                    requestNewUsername(mustReplacePrevious: true)
+                    requestNewUsername(mustReplace: true)
                 }))
             }
         }
     }
     
-    func requestNewUsername(mustReplacePrevious: Bool) {
+    func requestNewUsername(mustReplace: Bool) {
         global.firebaseUser!.getIDToken(completion: { (token, error) in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "newUsername=\(newUsername.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "reason=\(reasonIndex)&" +
+                "reason=\(reason)&" +
                 "comments=\(comments.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "mustReplacePrevious=\(mustReplacePrevious)"
-            global.runPhp(script: "requestNewUsername", postString: postString) { json in
+                "mustReplace=\(mustReplace)"
+            global.runHttp(script: "requestNewUsername", postString: postString) { json in
                 if json["isExtantUsername"] != nil &&
                     json["isExtantUsername"] as! Bool {
                     activeAlert = .extantUsername

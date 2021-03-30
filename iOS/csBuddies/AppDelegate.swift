@@ -31,10 +31,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         if globalObject.myId != "" {
             globalObject.firebaseUser!.getIDToken(completion: { (token, error) in
                 let postString =
-                    "myId=\(globalObject.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                     "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                    "fcm=\(fcmToken!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-                globalObject.runPhp(script: "updateFcm", postString: postString) { json in }
+                    "fcmToken=\(fcmToken!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+                globalObject.runHttp(script: "updateFcmToken", postString: postString) { json in }
             })
         }
     }

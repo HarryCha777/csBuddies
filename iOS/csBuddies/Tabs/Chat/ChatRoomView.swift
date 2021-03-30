@@ -83,9 +83,9 @@ struct ChatRoomView: View {
                             let userPreviewData = UserPreviewData(
                                 userId: buddyId,
                                 username: buddyUsername,
+                                gender: 3,
                                 birthday: global.getUtcTime(),
-                                genderIndex: 3,
-                                countryIndex: 0,
+                                country: 0,
                                 intro: "",
                                 lastVisitedAt: Date(timeIntervalSince1970: 0))
                             userPreviewData.updateClientData()
@@ -136,14 +136,9 @@ struct ChatRoomView: View {
             global.updateBadges()
             global.firebaseUser!.getIDToken(completion: { (token, error) in
                 let postString =
-                    "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                     "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                     "buddyId=\(buddyId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-                global.runPhp(script: "readMessages", postString: postString) { json in
-                    global.db.collection("accounts")
-                        .document(buddyId)
-                        .setData(["hasChanged": true], merge: true) { error in }
-                }
+                global.runHttp(script: "readMessages", postString: postString) { json in }
             })
         }
     }

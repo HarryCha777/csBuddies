@@ -17,7 +17,7 @@ struct TabsView: View {
         ZStack {
             GeometryReader { geometry in
                 ZStack(alignment: .bottomLeading) {
-                    TabView(selection: $global.tabIndex) {
+                    TabView(selection: $global.tab) {
                         NavigationView {
                             BuddiesView()
                                 .environmentObject(globalObject)

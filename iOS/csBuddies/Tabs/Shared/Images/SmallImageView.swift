@@ -50,7 +50,7 @@ struct SmallImageView: View {
                                 let postString =
                                     "userId=\(userId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                                     "size=small"
-                                global.runPhp(script: "getImage", postString: postString) { json in
+                                global.runHttp(script: "getImage", postString: postString) { json in
                                     global.smallImageCache.setObject(ImageCache(image: (json["image"] as! String), lastCachedAt: global.getUtcTime()), forKey: userId as NSString)
                                 }
                             }

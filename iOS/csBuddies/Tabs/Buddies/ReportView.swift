@@ -16,7 +16,7 @@ struct ReportView: View {
     
     @State private var isSelectedList = [Bool](repeating: false, count: 7) // 7 is reasonOptions.count.
     @State private var reasonOptions = ["Inappropriate Photo", "Inappropriate Intro", "Inappropriate Byte", "Inappropriate Comment", "Inappropriate Message", "Inappropriate Activity", "Other"]
-    @State private var reasonIndex = -1
+    @State private var reason = -1
     @State private var comments = ""
     @State private var isReporting = false
     
@@ -35,7 +35,7 @@ struct ReportView: View {
             
             Section(header: Text("Reasons")) {
                 ForEach(reasonOptions.indices) { index in
-                    RadioButton(index: index, reasonIndex: $reasonIndex, reasonOptions: reasonOptions, isSelectedList: $isSelectedList)
+                    RadioButton(index: index, reason: $reason, reasonOptions: reasonOptions, isSelectedList: $isSelectedList)
                 }
             }
             
@@ -49,13 +49,13 @@ struct ReportView: View {
                 if comments.count > 1000 {
                     activeAlert = .tooLongComments
                 } else {
-                    reportBuddy(mustReplacePrevious: false)
+                    reportBuddy(mustReplace: false)
                 }
             }) {
                 Text("Report User")
                     .accentColor(.red)
             }
-            .disabled(reasonIndex == -1)
+            .disabled(reason == -1)
         }
         .listStyle(InsetGroupedListStyle())
         .disabledOnLoad(isLoading: isReporting)
@@ -78,22 +78,21 @@ struct ReportView: View {
             case .extantReport:
                 return Alert(title: Text("Already Reported"), message: Text("You already reported this user. Would you like to replace the previous report with this one?"), primaryButton: .destructive(Text("Cancel")), secondaryButton: .default(Text("OK"), action: {
                     isReporting = true
-                    reportBuddy(mustReplacePrevious: true)
+                    reportBuddy(mustReplace: true)
                 }))
             }
         }
     }
     
-    func reportBuddy(mustReplacePrevious: Bool) {
+    func reportBuddy(mustReplace: Bool) {
         global.firebaseUser!.getIDToken(completion: { (token, error) in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "buddyId=\(buddyId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "reason=\(reasonIndex)&" +
+                "reason=\(reason)&" +
                 "comments=\(comments.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "mustReplacePrevious=\(mustReplacePrevious)"
-            global.runPhp(script: "reportBuddy", postString: postString) { json in
+                "mustReplace=\(mustReplace)"
+            global.runHttp(script: "reportBuddy", postString: postString) { json in
                 if json["isAdmin"] != nil &&
                     json["isAdmin"] as! Bool {
                     activeAlert = .cannotReportAdmin

@@ -127,9 +127,9 @@ struct BytePreviewView: View {
                                 let userPreviewData = UserPreviewData(
                                     userId: global.bytes[byteId]!.userId,
                                     username: global.bytes[byteId]!.username,
+                                    gender: 3,
                                     birthday: global.getUtcTime(),
-                                    genderIndex: 3,
-                                    countryIndex: 0,
+                                    country: 0,
                                     intro: "",
                                     lastVisitedAt: Date(timeIntervalSince1970: 0))
                                 userPreviewData.updateClientData()
@@ -140,10 +140,9 @@ struct BytePreviewView: View {
                             ), secondaryButton: .destructive(Text("Delete"), action: {
                                 global.firebaseUser!.getIDToken(completion: { (token, error) in
                                     let postString =
-                                        "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                                         "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                                         "byteId=\(byteId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-                                    global.runPhp(script: "deleteByte", postString: postString) { json in
+                                    global.runHttp(script: "deleteByte", postString: postString) { json in
                                         global.bytes[byteId]!.isDeleted = true
                                         
                                         let hasAlreadyDeleted = json["hasAlreadyDeleted"] as! Bool

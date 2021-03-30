@@ -122,17 +122,16 @@ struct BuddiesView: View {
         
         global.getTokenIfSignedIn { token in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "gender=\(global.buddiesFilterGenderIndex - 1)&" +
+                "gender=\(global.buddiesFilterGender - 1)&" +
                 "minAge=\(global.buddiesFilterMinAge)&" +
                 "maxAge=\(global.buddiesFilterMaxAge)&" +
-                "country=\(global.buddiesFilterCountryIndex - 1)&" +
+                "country=\(global.buddiesFilterCountry - 1)&" +
                 "interests=\(global.buddiesFilterInterests.toInterestsString().addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "sort=\(global.buddiesFilterSortIndex)&" +
+                "sort=\(global.buddiesFilterSort)&" +
                 "bottomLastVisitedAt=\(bottomLastVisitedAt.toString())&" +
                 "bottomSignedUpAt=\(bottomSignedUpAt.toString())"
-            global.runPhp(script: "getTabBuddies", postString: postString) { json in
+            global.runHttp(script: "getTabBuddies", postString: postString) { json in
                 if json.count <= 1 {
                     mustGetBuddies = false
                     isLoading = false
@@ -140,21 +139,21 @@ struct BuddiesView: View {
                     return
                 }
                 
-                for i in 1...json.count - 1 {
+                for i in 0...json.count - 2 {
                     let row = json[String(i)] as! NSDictionary
                     let userPreviewData = UserPreviewData(
                         userId: row["buddyId"] as! String,
                         username: row["username"] as! String,
-                        birthday: (row["birthday"] as! String).toDate(fromFormat: "yyyy-MM-dd"),
-                        genderIndex: row["gender"] as! Int,
-                        countryIndex: row["country"] as! Int,
+                        gender: row["gender"] as! Int,
+                        birthday: (row["birthday"] as! String).toDate(hasTime: false),
+                        country: row["country"] as! Int,
                         intro: row["intro"] as! String,
                         lastVisitedAt: (row["lastVisitedAt"] as! String).toDate())
                     userPreviewData.updateClientData()
                     buddyIds.append(userPreviewData.userId)
                 }
                 
-                let lastRow = json[String(json.count)] as! NSDictionary
+                let lastRow = json[String(json.count - 1)] as! NSDictionary
                 bottomLastVisitedAt = (lastRow["bottomLastVisitedAt"] as! String).toDate()
                 bottomSignedUpAt = (lastRow["bottomSignedUpAt"] as! String).toDate()
                 

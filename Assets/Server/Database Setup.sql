@@ -1,6 +1,19 @@
-create database cs_buddies;
-\c cs_buddies;
+create database csbuddies;
+\c csbuddies;
 create extension if not exists "uuid-ossp";
+
+create table config(
+config_id uuid primary key default uuid_generate_v4(),
+
+announcement_text varchar(1000) not null default '',
+announcement_link varchar(1000) not null default '',
+
+under_maintenance_at timestamp(3),
+maintenance_text varchar(1000) not null default '',
+
+update_version int not null default 0,
+update_text varchar(1000) not null default ''
+);
 
 create table account(
 user_id uuid primary key default uuid_generate_v4(),
@@ -23,22 +36,22 @@ notify_likes boolean not null default true,
 notify_comments boolean not null default true,
 notify_messages boolean not null default true,
 
-fcm varchar(1000) not null default '',
+fcm_token varchar(1000) not null default '',
 badges smallint not null default 0,
 
 last_synced_at timestamp(3) not null default current_timestamp,
+last_outdated_at timestamp(3) not null default current_timestamp,
 last_visited_at timestamp(3) not null default current_timestamp,
 last_updated_at timestamp(3) not null default current_timestamp,
 last_signed_in_at timestamp(3) not null default current_timestamp,
 last_signed_out_at timestamp(3),
 signed_up_at timestamp(3) not null default current_timestamp,
 
-user_outdated_at timestamp(3),
+client_outdated_at timestamp(3),
 became_admin_at timestamp(3),
-became_premium_at timestamp(3),
 banned_at timestamp(3),
 disabled_at timestamp(3),
-deleted_at timestamp(3)
+deleted_at timestamp(3),
 
 deletion_reason smallint,    -- 0 = Nobody talked to me, 1 = The users are mean, 2 = I saw inappropriate content, 3 = I got spammed, 4 = The app is buggy, 5 = I need a break, and 6 = Other.
 deletion_comments varchar(1000)
@@ -121,11 +134,4 @@ comments varchar(1000) not null,
 requested_at timestamp(3) not null default current_timestamp,
 reviewed_at timestamp(3),
 is_approved boolean not null default false
-);
-
-create table time_format_2(
-time_format_id uuid primary key default uuid_generate_v4(),
-user_id uuid not null,
-bottom_last_visited_at_string varchar(100) not null,
-created_at timestamp(3) not null default current_timestamp
 );

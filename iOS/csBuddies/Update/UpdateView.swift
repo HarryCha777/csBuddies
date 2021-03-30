@@ -15,7 +15,7 @@ struct UpdateView: View {
         SimpleView(
             lottieView: LottieView(name: "attention", size: 300, mustLoop: true),
             title: "Update Required",
-            subtitle: global.updateText == "" ? "csBuddies requires an update before continuing." : global.updateText.replacingOccurrences(of: "\\n", with: "\n"),
+            subtitle: global.updateText == "" ? "csBuddies requires an update before continuing." : global.updateText,
             bottomView: AnyView(Link(destination: URL(string: "https://apps.apple.com/app/id1524982759")!) {
                 ColoredButton(title: "Update")
             }))

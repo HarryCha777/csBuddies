@@ -51,7 +51,7 @@ struct BigImageView: View {
                 let postString =
                     "userId=\(userId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                     "size=big"
-                global.runPhp(script: "getImage", postString: postString) { json in
+                global.runHttp(script: "getImage", postString: postString) { json in
                     bigImage = (json["image"] as! String)
                     global.bigImageCache.setObject(ImageCache(image: bigImage, lastCachedAt: global.getUtcTime()), forKey: userId as NSString)
                     isLoading = false

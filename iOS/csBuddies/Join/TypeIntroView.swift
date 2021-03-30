@@ -229,16 +229,16 @@ struct TypeIntroView: View {
                 "username=\(global.username.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "smallImage=\(global.smallImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "bigImage=\(global.bigImage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "gender=\(global.genderIndex)&" +
+                "gender=\(global.gender)&" +
                 "birthday=\(global.birthday.toString(toFormat: "yyyy-MM-dd"))&" +
-                "country=\(global.countryIndex)&" +
+                "country=\(global.country)&" +
                 "interests=\(global.interests.toInterestsString().addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "otherInterests=\(global.otherInterests.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "intro=\(global.intro.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "github=\(global.github.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "linkedin=\(global.linkedin.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
-                "fcm=\(Messaging.messaging().fcmToken!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-            global.runPhp(script: "addUser", postString: postString) { json in
+                "fcmToken=\(Messaging.messaging().fcmToken!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
+            global.runHttp(script: "addUser", postString: postString) { json in
                 if json["isExtantUsername"] != nil &&
                     json["isExtantUsername"] as! Bool {
                     activeAlert = .extantUsername
@@ -246,19 +246,12 @@ struct TypeIntroView: View {
                 }
                 
                 global.myId = json["myId"] as! String
-                makeDocument()
-            }
-        })
-    }
-    
-    func makeDocument() {
-        // Force refresh because backend changed the custom claims.
-        global.firebaseUser!.getIDTokenResult(forcingRefresh: true, completion: { (result, error) in
-            global.db.collection("accounts")
-                .document(global.myId)
-                .setData(["hasChanged": false]) { error in
+                
+                // Force refresh because backend changed the custom claims.
+                global.firebaseUser!.getIDTokenResult(forcingRefresh: true, completion: { (result, error) in
                     global.activeRootView = .loading
-                }
+                })
+            }
         })
     }
 }

@@ -94,15 +94,14 @@ struct MessageInputView: View {
         
         global.firebaseUser!.getIDToken(completion: { (token, error) in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "buddyId=\(buddyId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "content=\(originalMessage.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-            global.runPhp(script: "addMessage", postString: postString) { json in
+            global.runHttp(script: "addMessage", postString: postString) { json in
                 if json["isTooMany"] != nil &&
                     json["isTooMany"] as! Bool {
                     message = originalMessage
-                    global.chatData[buddyId] = nil
+                    global.chatData[buddyId]!.messages = global.chatData[buddyId]!.messages.filter() { $0.isSending == false }
                     dailyLimit = json["dailyLimit"] as! Int
                     activeAlert = .tooManyChatRoomsToday
                     return
@@ -113,10 +112,6 @@ struct MessageInputView: View {
                 global.chatData[buddyId]!.messages[index!].messageId = json["messageId"] as! String
                 global.chatData[buddyId]!.messages[index!].isSending = false
                 global.chatData[buddyId]!.messages[index!].sentAt = now
-                
-                global.db.collection("accounts")
-                    .document(buddyId)
-                    .setData(["hasChanged": true], merge: true) { error in }
             }
         })
     }

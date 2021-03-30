@@ -101,10 +101,9 @@ struct ByteWriteView: View {
     func addByte() {
         global.firebaseUser!.getIDToken(completion: { (token, error) in
             let postString =
-                "myId=\(global.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "content=\(byte.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-            global.runPhp(script: "addByte", postString: postString) { json in
+            global.runHttp(script: "addByte", postString: postString) { json in
                 if json["isTooMany"] != nil &&
                     json["isTooMany"] as! Bool {
                     dailyLimit = json["dailyLimit"] as! Int

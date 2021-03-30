@@ -25,22 +25,19 @@ class Global: ObservableObject {
     }
 
     // LoadingView
-    @Published var db = Firestore.firestore()
-    @Published var webServerLink = ""
+    @Published var webServerLink = "54.214.56.32:3000"
     @Published var referenceTime: ReferenceTime?
     @Published var activeRootView: RootViews = .loading
     @Published var firebaseUser = Auth.auth().currentUser
     @Published var myId = ""
-    @Published var isGlobalListenerSetUp = false
     @Published var firstLaunchedAt = Date() { didSet { saveUserData() } }
     @Published var hasAskedReview = false { didSet { saveUserData() } }
     @Published var hasUserDataLoaded = false
     @Published var onlineTimeout = 60 * 3
+    @Published var websocket: Websocket?
     
     // WelcomeView
     @Published var hasSignedIn = false
-    @Published var isAccountsListenerSetUp = false
-    @Published var accountsListener: ListenerRegistration?
 
     // MaintenanceView
     @Published var maintenanceText = ""
@@ -61,10 +58,10 @@ class Global: ObservableObject {
 
     // SetUserProfileView
     @Published var genderOptions = ["Male", "Female", "Other", "Private"]
-    @Published var genderIndex = 0 { didSet { saveUserData() } }
+    @Published var gender = 0 { didSet { saveUserData() } }
     @Published var birthday = Date(timeIntervalSince1970: 946684800) { didSet { saveUserData() } } // Default birthday is 1/1/2000 12:00:00 AM UTC.
     @Published var countryOptions = ["Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo, Democratic Republic of the", "Congo, Republic of the", "Costa Rica", "Cote d'Ivoire", "Croatia", "Cuba", "Cyprus", "Czechia", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"]
-    @Published var countryIndex = 187 { didSet { saveUserData() } } // Default country is US.
+    @Published var country = 187 { didSet { saveUserData() } } // Default country is US.
     @Published var github = "" { didSet { saveUserData() } }
     @Published var linkedin = "" { didSet { saveUserData() } }
     
@@ -86,9 +83,8 @@ class Global: ObservableObject {
     @Published var bigImageCache = NSCache<NSString, ImageCache>()
     @Published var hasImageCacheUpdated = false
     @Published var intro = "" { didSet { saveUserData() } }
-    @Published var isPremium = false
     @Published var isAdmin = false
-    @Published var tabIndex = 0
+    @Published var tab = 0
     
     // TabsView
     @Published var isKeyboardHidden = true
@@ -106,12 +102,12 @@ class Global: ObservableObject {
     @Published var blockedBuddyIds = [String]() { didSet { saveUserData() } }
 
     // BuddiesFilterView
-    @Published var buddiesFilterGenderIndex = 0 { didSet { saveUserData() } }
+    @Published var buddiesFilterGender = 0 { didSet { saveUserData() } }
     @Published var buddiesFilterMinAge = 13 { didSet { saveUserData() } }
     @Published var buddiesFilterMaxAge = 130 { didSet { saveUserData() } }
-    @Published var buddiesFilterCountryIndex = 0 { didSet { saveUserData() } }
+    @Published var buddiesFilterCountry = 0 { didSet { saveUserData() } }
     @Published var buddiesFilterInterests = [String]() { didSet { saveUserData() } }
-    @Published var buddiesFilterSortIndex = 0 { didSet { saveUserData() } }
+    @Published var buddiesFilterSort = 0 { didSet { saveUserData() } }
 
     // BytesView
     @Published var bytes = [String: ByteData]()
@@ -134,7 +130,7 @@ class Global: ObservableObject {
     @Published var commentDraft = "" { didSet { saveUserData() } }
     
     // BytesFilterView
-    @Published var bytesFilterSortIndex = 0 { didSet { saveUserData() } }
+    @Published var bytesFilterSort = 0 { didSet { saveUserData() } }
     
     // ChatView
     @Published var hasAskedNotification = false { didSet { saveUserData() } }
@@ -160,8 +156,8 @@ class Global: ObservableObject {
     // UserProfileView
     @Published var bytesMade = 0 { didSet { saveUserData() } }
     @Published var commentsMade = 0 { didSet { saveUserData() } }
-    @Published var byteLikesReceived = 0
-    @Published var commentLikesReceived = 0
+    @Published var byteLikesReceived = 0 { didSet { saveUserData() } }
+    @Published var commentLikesReceived = 0 { didSet { saveUserData() } }
     @Published var byteLikesGiven = 0 { didSet { saveUserData() } }
     @Published var commentLikesGiven = 0 { didSet { saveUserData() } }
     
@@ -177,9 +173,9 @@ class Global: ObservableObject {
         username = ""
         smallImage = ""
         bigImage = ""
-        genderIndex = 0
+        gender = 0
         birthday = Date(timeIntervalSince1970: 946684800) // Default birthday is 1/1/2000 12:00:00 AM UTC.
-        countryIndex = 187 // Default country is US.
+        country = 187 // Default country is US.
         interests = [String]()
         otherInterests = ""
         intro = ""
@@ -200,12 +196,9 @@ class Global: ObservableObject {
         byteDraft = ""
         commentDraft = ""
         messageDrafts = [String: String]()
-        
-        isPremium = false
         isAdmin = false
         
-        accountsListener!.remove()
-        isAccountsListenerSetUp = false
+        websocket!.disconnect()
     }
     
     func saveUserData() {
@@ -222,9 +215,9 @@ class Global: ObservableObject {
         coreDataUser.username = username
         coreDataUser.smallImage = smallImage
         coreDataUser.bigImage = bigImage
-        coreDataUser.genderIndex = Int16(genderIndex)
+        coreDataUser.gender = Int16(gender)
         coreDataUser.birthday = birthday
-        coreDataUser.countryIndex = Int16(countryIndex)
+        coreDataUser.country = Int16(country)
         coreDataUser.interests = interests as NSObject
         coreDataUser.otherInterests = otherInterests
         coreDataUser.intro = intro
@@ -236,6 +229,8 @@ class Global: ObservableObject {
         coreDataUser.notifyMessages = notifyMessages
         coreDataUser.bytesMade = Int16(bytesMade)
         coreDataUser.commentsMade = Int16(commentsMade)
+        coreDataUser.byteLikesReceived = Int16(byteLikesReceived)
+        coreDataUser.commentLikesReceived = Int16(commentLikesReceived)
         coreDataUser.byteLikesGiven = Int16(byteLikesGiven)
         coreDataUser.commentLikesGiven = Int16(commentLikesGiven)
         coreDataUser.blockedBuddyIds = blockedBuddyIds as NSObject
@@ -246,13 +241,13 @@ class Global: ObservableObject {
         coreDataUser.commentDraft = commentDraft
         coreDataUser.messageDrafts = messageDrafts as NSObject
         
-        coreDataUser.buddiesFilterGenderIndex = Int16(buddiesFilterGenderIndex)
+        coreDataUser.buddiesFilterGender = Int16(buddiesFilterGender)
         coreDataUser.buddiesFilterMinAge = Int16(buddiesFilterMinAge)
         coreDataUser.buddiesFilterMaxAge = Int16(buddiesFilterMaxAge)
-        coreDataUser.buddiesFilterCountryIndex = Int16(buddiesFilterCountryIndex)
+        coreDataUser.buddiesFilterCountry = Int16(buddiesFilterCountry)
         coreDataUser.buddiesFilterInterests = buddiesFilterInterests as NSObject
-        coreDataUser.buddiesFilterSortIndex = Int16(buddiesFilterSortIndex)
-        coreDataUser.bytesFilterSortIndex = Int16(bytesFilterSortIndex)
+        coreDataUser.buddiesFilterSort = Int16(buddiesFilterSort)
+        coreDataUser.bytesFilterSort = Int16(bytesFilterSort)
         coreDataUser.firstLaunchedAt = firstLaunchedAt
         coreDataUser.hasAskedReview = hasAskedReview
         coreDataUser.hasAskedNotification = hasAskedNotification
@@ -270,35 +265,42 @@ class Global: ObservableObject {
             return
         }
         
-        firebaseUser!.getIDToken(completion: { (token, error) in
-            completion(token!)
-            return
+        firebaseUser!.getIDTokenResult(completion: { (result, error) in
+            if result!.claims["userId"] as? String == nil { // User verified email but didn't make a profile.
+                completion("")
+                return
+            }
+            
+            completion(result!.token)
         })
     }
     
-    func runPhp(script: String, postString: String, completion: @escaping (NSDictionary) -> Void) {
+    func runHttp(script: String, postString: String, completion: @escaping (NSDictionary) -> Void) {
         if !Reachability.isConnectedToNetwork() {
             isOffline = true
             return
         }
 
-        //print("DEBUG - script: \(script)")
-        //print("DEBUG - postString: \(postString)")
+        /*if postString.count > 40 {
+            print("DEBUG - \(script) post: \(postString[0...min(postString.count, 40)])")
+        } else {
+            print("DEBUG - \(script) post: \(postString)")
+        }*/
         
-        let scriptUrl = URL(string: "\(webServerLink)/22/\(script).php");
+        let scriptUrl = URL(string: "http://\(webServerLink)/\(script)/");
         var request = URLRequest(url: scriptUrl!)
         request.httpMethod = "POST"
-        request.httpBody = postString.data(using: String.Encoding.utf8)
+        request.httpBody = postString.data(using: .utf8)
         
         let task = URLSession.shared.dataTask(with: request) { (data: Data?, response: URLResponse?, error: Error?) in
             /*let responseString = NSString(data: data!, encoding: String.Encoding.utf8.rawValue)
-            if script == "getImage" {
-                print("DEBUG - \(script) response string = some image probably")
+            if String(responseString!).count > 40 {
+                print("DEBUG - \(script) response = \(String(describing: responseString)[0...min(String(describing: responseString).count, 40)])")
             } else {
-                print("DEBUG - \(script) response string = \(String(describing: responseString))")
+                print("DEBUG - \(script) response = \(String(describing: responseString))")
             }*/
             
-            let json = try? JSONSerialization.jsonObject(with: data!, options: .mutableContainers) as? NSDictionary
+            let json = try? JSONSerialization.jsonObject(with: data!, options: []) as? NSDictionary
             DispatchQueue.main.async {
                 if json != nil {
                     completion(json!)
@@ -327,12 +329,11 @@ class Global: ObservableObject {
         
         firebaseUser!.getIDToken(completion: { (token, error) in
             let postString =
-                "myId=\(self.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "notifyLikes=\(self.notifyLikes)&" +
                 "notifyComments=\(self.notifyComments)&" +
                 "notifyMessages=\(self.notifyMessages)"
-            self.runPhp(script: "updateNotifications", postString: postString) { json in
+            self.runHttp(script: "updateNotifications", postString: postString) { json in
                 self.saveUserData()
             }
         })
@@ -341,10 +342,9 @@ class Global: ObservableObject {
     func updateBadges() {
         firebaseUser!.getIDToken(completion: { (token, error) in
             let postString =
-                "myId=\(self.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "badges=\(self.getUnreadNotificationsCounter() + self.getUnreadMessagesCounter())"
-            self.runPhp(script: "updateBadges", postString: postString) { json in }
+            self.runHttp(script: "updateBadges", postString: postString) { json in }
         })
     }
     
@@ -444,10 +444,9 @@ class Global: ObservableObject {
     func block(buddyId: String) {
         firebaseUser!.getIDToken(completion: { (token, error) in
             let postString =
-                "myId=\(self.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "buddyId=\(buddyId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-            self.runPhp(script: "blockBuddy", postString: postString) { json in
+            self.runHttp(script: "blockBuddy", postString: postString) { json in
                 if json["isAdmin"] != nil &&
                     json["isAdmin"] as! Bool {
                     self.activeAlert = .cannotBlockAdmin
@@ -463,10 +462,9 @@ class Global: ObservableObject {
     func unblock(buddyId: String) {
         firebaseUser!.getIDToken(completion: { (token, error) in
             let postString =
-                "myId=\(self.myId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "token=\(token!.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)&" +
                 "buddyId=\(buddyId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-            self.runPhp(script: "unblockBuddy", postString: postString) { json in
+            self.runHttp(script: "unblockBuddy", postString: postString) { json in
                 self.blockedBuddyIds = self.blockedBuddyIds.filter() { $0 != buddyId }
                 self.confirmationText = "Unblocked"
             }
@@ -575,6 +573,11 @@ extension Date {
 }
 
 extension String {
+    // Get correct count of emoji sequences, such as "👩‍👩‍👧‍👦".
+    var count: Int {
+        self.unicodeScalars.count
+    }
+    
     // Check if URL is valid.
     var isValidUrl: Bool {
         // Only valid characters are numbers, letters, -, ., _, ~, :, /, ?, #, [, ], @, !, $, &, ', (, ), *, +, ,, ;, %, and =.
@@ -601,33 +604,40 @@ extension String {
     }
     
     // Convert string in date format to date.
-    func toDate(fromFormat: String = "yyyy-MM-dd HH:mm:ss.SSS") -> Date {
+    func toDate(hasTime: Bool = true) -> Date {
         // Read about preventing common DateFormatter pitfalls using .calendar, .locale, and .timeZone:
         // https://blog.sparksuite.com/avoiding-common-lesser-known-pitfalls-with-dates-in-swift-297d0e33c74a
+        
+        let fromFormat = hasTime ? "yyyy-MM-dd HH:mm:ss.SSS" : "yyyy-MM-dd"
         
         let df = DateFormatter()
         df.dateFormat = fromFormat
         df.calendar = Calendar(identifier: .gregorian)
         df.locale = Locale(identifier: "en_US_POSIX")
         
-        let hasTime = fromFormat.rangeOfCharacter(from: CharacterSet(charactersIn: "HhmsSa")) != nil
         if hasTime { // Prevent birthday from changing by a day depending on time zone.
             df.timeZone = NSTimeZone(name: "UTC") as TimeZone?
         }
         
-        // PostgreSQL truncates timestamp's trailing zeroes for milliseconds, so add them back.
-        var milliseconds = ""
-        if fromFormat == "yyyy-MM-dd HH:mm:ss.SSS" {
-            if self.count == 19 {
-                milliseconds = ".000"
-            } else if self.count == 21 {
-                milliseconds = "00"
-            } else if self.count == 22 {
-                milliseconds = "0"
+        var chars = Array(self)
+        chars[10] = " " // Replace "T" with a space.
+        var formattedString = String(chars).dropLast() // Drop "Z" at the end.
+        
+        if hasTime {
+            // Milliseconds' trailing zeroes are truncated, so add them back.
+            if formattedString.count == 19 {
+                formattedString += ".000"
+            } else if formattedString.count == 21 {
+                formattedString += "00"
+            } else if formattedString.count == 22 {
+                formattedString += "0"
             }
+        } else {
+            // Remove " HH:mm:ss" at the end.
+            formattedString = formattedString.dropLast(9)
         }
         
-        return df.date(from: self + milliseconds)!
+        return df.date(from: String(formattedString))!
     }
 
     // Convert interests from string array.

@@ -144,9 +144,9 @@ struct UserView: View {
                     let userPreviewData = UserPreviewData(
                         userId: userId,
                         username: global.users[userId]!.username,
+                        gender: global.users[userId]!.gender,
                         birthday: global.users[userId]!.birthday,
-                        genderIndex: global.users[userId]!.genderIndex,
-                        countryIndex: global.users[userId]!.countryIndex,
+                        country: global.users[userId]!.country,
                         intro: global.users[userId]!.intro,
                         lastVisitedAt: global.users[userId]!.lastVisitedAt)
                     userPreviewData.updateClientData()
@@ -169,9 +169,9 @@ struct UserView: View {
             let userData = UserData(
                 userId: global.myId,
                 username: global.username,
-                genderIndex: global.genderIndex,
+                gender: global.gender,
                 birthday: global.birthday,
-                countryIndex: global.countryIndex,
+                country: global.country,
                 interests: global.interests,
                 intro: global.intro,
                 github: global.github,
@@ -195,10 +195,10 @@ struct UserView: View {
         
         let postString =
             "buddyId=\(userId.addingPercentEncoding(withAllowedCharacters: .rfc3986Unreserved)!)"
-        global.runPhp(script: "getBuddy", postString: postString) { json in
+        global.runHttp(script: "getBuddy", postString: postString) { json in
             if json["isBanned"] != nil &&
                 json["isBanned"] as! Bool {
-                var userData = UserData(userId: userId, username: json["username"] as! String, genderIndex: 0, birthday: global.getUtcTime(), countryIndex: 0, interests: [String](), intro: "", github: "", linkedin: "", lastVisitedAt: global.getUtcTime(), lastUpdatedAt: global.getUtcTime(), isAdmin: false, bytesMade: 0, commentsMade: 0, byteLikesReceived: 0, commentLikesReceived: 0, byteLikesGiven: 0, commentLikesGiven: 0)
+                var userData = UserData(userId: userId, username: json["username"] as! String, gender: 0, birthday: global.getUtcTime(), country: 0, interests: [String](), intro: "", github: "", linkedin: "", lastVisitedAt: global.getUtcTime(), lastUpdatedAt: global.getUtcTime(), isAdmin: false, bytesMade: 0, commentsMade: 0, byteLikesReceived: 0, commentLikesReceived: 0, byteLikesGiven: 0, commentLikesGiven: 0)
                 userData.isBanned = true
                 userData.updateClientData()
                 
@@ -209,7 +209,7 @@ struct UserView: View {
             
             if json["isDeleted"] != nil &&
                 json["isDeleted"] as! Bool {
-                var userData = UserData(userId: userId, username: json["username"] as! String, genderIndex: 0, birthday: global.getUtcTime(), countryIndex: 0, interests: [String](), intro: "", github: "", linkedin: "", lastVisitedAt: global.getUtcTime(), lastUpdatedAt: global.getUtcTime(), isAdmin: false, bytesMade: 0, commentsMade: 0, byteLikesReceived: 0, commentLikesReceived: 0, byteLikesGiven: 0, commentLikesGiven: 0)
+                var userData = UserData(userId: userId, username: json["username"] as! String, gender: 0, birthday: global.getUtcTime(), country: 0, interests: [String](), intro: "", github: "", linkedin: "", lastVisitedAt: global.getUtcTime(), lastUpdatedAt: global.getUtcTime(), isAdmin: false, bytesMade: 0, commentsMade: 0, byteLikesReceived: 0, commentLikesReceived: 0, byteLikesGiven: 0, commentLikesGiven: 0)
                 userData.isDeleted = true
                 userData.updateClientData()
                 
@@ -221,9 +221,9 @@ struct UserView: View {
             let userData = UserData(
                 userId: userId,
                 username: json["username"] as! String,
-                genderIndex: json["gender"] as! Int,
-                birthday: (json["birthday"] as! String).toDate(fromFormat: "yyyy-MM-dd"),
-                countryIndex: json["country"] as! Int,
+                gender: json["gender"] as! Int,
+                birthday: (json["birthday"] as! String).toDate(hasTime: false),
+                country: json["country"] as! Int,
                 interests: (json["interests"] as! String).toInterestsArray(),
                 intro: json["intro"] as! String,
                 github: json["github"] as! String,
@@ -279,9 +279,9 @@ struct UserData: Identifiable, Codable {
     var id = UUID()
     var userId: String
     var username: String
-    var genderIndex: Int
+    var gender: Int
     var birthday: Date
-    var countryIndex: Int
+    var country: Int
     var interests: [String]
     var intro: String
     var github: String
@@ -300,9 +300,9 @@ struct UserData: Identifiable, Codable {
     
     init(userId: String,
          username: String,
-         genderIndex: Int,
+         gender: Int,
          birthday: Date,
-         countryIndex: Int,
+         country: Int,
          interests: [String],
          intro: String,
          github: String,
@@ -318,9 +318,9 @@ struct UserData: Identifiable, Codable {
          commentLikesGiven: Int) {
         self.userId = userId
         self.username = username
-        self.genderIndex = genderIndex
+        self.gender = gender
         self.birthday = birthday
-        self.countryIndex = countryIndex
+        self.country = country
         self.interests = interests
         self.intro = intro
         self.github = github
